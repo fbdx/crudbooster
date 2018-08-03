@@ -198,7 +198,7 @@ class CBController extends Controller {
 
 		$tablePK = $data['table_pk'];
 		$table_columns = CB::getTableColumns($this->table);
-		$result = DB::table($this->table)->select(DB::raw($this->table.".".$this->primary_key));
+		$result = DB::table($this->table)->select(DB::raw($this->table.".".$this->primary_key));		
 
 		if(Request::get('parent_id')) {
 			$table_parent = $this->table;
@@ -218,6 +218,7 @@ class CBController extends Controller {
 		$join_table_temp  = array();
 		$table            = $this->table;
 		$columns_table    = $this->columns_table;
+
 		foreach($columns_table as $index => $coltab) {
 
 			$join = @$coltab['join'];
@@ -241,8 +242,7 @@ class CBController extends Controller {
 
 			if(strpos($field,'.')!==FALSE) {
 				$result->addselect($field);
-			}else{
-				$result->addselect($table.'.'.$field);
+				continue;
 			}
 
 			$field_array = explode('.', $field);
