@@ -503,7 +503,7 @@ class CBController extends Controller {
 			}
 
 			foreach($columns_table as $col) {
-				echo $col."<br>";
+				echo $col['field']."<br>";
 		          if($col['visible']===FALSE) continue;		          
 		          try {
 		          	//$value = @$row->{$col['field']};
