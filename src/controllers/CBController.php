@@ -519,7 +519,7 @@ class CBController extends Controller {
 		          	{
 		          		$field = $col['field'];
 		          	}
-		          	$value = @$row->{$field};
+		          	$value = @$row->{$col['field']};
 		          	$title = @$row->{$this->title_field};
 		          }
 		          catch (Exception $e)
