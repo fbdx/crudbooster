@@ -241,16 +241,18 @@ class CBController extends Controller {
 			}
 
 			if(strpos($field,'.')!==FALSE) {
-				$result->addselect($field);
-				$field_array = explode('.', $field);
-
-				if(isset($field_array[1])) {
-					$field = $field_array[1];
-					$table = $field_array[0];
-				}
+				$result->addselect($field);								
+				
+			}else{
+				$result->addselect($table.'.'.$field);
 				continue;
 			}
 
+			$field_array = explode('.', $field);
+			if(isset($field_array[1])) {
+				$field = $field_array[1];
+				$table = $field_array[0];
+			}
 			
 
 			if($join) {
@@ -503,10 +505,10 @@ class CBController extends Controller {
 			}
 
 			foreach($columns_table as $col) {
-				echo $col['field']."<br>";
+				//echo $col['field']."<br>";
 		          if($col['visible']===FALSE) continue;		          
 		          try {
-		          	//$value = @$row->{$col['field']};
+		          	$value = @$row->{$col['field']};
 		          	$title = @$row->{$this->title_field};
 		          }
 		          catch (Exception $e)
