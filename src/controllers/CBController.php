@@ -508,7 +508,18 @@ class CBController extends Controller {
 				//echo $col['field']."<br>";
 		          if($col['visible']===FALSE) continue;		          
 		          try {
-		          	$value = @$row->{$col['field']};
+		          	if(strpos($col['field'],'.')!==FALSE) {
+		          		$field_array = explode('.', $col['field']);
+						if(isset($field_array[1])) {
+							$field = $field_array[1];
+							$table = $field_array[0];
+						}
+		          	}
+		          	else
+		          	{
+		          		$field = $col['field']
+		          	}
+		          	$value = @$row->{$field};
 		          	$title = @$row->{$this->title_field};
 		          }
 		          catch (Exception $e)
