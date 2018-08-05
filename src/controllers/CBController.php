@@ -242,15 +242,16 @@ class CBController extends Controller {
 
 			if(strpos($field,'.')!==FALSE) {
 				$result->addselect($field);
+				$field_array = explode('.', $field);
+
+				if(isset($field_array[1])) {
+					$field = $field_array[1];
+					$table = $field_array[0];
+				}
 				continue;
 			}
 
-			$field_array = explode('.', $field);
-
-			if(isset($field_array[1])) {
-				$field = $field_array[1];
-				$table = $field_array[0];
-			}
+			
 
 			if($join) {
 
