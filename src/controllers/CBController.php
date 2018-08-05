@@ -246,11 +246,11 @@ class CBController extends Controller {
 			}
 
 			$field_array = explode('.', $field);
-
 			if(isset($field_array[1])) {
 				$field = $field_array[1];
 				$table = $field_array[0];
 			}
+			
 
 			if($join) {
 
@@ -502,6 +502,7 @@ class CBController extends Controller {
 			}
 
 			foreach($columns_table as $col) {
+				//echo $col['field']."<br>";
 		          if($col['visible']===FALSE) continue;		          
 
 		          $value = @$row->{$col['field']};
