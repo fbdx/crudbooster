@@ -517,7 +517,7 @@ class CBController extends Controller {
 		          	}
 		          	else
 		          	{
-		          		$field = $col['field']
+		          		$field = $col['field'];
 		          	}
 		          	$value = @$row->{$field};
 		          	$title = @$row->{$this->title_field};
