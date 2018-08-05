@@ -503,9 +503,16 @@ class CBController extends Controller {
 
 			foreach($columns_table as $col) {
 		          if($col['visible']===FALSE) continue;		          
-
-		          $value = @$row->{$col['field']};
-		          $title = @$row->{$this->title_field};
+		          try {
+		          	$value = @$row->{$col['field']};
+		          	$title = @$row->{$this->title_field};
+		          }
+		          catch (Exception $e)
+		          {
+		          	$value = "";
+		          	$title = "";
+		          }
+		          
 		          $label = $col['label'];
 
 		          if(isset($col['image'])) {
