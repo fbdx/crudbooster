@@ -246,11 +246,11 @@ class CBController extends Controller {
 			}
 
 			$field_array = explode('.', $field);
+
 			if(isset($field_array[1])) {
 				$field = $field_array[1];
 				$table = $field_array[0];
 			}
-			
 
 			if($join) {
 
@@ -502,7 +502,6 @@ class CBController extends Controller {
 			}
 
 			foreach($columns_table as $col) {
-				//echo $col['field']."<br>";
 		          if($col['visible']===FALSE) continue;		          
 
 		          $value = @$row->{$col['field']};
@@ -1326,12 +1325,15 @@ class CBController extends Controller {
 		Session::put('current_row_id',$id);
 		$option_id		 = $this->option_id;
 		$option_fields	 = $this->option_fields;
+		$table = $this->table;
+
+		$mainmerge_id = DB::table('mainmerge')->where('customer_id', $id)->value('id');
 		
-		/*if(DB::table('customer')){
-			return view('crudbooster::default.without_form',compact('id','row','page_menu','page_title','command','option_id','option_fields'));	
-		} else {*/
-			return view('crudbooster::default.form',compact('id','row','page_menu','page_title','command','option_id','option_fields'));
-		//}
+		if(DB::table('customer')){
+			return view('crudbooster::default.form',compact('id','mainmerge_id','row','page_menu','page_title','command','option_id','option_fields'));	
+		} else {
+			return view('crudbooster::default.form',compact('id','row','page_menu','page_title','command','option_id','option_fields','table'));
+		}
 		
 	}
 
