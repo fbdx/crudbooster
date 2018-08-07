@@ -229,7 +229,6 @@
               $(".filter-combo").change(function() {         
 
                 var n = $(this).val();
-
                 var p = $(this).parents('.row-filter-combo');
 
                 var type_data = $(this).attr('data-type');
@@ -291,8 +290,11 @@
                 }
                 else
                 {
-                  filter_value.removeAttr('placeholder').val('').prop('disabled',true);
-
+                  if(n == 'between'){
+                    p.find('.filter-value-between').prop('disabled',true);                    
+                  } else {
+                    filter_value.removeAttr('placeholder').val('').prop('disabled',true);
+                  }
                 }
 
               
@@ -394,7 +396,7 @@
                             @else
                               <input type='text' class='filter-value form-control' style="{{ (CRUDBooster::getTypeFilter($col["field_with"]) == 'between')?"display:none":"display:block"}}" disabled name='filter_column[{{$col["field_with"]}}][value]' value='{{ (!is_array(CRUDBooster::getValueFilter($col["field_with"])))?CRUDBooster::getValueFilter($col["field_with"]):"" }}'>
                             @endif                            
-              
+                        
                             <div class='row between-group' style="{{ (CRUDBooster::getTypeFilter($col["field_with"]) == 'between')?"display:block":"display:none" }}">
                               <div class='col-sm-6'>
                                 <div class='input-group'>
