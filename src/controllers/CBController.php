@@ -1327,13 +1327,13 @@ class CBController extends Controller {
 		$option_fields	 = $this->option_fields;
 		$table = $this->table;
 
-		$mainmerge_id = DB::table('mainmerge')->where('customer_id', $id)->value('id');
+		// $mainmerge_id = DB::table('mainmerge')->where('customer_id', $id)->value('id');
 		
-		if(DB::table('customer')){
-			return view('crudbooster::default.form',compact('id','mainmerge_id','row','page_menu','page_title','command','option_id','option_fields'));	
-		} else {
-			return view('crudbooster::default.form',compact('id','row','page_menu','page_title','command','option_id','option_fields','table'));
-		}
+		// if(DB::table('customer')){
+		// 	return view('crudbooster::default.form',compact('id','mainmerge_id','row','page_menu','page_title','command','option_id','option_fields'));	
+		// } else {
+		return view('crudbooster::default.form',compact('id','row','page_menu','page_title','command','option_id','option_fields','table'));
+		// }
 		
 	}
 

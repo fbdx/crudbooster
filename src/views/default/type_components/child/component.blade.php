@@ -18,7 +18,7 @@
 		<div class="panel-body">
 			
 			<div class='row'>
-				@if($table != 'customer')
+				{{-- @if($table != 'customer') --}}
 				<div class='col-sm-10'>
 					<div class="panel panel-default">
 						<div class="panel-heading"><i class="fa fa-pencil-square-o"></i> Form</div>
@@ -471,7 +471,7 @@
 						</div>
 					</div>
 				</div>
-				@endif
+				{{-- @endif --}}
 			</div>
 
 			<div class="panel panel-default">
@@ -561,12 +561,12 @@
 								</td>
 							@endforeach		
 							<td>
-								@if($table == 'customer')
+								{{-- @if($table == 'customer')
 									<a href='/admin/mainmerge/edit/{{$mainmerge_id}}' onclick='editRow{{$name}}(this)' class='btn btn-warning btn-xs'><i class='fa fa-pencil'></i></a>
-								@else
+								@else --}}
 									<a href='#panel-form-{{$name}}' onclick='editRow{{$name}}(this)' class='btn btn-warning btn-xs'><i class='fa fa-pencil'></i></a>
 									<a href='javascript:void(0)' onclick='deleteRow{{$name}}(this)' class='btn btn-danger btn-xs'><i class='fa fa-trash'></i></a>
-								@endif
+								{{-- @endif --}}
 							</td>					
 						</tr>
 
