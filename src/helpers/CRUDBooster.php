@@ -12,9 +12,9 @@ use Validator;
 class CRUDBooster  {		
 
 		public static function getSetting($name){	
-			if(Cache::has('setting_'.$name)) {
-				return Cache::get('setting_'.$name);
-			}
+			// if(Cache::has('setting_'.$name)) {
+			// 	return Cache::get('setting_'.$name);
+			// }
 
 		    $query = DB::table('cms_settings')->where('name',$name)->first();
 		    Cache::forever('setting_'.$name,$query->content);
