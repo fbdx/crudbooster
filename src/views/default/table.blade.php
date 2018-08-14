@@ -318,7 +318,7 @@
                     <h4 class="modal-title"><i class='fa fa-filter'></i> {{trans("crudbooster.filter_dialog_title")}}</h4>
                   </div>
                   <form method='get' action=''>                    
-                    <div class="modal-body"> 
+                    <div class="modal-body" style="padding-bottom: 110px"> 
 
                       <?php foreach($columns as $key => $col):?>
                         <?php if( isset($col['image']) || isset($col['download']) || $col['visible']===FALSE) continue;?>   
