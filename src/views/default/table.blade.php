@@ -139,7 +139,7 @@
                           
                               @foreach($hc as $h)
                                 @if($loop->index==1) 
-                                  <td><a href='{{CRUDBooster::mainpath("edit/$row->id")}}'>{!! $h !!}</a></td>
+                                  <td><a href="{{CRUDBooster::mainpath("edit/").$h}}">{!! $h !!}</a></td>
                                 @else
                                   <td>{!! $h !!}</td>
                                 @endif
