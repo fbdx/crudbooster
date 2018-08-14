@@ -87,6 +87,8 @@ class CBController extends Controller {
 
 		$this->checkHideForm();
 
+
+
 		$this->primary_key 					 = CB::pk($this->table);
 		$this->columns_table                 = $this->col;
 		$this->data_inputan                  = $this->form;
@@ -1036,7 +1038,6 @@ class CBController extends Controller {
 
 		foreach($this->data_inputan as $ro) {
 			$name = $ro['name'];
-
 			if(!$name) continue;
 
 			if($ro['exception']) continue;
@@ -1337,9 +1338,12 @@ class CBController extends Controller {
 		
 	}
 
+	public $countChild = 0;
 	public function postEditSave($id) {
+
 		$this->cbLoader();
 		$row = DB::table($this->table)->where($this->primary_key,$id)->first();
+
 
 		if(!CRUDBooster::isUpdate() && $this->global_privilege==FALSE) {
 			CRUDBooster::insertLog(trans("crudbooster.log_try_add",['name'=>$row->{$this->title_field},'module'=>CRUDBooster::getCurrentModule()->name]));
@@ -1359,8 +1363,15 @@ class CBController extends Controller {
 		DB::table($this->table)->where($this->primary_key,$id)->update($this->arr);		
 
 		//Looping Data Input Again After Insert
+		// dd($this->data_inputan);
+		
+
 		foreach($this->data_inputan as $ro) {
+
 			$name = $ro['name'];
+			
+			$type = $ro['type'];
+
 			if(!$name) continue;
 
 			$inputdata = Request::get($name);
@@ -1414,38 +1425,63 @@ class CBController extends Controller {
 			}
 
 			if($ro['type']=='child') {
+
+				$tempId = array();
 				$name = str_slug($ro['label'],'');
-				$columns = $ro['columns'];				
-				$count_input_data = count(Request::get($name.'-'.$columns[0]['name']))-1;
+				$columns = $ro['columns'];
+				$count_input_data = !empty(Request::get($name.'-'.$columns[0]['name']))-1;
 				$child_array = [];
 				$childtable = CRUDBooster::parseSqlTable($ro['table'])['table'];
 				$fk = $ro['foreign_key'];
 
-				DB::table($childtable)->where($fk,$id)->delete();
-				$lastId = CRUDBooster::newId($childtable);
+
+				
+				// DB::table($childtable)->where($fk,$id)->delete();
+				// $lastId = CRUDBooster::newId($childtable);
 				$childtablePK = CB::pk($childtable);
+
+				// $customerData = DB::table($this->table)->where('id')
+
+				// dd($childData);
+
 
 				for($i=0;$i<=$count_input_data;$i++) {
 					
 					$column_data = [];
-					$column_data[$childtablePK] = $lastId;
+					// $column_data[$childtablePK] = $lastId;
 					$column_data[$fk] = $id;
 					foreach($columns as $col) {
 						$colname = $col['name'];
 						$column_data[$colname] = Request::get($name.'-'.$colname)[$i];
 					}
+					// var_dump($column_data);
 					$child_array[] = $column_data;
+					// $lastId++;
+					// unset($row['id']);
+					$customerArray[] = $row;
+					if($child_array[$i]['id'] == NULL){
+						// unset($customerArray[$i]->id);
+						// dd($customerArray);
+						$lastId = CRUDBooster::newId($childtable);
+						$child_array[$i]['id'] = $lastId;
+						// dd($child_array);
 
-					$lastId++;
+						DB::table($childtable)->insert($child_array[$i],$row);
+
+					}
+					$tempId[] = $child_array[$i]['id'];
+					unset($child_array[$i]['id']);
+
+					DB::table($childtable) 
+					->where('id', $tempId[$i])
+					->update($child_array[$i]);
 				}	
-
-				$child_array = array_reverse($child_array);
 				
-				DB::table($childtable)->insert($child_array);
+				// DB::table($childtable)->insert($child_array[0]);
+
 			}
 
-
-		}
+		}//end foreach
 
 		$this->hook_after_edit($id);
 
