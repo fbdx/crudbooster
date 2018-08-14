@@ -138,7 +138,11 @@
                           @endif
                           
                               @foreach($hc as $h)
-                                <td>{!! $h !!}</td>
+                                @if($loop->index==1) 
+                                  <td><a href='{{CRUDBooster::mainpath("edit/$row->id")}}'>{!! $h !!}</a></td>
+                                @else
+                                  <td>{!! $h !!}</td>
+                                @endif
                               @endforeach
                           </tr>
                       @endforeach
