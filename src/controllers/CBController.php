@@ -1429,10 +1429,11 @@ class CBController extends Controller {
 				$tempId = array();
 				$name = str_slug($ro['label'],'');
 				$columns = $ro['columns'];
-				$count_input_data = !empty(Request::get($name.'-'.$columns[0]['name']))-1;
+				$count_input_data = count(Request::get($name.'-'.$columns[0]['name']))-1;
 				$child_array = [];
 				$childtable = CRUDBooster::parseSqlTable($ro['table'])['table'];
 				$fk = $ro['foreign_key'];
+
 
 
 				
