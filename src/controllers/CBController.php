@@ -1424,27 +1424,17 @@ class CBController extends Controller {
 				}
 			}
 
+
 			if($ro['type']=='child') {
 
 				$tempId = array();
 				$name = str_slug($ro['label'],'');
 				$columns = $ro['columns'];
-				$count_input_data = count(Request::get($name.'-'.$columns[0]['name']))-1;
+				$count_input_data = !empty(Request::get($name.'-'.$columns[0]['name']))-1;
 				$child_array = [];
-				$childtable = CRUDBooster::parseSqlTable($ro['table'])['table'];
+				$childtable = CRUDBooster::parseSqlTable($ro['table'])['table'];				
 				$fk = $ro['foreign_key'];
-
-
-
-				
-				// DB::table($childtable)->where($fk,$id)->delete();
-				// $lastId = CRUDBooster::newId($childtable);
 				$childtablePK = CB::pk($childtable);
-
-				// $customerData = DB::table($this->table)->where('id')
-
-				// dd($childData);
-
 
 				for($i=0;$i<=$count_input_data;$i++) {
 					
@@ -1455,19 +1445,24 @@ class CBController extends Controller {
 						$colname = $col['name'];
 						$column_data[$colname] = Request::get($name.'-'.$colname)[$i];
 					}
-					// var_dump($column_data);
-					$child_array[] = $column_data;
-					// $lastId++;
-					// unset($row['id']);
-					$customerArray[] = $row;
-					if($child_array[$i]['id'] == NULL){
-						// unset($customerArray[$i]->id);
-						// dd($customerArray);
-						$lastId = CRUDBooster::newId($childtable);
-						$child_array[$i]['id'] = $lastId;
-						// dd($child_array);
 
-						DB::table($childtable)->insert($child_array[$i],$row);
+					$child_array[] = $column_data;
+
+					if($child_array[$i]['id'] == NULL){
+						
+						$customer_array[] = $row;
+
+						$test = (array) $customer_array[$i];
+
+						foreach($child_array as $key => $value)
+						{
+							$newArray = array_merge($child_array[$key],$test);
+						}
+						unset($newArray['id']);
+						$lastId = CRUDBooster::newId($childtable);
+						$newArray['id'] = $lastId;
+
+						DB::table($childtable)->insert($newArray);
 
 					}
 					$tempId[] = $child_array[$i]['id'];
@@ -1476,9 +1471,8 @@ class CBController extends Controller {
 					DB::table($childtable) 
 					->where('id', $tempId[$i])
 					->update($child_array[$i]);
+	
 				}	
-				
-				// DB::table($childtable)->insert($child_array[0]);
 
 			}
 
