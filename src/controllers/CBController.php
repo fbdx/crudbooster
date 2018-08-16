@@ -1447,24 +1447,23 @@ class CBController extends Controller {
 					}
 
 					$child_array[] = $column_data;
-
+					// dd($child_array);
 					if($child_array[$i]['id'] == NULL){
 						
-						$customer_array[] = $row;
+						// $customer_array[] = $row;
 
-						$test = (array) $customer_array[$i];
+						// $test = (array) $customer_array[$i];
 
-						foreach($child_array as $key => $value)
-						{
-							$newArray = array_merge($child_array[$key],$test);
-						}
-						unset($newArray['id']);
+						// foreach($child_array as $key => $value)
+						// {
+						// 	$newArray = array_merge($child_array[$key],$test);
+						// }
+						unset($child_array['id']);
 						$lastId = CRUDBooster::newId($childtable);
-						$newArray['id'] = $lastId;
-
-						DB::table($childtable)->insert($newArray);
-
+						$child_array[$i]['id'] = $lastId;
+						DB::table($childtable)->insert($child_array);
 					}
+
 					$tempId[] = $child_array[$i]['id'];
 					unset($child_array[$i]['id']);
 
