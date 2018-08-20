@@ -360,13 +360,17 @@ class CBController extends Controller {
 			$filter_column = Request::get('filter_column');
 			$result->where(function($w) use ($filter_column,$fc) {
 				foreach($filter_column as $key=>$fc) {
-
+					// dd($fc);
 					$value = @$fc['value'];
 					$type  = @$fc['type'];
 
 					if($type == 'empty') {
 						$w->whereNull($key)->orWhere($key,'');
 						continue;
+					}
+
+					if($value == 'empty') {
+						$w->whereNull($key)->orWhere($key,'');
 					}
 
 					if($value=='' || $type=='') continue;

@@ -234,9 +234,9 @@
 
                 var n = $(this).val();
                 var p = $(this).parents('.row-filter-combo');
-
                 var type_data = $(this).attr('data-type');
                 var filter_value = p.find('.filter-value');
+                console.log(filter_value);
 
                 
                 if($(this).is( ":checked" ))
@@ -250,6 +250,7 @@
                       p.find('.between-group').find('input').prop('disabled',true);
                     break;
                     case 'like':
+                    case 'empty':
                     case 'not like':                                                              
                       filter_value.attr('placeholder','{{trans("crudbooster.filter_eg")}} : {{trans("crudbooster.filter_lorem_ipsum")}}').prop('disabled',false);
                     break;
@@ -372,13 +373,17 @@
                             </select> --}}
 
                               <div class="form-check" style="margin-top : 4%; text-align: right;">
-                                
+                                {{-- {{CRUDBooster::getValueFilter($col["field_with"])}} --}}
                                 @if($col['type'] == 'date')
                                   <input name='filter_column[{{$col["field_with"]}}][type]' data-type='{{$col["type_data"]}}' class="filter-combo" type="checkbox" {{ (CRUDBooster::getTypeFilter($col["field_with"]) == 'between')?"checked":"" }} value='between'>
                                 @elseif($col['type'] == 'text')
                                   <input name='filter_column[{{$col["field_with"]}}][type]' data-type='{{$col["type_data"]}}' class="filter-combo" type="checkbox" {{ (CRUDBooster::getTypeFilter($col["field_with"]) == '=')?"checked":"" }} value='='>
                                 @else
-                                  <input name='filter_column[{{$col["field_with"]}}][type]' data-type='{{$col["type_data"]}}' class="filter-combo" type="checkbox" {{ (CRUDBooster::getTypeFilter($col["field_with"]) == 'like')?"checked":"" }} value='like'>
+                                  @if(CRUDBooster::getValueFilter($col["field_with"]) == 'empty')
+                                    <input name='filter_column[{{$col["field_with"]}}][type]' data-type='{{$col["type_data"]}}' class="filter-combo" type="checkbox" {{ (CRUDBooster::getTypeFilter($col["field_with"]) == 'empty')?"checked":"" }} value='empty'>
+                                  @else
+                                    <input name='filter_column[{{$col["field_with"]}}][type]' data-type='{{$col["type_data"]}}' class="filter-combo" type="checkbox" {{ (CRUDBooster::getTypeFilter($col["field_with"]) == 'like')?"checked":"" }} value='like'>
+                                  @endif
                                 @endif
 
                               </div>
