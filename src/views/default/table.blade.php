@@ -236,11 +236,13 @@
                 var p = $(this).parents('.row-filter-combo');
                 var type_data = $(this).attr('data-type');
                 var filter_value = p.find('.filter-value');
-                console.log(filter_value);
 
-                
-                if($(this).is( ":checked" ))
+                var test = {{CRUDBooster::myPrivilegeId()}}
+
+
+                if(test == 3 || test == 4)
                 {
+                
                   p.find('.between-group').hide();
                   p.find('.between-group').find('input').prop('disabled',true);
                   filter_value.val('').show().focus();
@@ -250,7 +252,6 @@
                       p.find('.between-group').find('input').prop('disabled',true);
                     break;
                     case 'like':
-                    case 'empty':
                     case 'not like':                                                              
                       filter_value.attr('placeholder','{{trans("crudbooster.filter_eg")}} : {{trans("crudbooster.filter_lorem_ipsum")}}').prop('disabled',false);
                     break;
@@ -292,13 +293,67 @@
                       p.find('.filter-value-between').prop('disabled',false);                    
                     break;
                   }
-                }
-                else
-                {
-                  if(n == 'between'){
-                    p.find('.filter-value-between').prop('disabled',true);                    
-                  } else {
-                    filter_value.removeAttr('placeholder').val('').prop('disabled',true);
+                } else {
+                  if($(this).is( ":checked" ))
+                  {
+                    p.find('.between-group').hide();
+                    p.find('.between-group').find('input').prop('disabled',true);
+                    filter_value.val('').show().focus();
+                    switch(n) {
+                      default:
+                        filter_value.removeAttr('placeholder').val('').prop('disabled',true);                                                            
+                        p.find('.between-group').find('input').prop('disabled',true);
+                      break;
+                      case 'like':
+                      case 'not like':                                                              
+                        filter_value.attr('placeholder','{{trans("crudbooster.filter_eg")}} : {{trans("crudbooster.filter_lorem_ipsum")}}').prop('disabled',false);
+                      break;
+                      case 'asc':                                        
+                        filter_value.prop('disabled',true).attr('placeholder','{{trans("crudbooster.filter_sort_ascending")}}');
+                      break;
+                      case 'desc':                                        
+                        filter_value.prop('disabled',true).attr('placeholder','{{trans("crudbooster.filter_sort_descending")}}');
+                      break;
+                      case '=':                                        
+                        filter_value.prop('disabled',false).attr('placeholder','{{trans("crudbooster.filter_eg")}} : {{trans("crudbooster.filter_lorem_ipsum")}}');
+
+                      break;
+                      case '>=':                                                
+                        filter_value.prop('disabled',false).attr('placeholder','{{trans("crudbooster.filter_eg")}} : 1000');
+                      break;
+                      case '<=':                                                
+                        filter_value.prop('disabled',false).attr('placeholder','{{trans("crudbooster.filter_eg")}} : 1000');
+                      break;
+                      case '>':                                               
+                        filter_value.prop('disabled',false).attr('placeholder','{{trans("crudbooster.filter_eg")}} : 1000');
+                      break;
+                      case '<':                                               
+                        filter_value.prop('disabled',false).attr('placeholder','{{trans("crudbooster.filter_eg")}} : 1000'); 
+                      break; 
+                      case '!=':                                        
+                        filter_value.prop('disabled',false).attr('placeholder','{{trans("crudbooster.filter_eg")}} : {{trans("crudbooster.filter_lorem_ipsum")}}');
+                      break;
+                      case 'in':                                        
+                        filter_value.prop('disabled',false).attr('placeholder','{{trans("crudbooster.filter_eg")}} : {{trans("crudbooster.filter_lorem_ipsum_dolor_sit")}}');
+                      break;
+                      case 'not in':                                        
+                        filter_value.prop('disabled',false).attr('placeholder','{{trans("crudbooster.filter_eg")}} : {{trans("crudbooster.filter_lorem_ipsum_dolor_sit")}}');
+                      break;
+                      case 'between':       
+                        filter_value.val('').hide();
+                        p.find('.between-group input').prop('disabled',false);
+                        p.find('.between-group').show().focus();
+                        p.find('.filter-value-between').prop('disabled',false);                    
+                      break;
+                  }
+                  }
+                  else
+                  {
+                    if(n == 'between'){
+                      p.find('.filter-value-between').prop('disabled',true);                    
+                    } else {
+                      filter_value.removeAttr('placeholder').val('').prop('disabled',true);
+                    }
                   }
                 }
 
@@ -341,39 +396,42 @@
                           </div> 
 
                           <div class='col-sm-3'>
-                            {{-- <select name='filter_column[{{$col["field_with"]}}][type]' data-type='{{$col["type_data"]}}' class="filter-combo form-control">
+                            
+                            @if(CRUDBooster::myPrivilegeId() == 3 || CRUDBooster::myPrivilegeId() == 4)
+                              <select name='filter_column[{{$col["field_with"]}}][type]' data-type='{{$col["type_data"]}}' class="filter-combo form-control">
+                                
+                                <option value=''>** {{trans("crudbooster.filter_select_operator_type")}}</option>
+                                @if($col['name'] == 'firstname' || $col['name'] == 'lastname')
+                                <option typeallow='all' {{ (CRUDBooster::getTypeFilter($col["field_with"]) == '=')?"selected":"" }} value='='>{{trans("crudbooster.filter_equal_to")}}</option>
+                                @elseif($col['name'] == 't2.date_created')
+                                <option {{ (CRUDBooster::getTypeFilter($col["field_with"]) == 'between')?"selected":"" }} value='between'>{{trans("crudbooster.filter_between")}}</option>  
+                                @else
+                                   @if(in_array($col['type_data'],['string','varchar','text','char']))<option {{ (CRUDBooster::getTypeFilter($col["field_with"]) == 'like')?"selected":"" }} value='like'>{{trans("crudbooster.filter_like")}}</option> 
+                                   @else
+                                     <option typeallow='all' {{ (CRUDBooster::getTypeFilter($col["field_with"]) == '=')?"selected":"" }} value='='>{{trans("crudbooster.filter_equal_to")}}</option>
+                                   @endif
+                                   
+                                   @if(in_array($col['type_data'],['string','varchar','text','char']))
+                                   <option {{ (CRUDBooster::getTypeFilter($col["field_with"]) == 'not like')?"selected":"" }} value='not like'>{{trans("crudbooster.filter_not_like")}}</option>
+                                   @else
+                                     <option typeallow='all' {{ (CRUDBooster::getTypeFilter($col["field_with"]) == '!=')?"selected":"" }} value='!='>{{trans("crudbooster.filter_not_equal_to")}}</option>
+                                   @endif 
+                                
+                                   @if(in_array($col['type_data'],['int','integer','double','float','decimal']))<option {{ (CRUDBooster::getTypeFilter($col["field_with"]) == '>=')?"selected":"" }} value='>='>{{trans("crudbooster.filter_greater_than_or_equal")}}</option>@endif
+                                   @if(in_array($col['type_data'],['int','integer','double','float','decimal']))<option {{ (CRUDBooster::getTypeFilter($col["field_with"]) == '<=')?"selected":"" }} value='<='>{{trans("crudbooster.filter_less_than_or_equal")}}</option>@endif
+                                   @if(in_array($col['type_data'],['int','integer','double','float','decimal']))<option {{ (CRUDBooster::getTypeFilter($col["field_with"]) == '<')?"selected":"" }} value='<'>{{trans("crudbooster.filter_less_than")}}</option>@endif
+                                   @if(in_array($col['type_data'],['int','integer','double','float','decimal']))<option {{ (CRUDBooster::getTypeFilter($col["field_with"]) == '>')?"selected":"" }} value='>'>{{trans("crudbooster.filter_greater_than")}}</option>@endif
+                                   
+                                   <!--<option typeallow='all' {{ (CRUDBooster::getTypeFilter($col["field_with"]) == 'in')?"selected":"" }} value='in'>{{trans("crudbooster.filter_in")}}</option>
+                                   <option typeallow='all' {{ (CRUDBooster::getTypeFilter($col["field_with"]) == 'not in')?"selected":"" }} value='not in'>{{trans("crudbooster.filter_not_in")}}</option>-->
+                                   @if(in_array($col['type_data'],['date','time','datetime','int','integer','double','float','decimal','timestamp'])||(strpos(strtolower($col['label']),"date")!==false))<option {{ (CRUDBooster::getTypeFilter($col["field_with"]) == 'between')?"selected":"" }} value='between'>{{trans("crudbooster.filter_between")}}</option>@endif                         
+                                   <option {{ (CRUDBooster::getTypeFilter($col["field_with"]) == 'empty')?"selected":"" }} value='empty'>Is Empty</option>
+                                @endif
+                              </select>
                               
-                              <option value=''>** {{trans("crudbooster.filter_select_operator_type")}}</option>
-                              @if($col['name'] == 'firstname' || $col['name'] == 'lastname')
-                              <option typeallow='all' {{ (CRUDBooster::getTypeFilter($col["field_with"]) == '=')?"selected":"" }} value='='>{{trans("crudbooster.filter_equal_to")}}</option>
-                              @elseif($col['name'] == 't2.date_created')
-                              <option {{ (CRUDBooster::getTypeFilter($col["field_with"]) == 'between')?"selected":"" }} value='between'>{{trans("crudbooster.filter_between")}}</option>  
-                              @else
-                                 @if(in_array($col['type_data'],['string','varchar','text','char']))<option {{ (CRUDBooster::getTypeFilter($col["field_with"]) == 'like')?"selected":"" }} value='like'>{{trans("crudbooster.filter_like")}}</option> 
-                                 @else
-                                   <option typeallow='all' {{ (CRUDBooster::getTypeFilter($col["field_with"]) == '=')?"selected":"" }} value='='>{{trans("crudbooster.filter_equal_to")}}</option>
-                                 @endif
-                                 
-                                 @if(in_array($col['type_data'],['string','varchar','text','char']))
-                                 <option {{ (CRUDBooster::getTypeFilter($col["field_with"]) == 'not like')?"selected":"" }} value='not like'>{{trans("crudbooster.filter_not_like")}}</option>
-                                 @else
-                                   <option typeallow='all' {{ (CRUDBooster::getTypeFilter($col["field_with"]) == '!=')?"selected":"" }} value='!='>{{trans("crudbooster.filter_not_equal_to")}}</option>
-                                 @endif 
-                              
-                                 @if(in_array($col['type_data'],['int','integer','double','float','decimal']))<option {{ (CRUDBooster::getTypeFilter($col["field_with"]) == '>=')?"selected":"" }} value='>='>{{trans("crudbooster.filter_greater_than_or_equal")}}</option>@endif
-                                 @if(in_array($col['type_data'],['int','integer','double','float','decimal']))<option {{ (CRUDBooster::getTypeFilter($col["field_with"]) == '<=')?"selected":"" }} value='<='>{{trans("crudbooster.filter_less_than_or_equal")}}</option>@endif
-                                 @if(in_array($col['type_data'],['int','integer','double','float','decimal']))<option {{ (CRUDBooster::getTypeFilter($col["field_with"]) == '<')?"selected":"" }} value='<'>{{trans("crudbooster.filter_less_than")}}</option>@endif
-                                 @if(in_array($col['type_data'],['int','integer','double','float','decimal']))<option {{ (CRUDBooster::getTypeFilter($col["field_with"]) == '>')?"selected":"" }} value='>'>{{trans("crudbooster.filter_greater_than")}}</option>@endif
-                                 
-                                 <!--<option typeallow='all' {{ (CRUDBooster::getTypeFilter($col["field_with"]) == 'in')?"selected":"" }} value='in'>{{trans("crudbooster.filter_in")}}</option>
-                                 <option typeallow='all' {{ (CRUDBooster::getTypeFilter($col["field_with"]) == 'not in')?"selected":"" }} value='not in'>{{trans("crudbooster.filter_not_in")}}</option>-->
-                                 @if(in_array($col['type_data'],['date','time','datetime','int','integer','double','float','decimal','timestamp'])||(strpos(strtolower($col['label']),"date")!==false))<option {{ (CRUDBooster::getTypeFilter($col["field_with"]) == 'between')?"selected":"" }} value='between'>{{trans("crudbooster.filter_between")}}</option>@endif                         
-                                 <option {{ (CRUDBooster::getTypeFilter($col["field_with"]) == 'empty')?"selected":"" }} value='empty'>Is Empty</option>
-                              @endif
-                            </select> --}}
-
+                            @else
                               <div class="form-check" style="margin-top : 4%; text-align: right;">
-                                {{-- {{CRUDBooster::getValueFilter($col["field_with"])}} --}}
+                               
                                 @if($col['type'] == 'date')
                                   <input name='filter_column[{{$col["field_with"]}}][type]' data-type='{{$col["type_data"]}}' class="filter-combo" type="checkbox" {{ (CRUDBooster::getTypeFilter($col["field_with"]) == 'between')?"checked":"" }} value='between'>
                                 @elseif($col['type'] == 'text')
@@ -385,9 +443,10 @@
                                     <input name='filter_column[{{$col["field_with"]}}][type]' data-type='{{$col["type_data"]}}' class="filter-combo" type="checkbox" {{ (CRUDBooster::getTypeFilter($col["field_with"]) == 'like')?"checked":"" }} value='like'>
                                   @endif
                                 @endif
-
+  
                               </div>
-                          
+
+                            @endif
 
   
                           </div><!--END COL_SM_4-->
