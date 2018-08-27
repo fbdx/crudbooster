@@ -80,6 +80,7 @@ class CBController extends Controller {
 	public $option_id			  = FALSE;
 	public $option_fields		  = array();
 	public $import_consignment	  = FALSE;
+	public $gigya_based	  		  = FALSE;
 
 
 	public function cbLoader() {
