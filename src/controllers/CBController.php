@@ -87,6 +87,8 @@ class CBController extends Controller {
 
 		$this->checkHideForm();
 
+
+
 		$this->primary_key 					 = CB::pk($this->table);
 		$this->columns_table                 = $this->col;
 		$this->data_inputan                  = $this->form;
@@ -358,13 +360,17 @@ class CBController extends Controller {
 			$filter_column = Request::get('filter_column');
 			$result->where(function($w) use ($filter_column,$fc) {
 				foreach($filter_column as $key=>$fc) {
-
+					// dd($fc);
 					$value = @$fc['value'];
 					$type  = @$fc['type'];
 
 					if($type == 'empty') {
 						$w->whereNull($key)->orWhere($key,'');
 						continue;
+					}
+
+					if($value == 'empty') {
+						$w->whereNull($key)->orWhere($key,'');
 					}
 
 					if($value=='' || $type=='') continue;
@@ -1036,7 +1042,6 @@ class CBController extends Controller {
 
 		foreach($this->data_inputan as $ro) {
 			$name = $ro['name'];
-
 			if(!$name) continue;
 
 			if($ro['exception']) continue;
@@ -1325,18 +1330,24 @@ class CBController extends Controller {
 		Session::put('current_row_id',$id);
 		$option_id		 = $this->option_id;
 		$option_fields	 = $this->option_fields;
+		$table = $this->table;
+
+		// $mainmerge_id = DB::table('mainmerge')->where('customer_id', $id)->value('id');
 		
-		/*if(DB::table('customer')){
-			return view('crudbooster::default.without_form',compact('id','row','page_menu','page_title','command','option_id','option_fields'));	
-		} else {*/
-			return view('crudbooster::default.form',compact('id','row','page_menu','page_title','command','option_id','option_fields'));
-		//}
+		// if(DB::table('customer')){
+		// 	return view('crudbooster::default.form',compact('id','mainmerge_id','row','page_menu','page_title','command','option_id','option_fields'));	
+		// } else {
+		return view('crudbooster::default.form',compact('id','row','page_menu','page_title','command','option_id','option_fields','table'));
+		// }
 		
 	}
 
+	public $countChild = 0;
 	public function postEditSave($id) {
+
 		$this->cbLoader();
 		$row = DB::table($this->table)->where($this->primary_key,$id)->first();
+
 
 		if(!CRUDBooster::isUpdate() && $this->global_privilege==FALSE) {
 			CRUDBooster::insertLog(trans("crudbooster.log_try_add",['name'=>$row->{$this->title_field},'module'=>CRUDBooster::getCurrentModule()->name]));
@@ -1356,8 +1367,15 @@ class CBController extends Controller {
 		DB::table($this->table)->where($this->primary_key,$id)->update($this->arr);		
 
 		//Looping Data Input Again After Insert
+		// dd($this->data_inputan);
+		
+
 		foreach($this->data_inputan as $ro) {
+
 			$name = $ro['name'];
+			
+			$type = $ro['type'];
+
 			if(!$name) continue;
 
 			$inputdata = Request::get($name);
@@ -1410,39 +1428,58 @@ class CBController extends Controller {
 				}
 			}
 
-			if($ro['type']=='child') {
-				$name = str_slug($ro['label'],'');
-				$columns = $ro['columns'];				
-				$count_input_data = count(Request::get($name.'-'.$columns[0]['name']))-1;
-				$child_array = [];
-				$childtable = CRUDBooster::parseSqlTable($ro['table'])['table'];
-				$fk = $ro['foreign_key'];
 
-				DB::table($childtable)->where($fk,$id)->delete();
-				$lastId = CRUDBooster::newId($childtable);
+			if($ro['type']=='child') {
+
+				$tempId = array();
+				$name = str_slug($ro['label'],'');
+				$columns = $ro['columns'];
+				$count_input_data = !empty(Request::get($name.'-'.$columns[0]['name']))-1;
+				$child_array = [];
+				$childtable = CRUDBooster::parseSqlTable($ro['table'])['table'];				
+				$fk = $ro['foreign_key'];
 				$childtablePK = CB::pk($childtable);
 
 				for($i=0;$i<=$count_input_data;$i++) {
 					
 					$column_data = [];
-					$column_data[$childtablePK] = $lastId;
+					// $column_data[$childtablePK] = $lastId;
 					$column_data[$fk] = $id;
 					foreach($columns as $col) {
 						$colname = $col['name'];
 						$column_data[$colname] = Request::get($name.'-'.$colname)[$i];
 					}
-					$child_array[] = $column_data;
 
-					$lastId++;
+					$child_array[] = $column_data;
+					// dd($child_array);
+					if($child_array[$i]['id'] == NULL){
+						
+						// $customer_array[] = $row;
+
+						// $test = (array) $customer_array[$i];
+
+						// foreach($child_array as $key => $value)
+						// {
+						// 	$newArray = array_merge($child_array[$key],$test);
+						// }
+						unset($child_array['id']);
+						$lastId = CRUDBooster::newId($childtable);
+						$child_array[$i]['id'] = $lastId;
+						DB::table($childtable)->insert($child_array);
+					}
+
+					$tempId[] = $child_array[$i]['id'];
+					unset($child_array[$i]['id']);
+
+					DB::table($childtable) 
+					->where('id', $tempId[$i])
+					->update($child_array[$i]);
+	
 				}	
 
-				$child_array = array_reverse($child_array);
-				
-				DB::table($childtable)->insert($child_array);
 			}
 
-
-		}
+		}//end foreach
 
 		$this->hook_after_edit($id);
 
