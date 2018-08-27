@@ -85,6 +85,9 @@ class CBController extends Controller {
 	public $import_consignment	  = FALSE;
 	public $gigya_based	  		  = FALSE;
 
+	private $gigya_api_key		  = config('crudbooster.GIGYAAPIKEY',"");
+	private $gigya_secret_key	  = config('crudbooster.GIGYASECRETKEY',"");
+	private $gigya_user_key		  = config('crudbooster.GIGYAUSERKEY',"");
 
 	public function cbLoader() {
 		$this->cbInit();
