@@ -30,6 +30,12 @@ return [
 
 	'MULTIPLE_DATABASE_MODULE' 	=>[],
 
+	'GIGYAAPIKEY' 	=>"",
+
+	'GIGYASECRETKEY' 	=>"",
+
+	'GIGYAUSERKEY' 	=>"",
+
 	/*
 	* Layout for the Admin LTE backend theme
 	*
