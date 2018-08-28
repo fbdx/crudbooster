@@ -84,10 +84,17 @@ class CBController extends Controller {
 	public $option_fields		  = array();
 	public $import_consignment	  = FALSE;
 	public $gigya_based	  		  = FALSE;
+	
+	private $gigya_api_key;
+	private $gigya_secret_key;
+	private $gigya_user_key;
 
-	private $gigya_api_key		  = config('crudbooster.GIGYAAPIKEY',"");
-	private $gigya_secret_key	  = config('crudbooster.GIGYASECRETKEY',"");
-	private $gigya_user_key		  = config('crudbooster.GIGYAUSERKEY',"");
+	public function __construct()
+	{
+		$this->$gigya_api_key  = config('crudbooster.GIGYAAPIKEY',"3_incRRpAGldxBvgnO6TlRjUNpXEXlw57H-XkuOCO5hNSQ9kN7K24fp3GJTF__nJpJ");
+		$this->$gigya_secret_key = config('crudbooster.GIGYASECRETKEY',"nahHEIQfVWi9f5M8zcyb8DXyadBKHBy1");
+		$this->$gigya_user_key = config('crudbooster.GIGYAUSERKEY',"AGwZ9vhys7JF");
+	}
 
 	public function cbLoader() {
 		$this->cbInit();
