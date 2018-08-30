@@ -2,7 +2,7 @@
 
 error_reporting(E_ALL ^ E_NOTICE);
 
-use crocodicstudio\crudbooster\controllers\Controller;
+use crocodicstudio\crudbooster\controllers\CBController;
 use Illuminate\Support\Facades\Session;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Request;
@@ -18,7 +18,6 @@ use Maatwebsite\Excel\Facades\Excel;
 use Illuminate\Support\Facades\Log;
 use CRUDBooster;
 use CB;
-use CBController;
 use Schema;
 use JsValidator;
 use GSSDK;
