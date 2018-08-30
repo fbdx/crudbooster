@@ -41,11 +41,12 @@ class GigyaCBController extends CBController {
     	echo "gigya api key<br>";
     	echo $offset."<br>";
     	echo $limit."<br>";
+    	echo "select * from accounts LIMIT ".$offset.",".$limit."<br>";
 
     	$method = "accounts.search";
 
     	// $request = new GSRequest($apiKey,$secretKey,$method);
-    	$request = new GSRequest($this->$gigya_api_key,$this->gigya_secret_key,$method,null,true,$this->gigya_user_key);
+    	$request = new GSRequest($this->gigya_api_key,$this->gigya_secret_key,$method,null,true,$this->gigya_user_key);
 
     	$request->setParam("query","select * from accounts LIMIT ".$offset.",".$limit);
     	// $request->setParam("openCursor",true);
