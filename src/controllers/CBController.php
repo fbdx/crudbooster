@@ -150,7 +150,7 @@ class CBController extends Controller {
 		echo view($template,$data);
 	}
 
-	private function checkHideForm() {
+	protected function checkHideForm() {
 		if(count($this->hide_form)) {
 			foreach($this->form as $i=>$f) {
 				if(in_array($f['name'], $this->hide_form)) {
@@ -160,7 +160,7 @@ class CBController extends Controller {
 		}
 	}
 
-	private function findNameFormType($name) {
+	protected function findNameFormType($name) {
 		$isFind = FALSE;
 		foreach($this->form as $i=>$f)
 		{
