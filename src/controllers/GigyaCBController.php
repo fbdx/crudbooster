@@ -31,10 +31,43 @@ class GigyaCBController extends CBController {
 
 	public function __construct()
 	{
-		$this->$gigya_api_key  = config('crudbooster.GIGYAAPIKEY',"");
-		$this->$gigya_secret_key = config('crudbooster.GIGYASECRETKEY',"");
-		$this->$gigya_user_key = config('crudbooster.GIGYAUSERKEY',"");
+		$this->gigya_api_key  = config('crudbooster.GIGYAAPIKEY',"");
+		$this->gigya_secret_key = config('crudbooster.GIGYASECRETKEY',"");
+		$this->gigya_user_key = config('crudbooster.GIGYAUSERKEY',"");
 	}
+
+	private function getCustomer()
+    {
+
+
+    	$method = "accounts.search";
+
+    	// $request = new GSRequest($apiKey,$secretKey,$method);
+    	$request = new GSRequest($this->$gigya_api_key,$this->gigya_secret_key,$method,null,true,$this->gigya_user_key);
+
+    	$request->setParam("query","select * from accounts LIMIT 5000");
+    	// $request->setParam("openCursor",true);
+
+    	$response = $request->send();
+
+    	if($response->getErrorCode()==0)
+    	    {
+    	        // echo "Success";
+                $response = $response->getResponseText();
+                $response = json_decode($response, true);
+                // return view('test', compact('response'));
+
+    	        return $response;
+
+    	    }
+    	else
+    	    {
+    	        echo ("Uh-oh, we got the following error: " . $response->getErrorMessage());
+    	        error_log($response->getLog());
+    	    }
+
+
+    }
 
 	public function getIndex() {
 		$this->cbLoader();
@@ -63,6 +96,7 @@ class GigyaCBController extends CBController {
 				}
 			}
 		}
+
 
 		$data['table'] 	  = $this->table;
 		$data['table_pk'] = CB::pk($this->table);
