@@ -39,9 +39,8 @@ class GigyaCBController extends CBController {
 	private function getCustomer($offset=0,$limit=20)
     {
     	echo "gigya api key<br>";
-    	echo $this->gigya_api_key."<br>";
-    	echo $this->gigya_secret_key."<br>";
-    	echo $this->gigya_user_key."<br>";
+    	echo $offset."<br>";
+    	echo $limit."<br>";
 
     	$method = "accounts.search";
 
