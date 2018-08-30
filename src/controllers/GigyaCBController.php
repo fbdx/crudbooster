@@ -36,7 +36,7 @@ class GigyaCBController extends CBController {
 		$this->gigya_user_key = config('crudbooster.GIGYAUSERKEY');
 	}
 
-	private function getCustomer()
+	private function getCustomer($offset=0,$limit=20)
     {
     	echo "gigya api key<br>";
     	echo $this->gigya_api_key."<br>";
@@ -48,7 +48,7 @@ class GigyaCBController extends CBController {
     	// $request = new GSRequest($apiKey,$secretKey,$method);
     	$request = new GSRequest($this->$gigya_api_key,$this->gigya_secret_key,$method,null,true,$this->gigya_user_key);
 
-    	$request->setParam("query","select * from accounts LIMIT 5000");
+    	$request->setParam("query","select * from accounts LIMIT ".$offset.",".$limit);
     	// $request->setParam("openCursor",true);
 
     	$response = $request->send();
