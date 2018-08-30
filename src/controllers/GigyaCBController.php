@@ -97,7 +97,8 @@ class GigyaCBController extends CBController {
 			}
 		}
 
-
+		$customerlist = getCustomer();
+		echo "<pre>".print_r($customerlist,TRUE)."</pre><br>";
 		$data['table'] 	  = $this->table;
 		$data['table_pk'] = CB::pk($this->table);
 		$data['page_title']       = $module->name;
