@@ -40,6 +40,8 @@ class GigyaCBController extends CBController {
     {
     	echo "gigya api key<br>";
     	echo $this->gigya_api_key."<br>";
+    	echo $this->gigya_secret_key."<br>";
+    	echo $this->gigya_user_key."<br>";
 
     	$method = "accounts.search";
 
