@@ -31,14 +31,15 @@ class GigyaCBController extends CBController {
 
 	public function __construct()
 	{
-		$this->gigya_api_key  = config('crudbooster.GIGYAAPIKEY',"");
-		$this->gigya_secret_key = config('crudbooster.GIGYASECRETKEY',"");
-		$this->gigya_user_key = config('crudbooster.GIGYAUSERKEY',"");
+		$this->gigya_api_key  = config('crudbooster.GIGYAAPIKEY');
+		$this->gigya_secret_key = config('crudbooster.GIGYASECRETKEY');
+		$this->gigya_user_key = config('crudbooster.GIGYAUSERKEY');
 	}
 
 	private function getCustomer()
     {
-
+    	echo "gigya api key<br>";
+    	echo $this->gigya_api_key."<br>";
 
     	$method = "accounts.search";
 
