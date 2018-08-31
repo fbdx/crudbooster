@@ -155,7 +155,7 @@ class GigyaCBController extends CBController {
 			if(strpos($field,'.')!==FALSE) {
 				$result->addselect($field);
 			}else{
-				$result->addselect($table.'.'.$field);
+				$result->addselect($field);
 			}
 
 			$field_array = explode('.', $field);
