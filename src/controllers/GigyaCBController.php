@@ -400,7 +400,7 @@ class GigyaCBController extends CBController {
 
 
 		$customerlist = $this->getCustomer();
-		//echo "<pre>".print_r($customerlist,TRUE)."</pre><br>";
+		echo "<pre>".print_r($data,TRUE)."</pre><br>";
 
  		$html_contents = ['html'=>$html_contents,'data'=>$data['result']];
 
