@@ -101,7 +101,7 @@ class GigyaCBController extends CBController {
 		}
 
 		$customerlist = $this->getCustomer();
-		echo "<pre>".print_r($customerlist,TRUE)."</pre><br>";
+		//echo "<pre>".print_r($customerlist,TRUE)."</pre><br>";
 		$data['table'] 	  = $this->table;
 		$data['table_pk'] = CB::pk($this->table);
 		$data['page_title']       = $module->name;
@@ -111,7 +111,7 @@ class GigyaCBController extends CBController {
 
 		$tablePK = $data['table_pk'];
 		$table_columns = CB::getTableColumns($this->table);
-		$result = DB::table($this->table)->select(DB::raw($this->table.".".$this->primary_key));
+		$result = DB::table($this->table)->select(DB::raw($this->primary_key));
 
 		if(Request::get('parent_id')) {
 			$table_parent = $this->table;
@@ -221,7 +221,7 @@ class GigyaCBController extends CBController {
 
 			}else{
 
-				$result->addselect($table.'.'.$field);
+				//$result->addselect($table.'.'.$field);
 				$columns_table[$index]['type_data']	 = CRUDBooster::getFieldType($table,$field);
 				$columns_table[$index]['field']      = $field;
 				$columns_table[$index]['field_raw']  = $field;
@@ -505,7 +505,7 @@ class GigyaCBController extends CBController {
 
 		$data['html_contents'] = $html_contents;
 		$data['limit'] = $result->count();
-		//echo $result->toSql()."<br>";
+		echo $result->toSql()."<br>";
 
 		return view("crudbooster::default.index",$data);
 	}
