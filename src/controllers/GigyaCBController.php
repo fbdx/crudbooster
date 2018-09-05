@@ -36,7 +36,7 @@ class GigyaCBController extends CBController {
 		$this->gigya_user_key = config('crudbooster.GIGYAUSERKEY');
 	}
 
-	private function getCustomer($offset=0,$limit=20)
+	private function getCustomer($offset=0,$limit=400)
     {
 
     	$method = "accounts.search";
@@ -89,14 +89,68 @@ class GigyaCBController extends CBController {
 		$table_columns = CB::getTableColumns($this->table);
 		$result = DB::table($this->table)->select(DB::raw($this->primary_key));
 
-		$this->hook_query_index($result);
+		$tempTable = $this->createTempTable();
+
+
+		if ($tempTable) {
+		//insert table
+
+		$gigyaData = $this->getCustomer();
+
+		// dd($gigyaData);
+
+		$gigyaResults = $gigyaData['results'];
+
+		foreach ($gigyaResults as $gigyaResult) {
+			$tableName = 'gigya';
+			// $profile[] = $gigyaResult['profile'];
+			$i = 0;
+			$col = array_keys($gigyaResult['profile']);
+			$colLength = sizeof($col);
+			// $childData[] = $gigyaResult['data']['child'];
+			// dump($profile);
+
+			$listOfColumn = DB::select(DB::raw("SHOW COLUMNS in $tableName"));
+
+			for ($a=0; $a < $colLength; $a++) { 
+
+			    $colName = $col[$a];
+			    // dd($colName);
+			    $profile[$i][$colName] = $gigyaResult['profile'][$colName];
+			    // dump($profile[$i][$colName]);
+			    foreach ($listOfColumn as $listOfCol) {
+			        $listCol[] = $listOfCol->Field;
+			        
+			    }
+			    // dump($colName,$listCol);
+			    if(!in_array($colName, $listCol)){
+			        // dump($colName,'not exist');/
+			        DB::insert(DB::raw("ALTER TABLE $tableName ADD COLUMN $colName varchar(255) NOT NULL"));
+			    }
+			}
+			    
+
+		    DB::table($tableName)->insert([
+		        $profile[0]
+		    ]);
+			// dump($profile);
+		    $i++;
+		}
+		$customerData = DB::table($tableName)->get();
+
+		//end insert table
+
+		// $this->hook_query_index($result);
+			# code...
 
 		$alias            = array();
 		$table            = $this->table;
-		$columns_table    = $this->columns_table;
-		foreach($columns_table as $index => $coltab) {
-			$field = @$coltab['name'];
 
+		$columns_table    = $this->columns_table;
+
+		foreach($columns_table as $index => $coltab) {
+
+			$field = @$coltab['name'];
 			if(!$field) die('Please make sure there is key `name` in each row of col');
 
 			if(strpos($field, ' as ')!==FALSE) {
@@ -109,11 +163,14 @@ class GigyaCBController extends CBController {
 				$columns_table[$index]['is_subquery'] = true;
 				continue;
 			}
+			// dd(strpos($field),'.');
 
 			if(strpos($field,'.')!==FALSE) {
+				// dd('1');
 				$result->addselect($field);
 			}else{
-				$result->addselect($field);
+				// dd('2');
+				$result->addselect($table.'.'.$field);
 			}
 
 			$field_array = explode('.', $field);
@@ -400,7 +457,8 @@ class GigyaCBController extends CBController {
 
 
 		$customerlist = $this->getCustomer();
-		echo "<pre>".print_r($data,TRUE)."</pre><br>";
+
+		// echo "<pre>".print_r($data,TRUE)."</pre><br>";
 
  		$html_contents = ['html'=>$html_contents,'data'=>$data['result']];
 
@@ -410,7 +468,28 @@ class GigyaCBController extends CBController {
 		$itemSql = str_replace("offset","start",$itemSql);
 		echo $itemSql."<br>";*/
 
+
 		return view("crudbooster::default.index",$data);
+	}
+	} //last
+
+	public function createTempTable()
+	{
+		$tableName = 'gigya';
+		
+		$table = DB::insert(DB::raw("create temporary table $tableName (
+                                        id int NOT NULL AUTO_INCREMENT,
+                                        firstName varchar(255) NOT NULL,
+                                        lastName varchar(255) NOT NULL,
+                                        email varchar(255) NOT NULL,
+                                        PRIMARY KEY (id)
+                                    )"));
+
+		
+
+		// $customerData = DB::table($tableName)->get();
+
+		return $table;
 	}
 
 
