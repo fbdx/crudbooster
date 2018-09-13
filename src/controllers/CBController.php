@@ -88,9 +88,6 @@ class CBController extends Controller {
 	public function __construct()
 	{
 
-		$this->$gigya_api_key  = config('crudbooster.GIGYAAPIKEY',"");
-		$this->$gigya_secret_key = config('crudbooster.GIGYASECRETKEY',"");
-		$this->$gigya_user_key = config('crudbooster.GIGYAUSERKEY',"");
 
 	}
 
