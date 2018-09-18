@@ -1443,7 +1443,7 @@ class CBController extends Controller {
 				$tempId = array();
 				$name = str_slug($ro['label'],'');
 				$columns = $ro['columns'];
-				$count_input_data = !empty(Request::get($name.'-'.$columns[0]['name']))-1;
+				$count_input_data = count(Request::get($name.'-'.$columns[0]['name']))-1;
 				$child_array = [];
 				$childtable = CRUDBooster::parseSqlTable($ro['table'])['table'];				
 				$fk = $ro['foreign_key'];
@@ -1460,30 +1460,43 @@ class CBController extends Controller {
 					}
 
 					$child_array[] = $column_data;
-					// dd($child_array);
+
 					if($child_array[$i]['id'] == NULL){
 						
-						// $customer_array[] = $row;
+						if($childtable == 'mainmerge') {
+						$customer_array[] = $row;
 
-						// $test = (array) $customer_array[$i];
+						$test = (array) $customer_array[$i];
 
-						// foreach($child_array as $key => $value)
-						// {
-						// 	$newArray = array_merge($child_array[$key],$test);
-						// }
-						unset($child_array['id']);
+						foreach($child_array as $key => $value)
+						{
+							$newArray = array_merge($child_array[$key],$test);
+						}
+						// var_dump($customer_array);
+						// dd($customer_array,$row);
+						unset($newArray['id']);
+						// dd($child_array);
 						$lastId = CRUDBooster::newId($childtable);
-						$child_array[$i]['id'] = $lastId;
-						DB::table($childtable)->insert($child_array);
-					}
+						$newArray['id'] = $lastId;
+						DB::table($childtable)->insert($newArray);
+						}
+						else {
+							// dd($child_array);
+							unset($child_array['id']);
+							$lastId = CRUDBooster::newId($childtable);
+							$child_array[$i]['id'] = $lastId;
+							DB::table($childtable)->insert($child_array);
+						}
 
+					}
+					// dd($child_array);
 					$tempId[] = $child_array[$i]['id'];
 					unset($child_array[$i]['id']);
 
 					DB::table($childtable) 
 					->where('id', $tempId[$i])
 					->update($child_array[$i]);
-	
+
 				}	
 
 			}
