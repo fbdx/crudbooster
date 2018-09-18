@@ -102,7 +102,7 @@ class GigyaCBController extends CBController {
 		$gigyaResults = $gigyaData['results'];
 
 		foreach ($gigyaResults as $gigyaResult) {
-			$tableName = 'gigya';
+			$tableName = 'customergigya';
 			// $profile[] = $gigyaResult['profile'];
 			$i = 0;
 			$col = array_keys($gigyaResult['profile']);
@@ -475,7 +475,7 @@ class GigyaCBController extends CBController {
 
 	public function createTempTable()
 	{
-		$tableName = 'gigya';
+		$tableName = 'customergigya';
 		
 		$table = DB::insert(DB::raw("create temporary table $tableName (
                                         id int NOT NULL AUTO_INCREMENT,
