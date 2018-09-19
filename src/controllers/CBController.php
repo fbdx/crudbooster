@@ -1794,7 +1794,7 @@ class CBController extends Controller {
 				{
 					//Log::error("notinloop");
 					//Log::error($a);
-					if (($a['consigmentno'] != '')||($a['returnreason'] != ''))
+					if (($a['consigmentno'] != '')||($a['returnreason'] != '')||($a['batchno'] != ''))
 					{
 						$arr = array();
 						foreach ($a as $key => $value)
