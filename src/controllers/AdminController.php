@@ -9,6 +9,8 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
 use CRUDBooster;
 
+use Illuminate\Support\Facades\Schema;
+
 class AdminController extends CBController {	
 
 	function getIndex() {
@@ -141,6 +143,8 @@ class AdminController extends CBController {
 		
 		$me = CRUDBooster::me();
 		CRUDBooster::insertLog(trans("crudbooster.log_logout",['email'=>$me->email]));
+
+		Schema::dropIfExists('customergigya');
 
 		Session::flush();
 		return redirect()->route('getLogin')->with('message',trans("crudbooster.message_after_logout"));
