@@ -36,42 +36,68 @@ class GigyaCBController extends CBController {
 		$this->gigya_user_key = config('crudbooster.GIGYAUSERKEY');
 	}
 
-	private function getCustomer($offset=0,$limit=500)
+	public function createTempTable()
+	{
+		$tableName = 'gigya_customer';
+
+		$table = DB::insert(DB::raw("create table $tableName (
+                                        id int NOT NULL AUTO_INCREMENT,
+                                        UID varchar(255) NOT NULL,
+                                        firstName varchar(255) NOT NULL,
+                                        lastName varchar(255),
+                                        email varchar(255) NOT NULL,
+                                        PRIMARY KEY (id)
+                                    )"));
+		return $table;
+	}
+
+	public function createChildTable()
+	{
+		$childTableName = 'gigya_child';
+
+		$table = DB::insert(DB::raw("create table $childTableName (
+                                        id int NOT NULL AUTO_INCREMENT,
+                                        UID varchar(255) NOT NULL,
+                                        firstName varchar(255) NOT NULL,
+                                        birthDate DATE,
+                                        PRIMARY KEY (id)
+                                    )"));
+
+		return $table;
+	}
+
+	private function getCustomer($offset=0,$limit=5000)
     {
-
     	$method = "accounts.search";
-
     	// $request = new GSRequest($apiKey,$secretKey,$method);
     	$request = new GSRequest($this->gigya_api_key,$this->gigya_secret_key,$method,null,true,$this->gigya_user_key);
 
-    	$request->setParam("query","select * from emailAccounts START ".$offset." LIMIT ".$limit."");
+    	$request->setParam("query","select * from emailAccounts where data.child is not null START ".$offset." LIMIT ".$limit."");
     	// $request->setParam("openCursor",true);
-
     	$response = $request->send();
 
     	if($response->getErrorCode()==0)
-    	    {
-    	        // echo "Success";
-                $response = $response->getResponseText();
-                $response = json_decode($response, true);
-                // return view('test', compact('response'));
-    	        return $response;
+	    {
+	        // echo "Success";
+            $response = $response->getResponseText();
+            $response = json_decode($response, true);
+            // return view('test', compact('response'));
+	        return $response;
 
-    	    }
+	    }
     	else
-    	    {
-    	        echo ("Uh-oh, we got the following error: " . $response->getErrorMessage());
-    	        error_log($response->getLog());
-    	    }
-
-
+	    {
+	        echo ("Uh-oh, we got the following error: " . $response->getErrorMessage());
+	        error_log($response->getLog());
+	    }
     }
 
-
-	public function getIndex() {
+	public function getIndex() 
+	{
 		$this->cbLoader();
 
 		$module = CRUDBooster::getCurrentModule();
+		// $testPath = CRUDBooster::mainpath();
 
 		if(!CRUDBooster::isView() && $this->global_privilege==FALSE) {
 			CRUDBooster::insertLog(trans('crudbooster.log_try_view',['module'=>$module->name]));
@@ -90,38 +116,38 @@ class GigyaCBController extends CBController {
 		$result = DB::table($this->table)->select(DB::raw($this->primary_key));
 
 		//insert table
-		// $tempTable = $this->createTempTable();
-
-		// dd($this->createTempTable());
-
-		$tableName = 'customergigya';
+		$tableName = 'gigya_customer';
+		$childTableName = 'gigya_child';
 		$tableExist = Schema::hasTable($tableName);
-		
-		if($tableExist != true){
+		$childTableExist = Schema::hasTable($childTableName);
+
+		if($tableExist !== true && childTableExist !== true){
 			$tempTable = $this->createTempTable();
+			$createChildTable = $this->createChildTable();
 		}
 
-		if ($tempTable) {
-
+		if ($tempTable && $createChildTable) {
 			$gigyaData = $this->getCustomer();
 			$gigyaResults = $gigyaData['results'];
-
+			// dd($gigyaResults);
 			foreach ($gigyaResults as $gigyaResult) {
-				
 				// $profile[] = $gigyaResult['profile'];
 				$i = 0;
 				$col = array_keys($gigyaResult['profile']);
 				$colLength = sizeof($col);
-				// $childData[] = $gigyaResult['data']['child'];
 
 
+				/**
+					** add column if not exist in gigya_customer table
+					** Insert data into the table
+					** 
+				*/
 				$listOfColumn = DB::select(DB::raw("SHOW COLUMNS in $tableName"));
 
 				$profile = [];
 				for ($a=0; $a < $colLength; $a++) { 
 
 				    $colName = $col[$a];
-				    // dump($colName);
 
 				    if ($colName == 'phones') {
 				    	$profile[$i]['phones'] = $gigyaResult['profile']['phones']['number'];	
@@ -144,17 +170,57 @@ class GigyaCBController extends CBController {
 			    DB::table($tableName)->insert([
 			        $profile[0]
 			    ]);
+
+			    /**
+					** get the child data and check if not null
+					* 
+			    */
+
+				$childData = $gigyaResult['data']['child'];
+				// dump($childData);
+
+				// $listOfColumn = DB::select(DB::raw("SHOW COLUMNS in $childTableName"));
+				
+				if($childData != null) {
+					$childs = [];
+					foreach ($childData as $key => $value) {
+						// dump($key,'/',$value);
+						if($key !== 0) {
+							$childs[$i][$key] = $value;
+							$childs[$i]['UID'] = $gigyaResult['UID'];
+						}
+					}
+
+					// 
+					// foreach ($listOfColumn as $listOfCol) {
+				 //        $listCol[] = $listOfCol->Field;
+					// }
+					// 	// dump($childs);
+				 //    if (!empty($childs)) {
+				 //    	if (!$childs[0][1]) {
+				 //    		if (!in_array($key, $listCol)) {
+				 //    			DB::insert(DB::raw("ALTER TABLE $childTableName ADD COLUMN $key varchar(255)"));
+				 //    		}
+
+					// 	    DB::table($childTableName)->insert([
+					// 	   		$childs[0]
+					// 	    ]);
+				 //    	}
+				 //    }
+
+				}
+
 			    $i++;
 			}
 
-			$customerData = DB::table($tableName)->get();
+			// $customerData = DB::table($tableName)->get();
+			// die();
 			//end insert table
-
-			// dd($customerData);
 
 			// $this->hook_query_index($result);
 				# code...
 		}
+
 		$alias            = array();
 		$table            = $this->table;
 
@@ -215,9 +281,7 @@ class GigyaCBController extends CBController {
 					}
 				}
 			}
-
-			
-		}
+		} //end foreach
 
 		if(Request::get('q')) {
 			$result->where(function($w) use ($columns_table, $request) {
@@ -275,7 +339,6 @@ class GigyaCBController extends CBController {
 							}
 						break;
 					}
-
 
 				}
 			});
@@ -484,21 +547,6 @@ class GigyaCBController extends CBController {
 		return view("crudbooster::default.index",$data);
 		
 	} //last
-
-	public function createTempTable()
-	{
-		$tableName = 'customergigya';
-
-		$table = DB::insert(DB::raw("create table $tableName (
-                                        id int NOT NULL AUTO_INCREMENT,
-                                        UID varchar(255) NOT NULL,
-                                        firstName varchar(255) NOT NULL,
-                                        lastName varchar(255),
-                                        email varchar(255) NOT NULL,
-                                        PRIMARY KEY (id)
-                                    )"));
-		return $table;
-	}
 
 	public function getEdit($id){
 		$this->cbLoader();
@@ -718,7 +766,6 @@ class GigyaCBController extends CBController {
         {
 
 	    	// dd($UID, $setInputData);
-	    	// $UID = 'b19c6d9dee2646859945360ea36a6c96';
 	    	$setInputData['phones'] = array("number"=>$setInputData['phones']);
 
 	    	$method = "accounts.search";
@@ -752,17 +799,16 @@ class GigyaCBController extends CBController {
 	            	    echo "<pre>".print_r($response,TRUE)."</pre>\n";
 	            	    echo $reg['email'];
 
-
 	            	}
 	            	else
 	            	{	
-	            		dd('error');
 	            	    echo ("Uh-oh, we got the following error: " . $response->getErrorMessage());
 	            	    error_log($response->getLog());
 	            	}
 
 	            } else {
-	            	dd('not found');
+	            	// dd('not found');
+	            	echo ("Uh-oh, no record found ");
 	            }
 	            // dd($response);
 		        // return $response;
