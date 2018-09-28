@@ -144,7 +144,7 @@ class AdminController extends CBController {
 		$me = CRUDBooster::me();
 		CRUDBooster::insertLog(trans("crudbooster.log_logout",['email'=>$me->email]));
 
-		Schema::dropIfExists('customergigya');
+		Schema::dropIfExists('gigyacustomer');
 
 		Session::flush();
 		return redirect()->route('getLogin')->with('message',trans("crudbooster.message_after_logout"));
