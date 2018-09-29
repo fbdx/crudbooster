@@ -55,14 +55,30 @@ class GigyaCBController extends CBController {
 	{
 		$childTableName = 'gigya_child';
 
-		$table = DB::insert(DB::raw("create table $childTableName (
-                                        id int NOT NULL AUTO_INCREMENT,
-                                        UID varchar(255) NOT NULL,
-                                        firstName varchar(255) NOT NULL,
-                                        birthDate DATE,
-                                        PRIMARY KEY (id)
-                                    )"));
+		$table = DB::insert(DB::raw("CREATE TABLE `gigya_child` (
+			`id` int(11) NOT NULL AUTO_INCREMENT,
+  			`UID` varchar(255) DEFAULT NULL,
+  			`firstName` varchar(255) DEFAULT NULL,
+		  `birthDate` date DEFAULT NULL,
+		  `birthDateReliability` int(11) NULL,
+		  `feeding` varchar(255) DEFAULT NULL,
+		  `customerid` int(11) NOT NULL,
+		  `sex` int(11) DEFAULT NULL,
+		  PRIMARY KEY (`id`),
+		  KEY `customerid` (`customerid`),
+		  CONSTRAINT `gigya_child_ibfk_1` FOREIGN KEY (`customerid`) REFERENCES `gigya_customer` (`id`)
+			)"));
 
+		// $table = DB::insert(DB::raw("create table $childTableName (
+  //                                       id int NOT NULL AUTO_INCREMENT,
+  //                                       UID varchar(255) NOT NULL,
+  //                                       firstName varchar(255) NOT NULL,
+  //                                       birthDate DATE,
+  //                                       birthDateReliability INT,
+  //                                       feeding varchar(255),
+  //                                       customer_id
+  //                                       PRIMARY KEY (id)
+  //                                   )"));
 		return $table;
 	}
 
@@ -124,101 +140,6 @@ class GigyaCBController extends CBController {
 		if($tableExist !== true && childTableExist !== true){
 			$tempTable = $this->createTempTable();
 			$createChildTable = $this->createChildTable();
-		}
-
-		if ($tempTable && $createChildTable) {
-			$gigyaData = $this->getCustomer();
-			$gigyaResults = $gigyaData['results'];
-			// dd($gigyaResults);
-			foreach ($gigyaResults as $gigyaResult) {
-				// $profile[] = $gigyaResult['profile'];
-				$i = 0;
-				$col = array_keys($gigyaResult['profile']);
-				$colLength = sizeof($col);
-
-
-				/**
-					** add column if not exist in gigya_customer table
-					** Insert data into the table
-					** 
-				*/
-				$listOfColumn = DB::select(DB::raw("SHOW COLUMNS in $tableName"));
-
-				$profile = [];
-				for ($a=0; $a < $colLength; $a++) { 
-
-				    $colName = $col[$a];
-
-				    if ($colName == 'phones') {
-				    	$profile[$i]['phones'] = $gigyaResult['profile']['phones']['number'];	
-				    } else { 
-				    	$profile[$i][$colName] = $gigyaResult['profile'][$colName];
-				    	$profile[$i]['UID'] = $gigyaResult['UID'];
-					}
-				    // dump($colName,$gigyaResult['profile'][$colName]);
-
-				    foreach ($listOfColumn as $listOfCol) {
-				        $listCol[] = $listOfCol->Field;
-				    }
-
-				    if(!in_array($colName, $listCol)){
-				        DB::insert(DB::raw("ALTER TABLE $tableName ADD COLUMN $colName varchar(255)"));
-				    }
-				    
-				}
-
-			    DB::table($tableName)->insert([
-			        $profile[0]
-			    ]);
-
-			    /**
-					** get the child data and check if not null
-					* 
-			    */
-
-				$childData = $gigyaResult['data']['child'];
-				// dump($childData);
-
-				// $listOfColumn = DB::select(DB::raw("SHOW COLUMNS in $childTableName"));
-				
-				if($childData != null) {
-					$childs = [];
-					foreach ($childData as $key => $value) {
-						// dump($key,'/',$value);
-						if($key !== 0) {
-							$childs[$i][$key] = $value;
-							$childs[$i]['UID'] = $gigyaResult['UID'];
-						}
-					}
-
-					// 
-					// foreach ($listOfColumn as $listOfCol) {
-				 //        $listCol[] = $listOfCol->Field;
-					// }
-					// 	// dump($childs);
-				 //    if (!empty($childs)) {
-				 //    	if (!$childs[0][1]) {
-				 //    		if (!in_array($key, $listCol)) {
-				 //    			DB::insert(DB::raw("ALTER TABLE $childTableName ADD COLUMN $key varchar(255)"));
-				 //    		}
-
-					// 	    DB::table($childTableName)->insert([
-					// 	   		$childs[0]
-					// 	    ]);
-				 //    	}
-				 //    }
-
-				}
-
-			    $i++;
-			}
-
-			// $customerData = DB::table($tableName)->get();
-			// die();
-			//end insert table
-
-			// $this->hook_query_index($result);
-				# code...
 		}
 
 		$alias            = array();
@@ -713,7 +634,6 @@ class GigyaCBController extends CBController {
 		$this->updateCustomerRecord($UID,$setInputData);
 
 		$this->hook_after_edit($id);
-
 
 		$this->return_url = ($this->return_url)?$this->return_url:Request::get('return_url');
 
