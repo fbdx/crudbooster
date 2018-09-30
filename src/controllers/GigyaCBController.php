@@ -653,6 +653,35 @@ class GigyaCBController extends CBController {
 
 	public function updateCustomerRecord($UID, $setInputData)
     {
+            	
+    	$method2 = "accounts.setAccountInfo";
+    	$request = new GSRequest($this->gigya_api_key,$this->gigya_secret_key,$method2,null,true,$this->gigya_user_key);
+    	$request->setParam("UID",$UID);
+    	$request->setParam("profile",json_encode($setInputData));
+
+    	$response = $request->send();
+    	// dd($response);
+    	if($response->getErrorCode()==0)
+    	{
+    	    // echo "Success";
+    	    $response = $response->getResponseText();
+    	    $response = json_decode($response, true);
+
+    	    Log::info(print_r($response,TRUE));
+    	    //echo "<pre>".print_r($response,TRUE)."</pre>\n";
+    	    //echo $reg['email'];
+    	}
+    	else
+    	{	
+    		Log::error("Uh-oh, we got the following error: " . $response->getErrorMessage());
+    	    //echo ("Uh-oh, we got the following error: " . $response->getErrorMessage());
+    	    //error_log($response->getLog());
+    	}
+
+    }
+
+	public function createCustomerRecord($UID, $setInputData)
+    {
     	//$method = "accounts.search";
     	$method = "accounts.initRegistration";
 
