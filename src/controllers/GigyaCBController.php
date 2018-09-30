@@ -452,7 +452,7 @@ class GigyaCBController extends CBController {
 		} //end foreach data[result]
 
 
-		$customerlist = $this->getCustomer();
+		//$customerlist = $this->getCustomer();
 
 		// echo "<pre>".print_r($data,TRUE)."</pre><br>";
 
