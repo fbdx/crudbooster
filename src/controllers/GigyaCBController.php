@@ -475,6 +475,7 @@ class GigyaCBController extends CBController {
 		$row             = DB::table($this->table)->where($this->primary_key,$id)->first();
 		$response = $this->getCustomerRecord($row->UID);
 		$results = $response['results'];
+		// dd($results);
 		$UID = $results[0]['UID'];
 		$profile = $results[0]['profile'];
 		$child = $results[0]['data']['child'];
@@ -495,14 +496,16 @@ class GigyaCBController extends CBController {
 
 		$childTable = DB::table('gigya_child')->where('UID',$UID)->first();
 		// dd($child,$childTable);
-		foreach ($child as $key => $value) {
-			if(isset($child)){
-				DB::table('gigya_child')
-                    ->where('UID', $UID)
-                    ->update([$key => $value]);
+		if(isset($child)){
+			foreach ($child as $key => $value) {
+				// if(isset($child)){
+					DB::table('gigya_child')
+	                    ->where('UID', $UID)
+	                    ->update([$key => $value]);
+				// }
 			}
 		}
-		
+
 		if(!CRUDBooster::isRead() && $this->global_privilege==FALSE || $this->button_edit==FALSE) {
 			CRUDBooster::insertLog(trans("crudbooster.log_try_edit",['name'=>$row->{$this->title_field},'module'=>CRUDBooster::getCurrentModule()->name]));
 			CRUDBooster::redirect(CRUDBooster::adminPath(),trans('crudbooster.denied_access'));
@@ -634,14 +637,15 @@ class GigyaCBController extends CBController {
 					// dd($child_array);
 					if($child_array[$i]['id'] == NULL){
 						
-						// $customer_array[] = $row;
+						$customer_array[] = $row;
 
-						// $test = (array) $customer_array[$i];
+						$test = (array) $customer_array[$i];
 
-						// foreach($child_array as $key => $value)
-						// {
-						// 	$newArray = array_merge($child_array[$key],$test);
-						// }
+						foreach($child_array as $key => $value)
+						{
+							$newArray = array_merge($child_array[$key],$test);
+						}
+
 						unset($child_array['id']);
 						$lastId = CRUDBooster::newId($childtable);
 						$child_array[$i]['id'] = $lastId;
@@ -655,12 +659,28 @@ class GigyaCBController extends CBController {
 					->where('id', $tempId[$i])
 					->update($child_array[$i]);
 	
-				}	
-
+				}
+				if($childtable == 'gigya_child'){
+					$childData = $child_array;
+				}
 			}
 
 		}//end foreach
-		$this->updateCustomerRecord($UID,$setInputData);
+		// dd($UID,$setInputData);
+
+		// $setInputData = array_diff($setInputData, ["UID","children", "sample_request", "careline_detail"]);
+		// dd($setInputData);
+		$removeKeys = array("UID","children", "sample_request", "careline_detail");
+		foreach ($removeKeys as $key) {
+			unset($setInputData[$key]);
+		}
+
+		$childArray = $childData[0];
+		unset($childArray['customerid']);
+
+		// dd($childArray);
+
+		$this->createCustomerRecord($UID,$setInputData,$childArray);
 
 		$this->hook_after_edit($id);
 
@@ -719,6 +739,7 @@ class GigyaCBController extends CBController {
     	$request->setParam("query","SELECT * FROM emailAccounts WHERE UID='$UID'");
 
 	    $response = $request->send();
+	    // dd($response);
 
     	if($response->getErrorCode()==0)
     	{
@@ -738,7 +759,7 @@ class GigyaCBController extends CBController {
     	}
     }
 
-	public function createCustomerRecord($UID, $setInputData)
+	public function createCustomerRecord($UID, $setInputData, $childArray)
     {
     	//$method = "accounts.search";
     	$method = "accounts.initRegistration";
@@ -752,6 +773,7 @@ class GigyaCBController extends CBController {
     	// $request->setParam("openCursor",true);
 
     	$response = $request->send();
+
     	$regtoken="";
     	// dd($response);
     	if($response->getErrorCode()==0)
@@ -771,9 +793,24 @@ class GigyaCBController extends CBController {
 
 	    if ($regtoken!="")
         {
-
+        	// dd($childArray);
 	    	// dd($UID, $setInputData);
 	    	$setInputData['phones'] = array("number"=>$setInputData['phones']);
+
+	  //   	$childData['child']{'firstName'} = $childArray['firstName'];
+	  //   	$childData['child']{'birthDate'} = $childArray['birthDate'];
+			// $childData['child']{'birthDateReliability'} = childArray['birthDateReliability'];
+	  //   	$childData['child']{'feeding'} = childArray['feeding'];
+
+
+	    	$childData['child.firstName'] = $childArray['firstName'];
+	    	$childData['child.birthDate'] = $childArray['birthDate'];
+	    	$childData['child.birthDateReliability'] = $childArray['birthDateReliability'];
+	    	$childData['child.feeding'] = $childArray['feeding'];
+
+	    	$child = $childData;
+
+	    	// dd($child);
 
 	    	$method = "accounts.search";
 	    	// $method = "accounts.getAccountInfo";
@@ -786,17 +823,14 @@ class GigyaCBController extends CBController {
 		   	{
 	            $response = $response->getResponseText();
 	            $response = json_decode($response, true);
-
 	            
-	            if (!empty($response['results'])) {
-	            	
 	            	$method2 = "accounts.setAccountInfo";
 	            	$request = new GSRequest($this->gigya_api_key,$this->gigya_secret_key,$method2,null,true,$this->gigya_user_key);
 	            	$request->setParam("regToken",$regtoken);
+					$request->setparam("data", json_encode($child));
 	            	$request->setParam("profile",json_encode($setInputData));
 
 	            	$response = $request->send();
-	            	// dd($response);
 	            	if($response->getErrorCode()==0)
 	            	{
 	            	    // echo "Success";
@@ -813,9 +847,6 @@ class GigyaCBController extends CBController {
 	            	    error_log($response->getLog());
 	            	}
 
-	            } else {
-	            	// dd('not found');
-	            	echo ("Uh-oh, no record found ");
 	            }
 	            // dd($response);
 		        // return $response;
@@ -831,4 +862,3 @@ class GigyaCBController extends CBController {
     }
 
 
-}
