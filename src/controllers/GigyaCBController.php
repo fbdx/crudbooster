@@ -134,6 +134,7 @@ class GigyaCBController extends CBController {
 		//insert table
 		$tableName = 'gigya_customer';
 		$childTableName = 'gigya_child';
+
 		$tableExist = Schema::hasTable($tableName);
 		$childTableExist = Schema::hasTable($childTableName);
 
@@ -472,7 +473,30 @@ class GigyaCBController extends CBController {
 	public function getEdit($id){
 		$this->cbLoader();
 		$row             = DB::table($this->table)->where($this->primary_key,$id)->first();
-		// $this->getCustomerRecord($row->UID);
+		$response = $this->getCustomerRecord($row->UID);
+		$results = $response['results'];
+		$UID = $results[0]['UID'];
+		$profile = $results[0]['profile'];
+		$child = $results[0]['data'];
+		// $row->firstName = $profile['firstName'];
+		// $row->email = $profile['email'];
+		// $row->address = $profile['address'];
+		// dd($profile['phones']['number']);
+		$mobileNumber = $profile['phones']['number'];
+
+		foreach ($profile as $key => $value) {
+			if($key == 'phones'){
+				$row->phones = $mobileNumber;
+			} else{
+				$row->$key = $profile[$key];
+			}
+		}
+
+		$childTable = DB::table('gigya_child')->where('UID',$UID)->first();
+		// dd($child,$childTable);
+		foreach ($child as $key => $value) {
+			# code...
+		}
 
 		if(!CRUDBooster::isRead() && $this->global_privilege==FALSE || $this->button_edit==FALSE) {
 			CRUDBooster::insertLog(trans("crudbooster.log_try_edit",['name'=>$row->{$this->title_field},'module'=>CRUDBooster::getCurrentModule()->name]));
@@ -678,6 +702,35 @@ class GigyaCBController extends CBController {
     	    //error_log($response->getLog());
     	}
 
+    }
+
+    public function getCustomerRecord($UID)
+    {
+    	$method = "accounts.search";
+    	$request = new GSRequest($this->gigya_api_key,$this->gigya_secret_key,$method,null,true,$this->gigya_user_key);
+
+    	// $request->setParam("UID",$UID);
+    	// $request->setParam("include","profile,data");
+    	$request->setParam("query","SELECT * FROM emailAccounts WHERE UID='$UID'");
+
+	    $response = $request->send();
+
+    	if($response->getErrorCode()==0)
+    	{
+    	    // echo "Success";
+    	    $response = $response->getResponseText();
+    	    $response = json_decode($response, true);
+    	    return $response;
+    	    Log::info(print_r($response,TRUE));
+    	    //echo "<pre>".print_r($response,TRUE)."</pre>\n";
+    	    //echo $reg['email'];
+    	}
+    	else
+    	{	
+    		Log::error("Uh-oh, we got the following error: " . $response->getErrorMessage());
+    	    //echo ("Uh-oh, we got the following error: " . $response->getErrorMessage());
+    	    //error_log($response->getLog());
+    	}
     }
 
 	public function createCustomerRecord($UID, $setInputData)
