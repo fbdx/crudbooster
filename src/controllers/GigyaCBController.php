@@ -477,7 +477,8 @@ class GigyaCBController extends CBController {
 		$results = $response['results'];
 		$UID = $results[0]['UID'];
 		$profile = $results[0]['profile'];
-		$child = $results[0]['data'];
+		$child = $results[0]['data']['child'];
+
 		// $row->firstName = $profile['firstName'];
 		// $row->email = $profile['email'];
 		// $row->address = $profile['address'];
@@ -495,9 +496,13 @@ class GigyaCBController extends CBController {
 		$childTable = DB::table('gigya_child')->where('UID',$UID)->first();
 		// dd($child,$childTable);
 		foreach ($child as $key => $value) {
-			# code...
+			if(isset($child)){
+				DB::table('gigya_child')
+                    ->where('UID', $UID)
+                    ->update([$key => $value]);
+			}
 		}
-
+		
 		if(!CRUDBooster::isRead() && $this->global_privilege==FALSE || $this->button_edit==FALSE) {
 			CRUDBooster::insertLog(trans("crudbooster.log_try_edit",['name'=>$row->{$this->title_field},'module'=>CRUDBooster::getCurrentModule()->name]));
 			CRUDBooster::redirect(CRUDBooster::adminPath(),trans('crudbooster.denied_access'));
