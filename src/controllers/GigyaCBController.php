@@ -524,9 +524,9 @@ class GigyaCBController extends CBController {
 		}
 
 		DB::table('gigya_child')->where('customerid', '=', $id)->delete();
-
+		//dd($child);
 		if(!is_null($child)){
-			//try {			
+			try {			
 
 				foreach($child as $child2)
 				{
@@ -541,15 +541,16 @@ class GigyaCBController extends CBController {
 	                ]);
 
 				}
-			/*}
+			}
 			catch (\Exception $e)
 			{
-
-				$child["customerid"] = $id;
+				if (!isset($child['customerid'])) {
+					$child["customerid"] = $id;
+				}
 				DB::table("gigya_child")->insert([
                             $child
                 ]);
-			}*/
+			}
 		}
 
 		DB::table('gigya_area_interest')->where('customerid', '=', $id)->delete();
