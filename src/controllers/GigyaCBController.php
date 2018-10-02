@@ -524,24 +524,31 @@ class GigyaCBController extends CBController {
 		}
 
 		DB::table('gigya_child')->where('customerid', '=', $id)->delete();
+
 		if(isset($child)){
-			try {			
+			//try {			
 				foreach($child as $child2)
 				{
-					$child2["customerid"] = $id;
+					
+					if (isset($child2['customerid'])) {
+					      $child2["customerid"] = intval($id);
+					};
+					
+					//dd($child2);
 					DB::table("gigya_child")->insert([
 	                            $child2
 	                ]);
 
 				}
-			}
+			/*}
 			catch (\Exception $e)
 			{
+
 				$child["customerid"] = $id;
 				DB::table("gigya_child")->insert([
                             $child
                 ]);
-			}
+			}*/
 		}
 
 		DB::table('gigya_area_interest')->where('customerid', '=', $id)->delete();
@@ -550,7 +557,8 @@ class GigyaCBController extends CBController {
 			try {			
 				foreach($interest as $interest2)
 				{
-					$interest2["customerid"] = $id;
+					if (isset($interest2['customerid']))
+						$interest2["customerid"] = $id;
 					DB::table("gigya_area_interest")->insert([
 	                            $interest2
 	                ]);
@@ -559,7 +567,8 @@ class GigyaCBController extends CBController {
 			}
 			catch (\Exception $e)
 			{
-				$interest["customerid"] = $id;
+				if (isset($interest['customerid']))
+					$interest["customerid"] = $id;
 				DB::table("gigya_area_interest")->insert([
                             $interest
                 ]);
