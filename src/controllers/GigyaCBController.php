@@ -46,6 +46,7 @@ class GigyaCBController extends CBController {
                                         firstName varchar(255) NOT NULL,
                                         lastName varchar(255),
                                         email varchar(255) NOT NULL,
+                                        isLite boolean NOT NULL,
                                         PRIMARY KEY (id)
                                     )"));
 		return $table;
@@ -79,6 +80,25 @@ class GigyaCBController extends CBController {
   //                                       customer_id
   //                                       PRIMARY KEY (id)
   //                                   )"));
+		return $table;
+	}
+
+	public function createAreaInterestTable()
+	{
+		$areaInterestTable = 'gigya_area_interest';
+
+		$table = DB::insert(DB::raw("CREATE TABLE `gigya_area_interest` (
+				  `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
+				  `interestCode` varchar(100) DEFAULT '',
+				  `answerDetails` varchar(255) DEFAULT NULL,
+				  `creationDate` datetime DEFAULT NULL,
+				  `lastUpdateDate` timestamp NULL DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP,
+				  `UID` varchar(255) DEFAULT NULL,
+				  `customerid` int(11) DEFAULT NULL,
+				  PRIMARY KEY (`id`),
+				  KEY `customerid` (`customerid`)
+				)"));
+
 		return $table;
 	}
 
@@ -134,13 +154,16 @@ class GigyaCBController extends CBController {
 		//insert table
 		$tableName = 'gigya_customer';
 		$childTableName = 'gigya_child';
+		$areaInterestTable = 'gigya_area_interest';
 
 		$tableExist = Schema::hasTable($tableName);
 		$childTableExist = Schema::hasTable($childTableName);
+		$areaInterestTableExist = Schema::hasTable($areaInterestTable);
 
-		if($tableExist !== true && childTableExist !== true){
+		if($tableExist !== true && childTableExist !== true && $areaInterestTableExist !== true){
 			$tempTable = $this->createTempTable();
 			$createChildTable = $this->createChildTable();
+			$areaInterestTableExist = $this->createAreaInterestTable();
 		}
 
 		$alias            = array();
