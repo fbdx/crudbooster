@@ -479,7 +479,7 @@ class GigyaCBController extends CBController {
 		$UID = $results[0]['UID'];
 		$profile = $results[0]['profile'];
 		$child = $results[0]['data']['child'];
-
+		$interest = $results[0]['data']['areaOfInterest'];
 		// $row->firstName = $profile['firstName'];
 		// $row->email = $profile['email'];
 		// $row->address = $profile['address'];
@@ -503,6 +503,14 @@ class GigyaCBController extends CBController {
 	                    ->where('UID', $UID)
 	                    ->update([$key => $value]);
 				// }
+			}
+		}
+
+		if(isset($interest)) {
+			foreach ($interest as $key => $value) {
+				DB::table('gigya_area_interest')
+                    ->where('UID', $UID)
+                    ->update([$key => $value]);
 			}
 		}
 
@@ -663,6 +671,10 @@ class GigyaCBController extends CBController {
 				if($childtable == 'gigya_child'){
 					$childData = $child_array;
 				}
+
+				if($childtable=='gigya_area_interest'){
+					$areaInterestData = $child_array;
+				}
 			}
 
 		}//end foreach
@@ -670,7 +682,7 @@ class GigyaCBController extends CBController {
 
 		// $setInputData = array_diff($setInputData, ["UID","children", "sample_request", "careline_detail"]);
 		// dd($setInputData);
-		$removeKeys = array("UID","children", "sample_request", "careline_detail");
+		$removeKeys = array("UID","children", "sample_request", "careline_detail","area_of_interest");
 		foreach ($removeKeys as $key) {
 			unset($setInputData[$key]);
 		}
@@ -678,9 +690,12 @@ class GigyaCBController extends CBController {
 		$childArray = $childData[0];
 		unset($childArray['customerid']);
 
+		$areaInterestData = $areaInterestData[0];
+		unset($areaInterestData['customerid']);
+
 		// dd($childArray);
 
-		$this->createCustomerRecord($UID,$setInputData,$childArray);
+		$this->updateCustomerRecord($UID,$setInputData,$childArray,$areaInterestData);
 
 		$this->hook_after_edit($id);
 
@@ -700,34 +715,34 @@ class GigyaCBController extends CBController {
 		}
 	}
 
-	public function updateCustomerRecord($UID, $setInputData)
-    {
+	// public function updateCustomerRecord($UID, $setInputData)
+ //    {
             	
-    	$method2 = "accounts.setAccountInfo";
-    	$request = new GSRequest($this->gigya_api_key,$this->gigya_secret_key,$method2,null,true,$this->gigya_user_key);
-    	$request->setParam("UID",$UID);
-    	$request->setParam("profile",json_encode($setInputData));
+ //    	$method2 = "accounts.setAccountInfo";
+ //    	$request = new GSRequest($this->gigya_api_key,$this->gigya_secret_key,$method2,null,true,$this->gigya_user_key);
+ //    	$request->setParam("UID",$UID);
+ //    	$request->setParam("profile",json_encode($setInputData));
 
-    	$response = $request->send();
-    	// dd($response);
-    	if($response->getErrorCode()==0)
-    	{
-    	    // echo "Success";
-    	    $response = $response->getResponseText();
-    	    $response = json_decode($response, true);
+ //    	$response = $request->send();
+ //    	// dd($response);
+ //    	if($response->getErrorCode()==0)
+ //    	{
+ //    	    // echo "Success";
+ //    	    $response = $response->getResponseText();
+ //    	    $response = json_decode($response, true);
 
-    	    Log::info(print_r($response,TRUE));
-    	    //echo "<pre>".print_r($response,TRUE)."</pre>\n";
-    	    //echo $reg['email'];
-    	}
-    	else
-    	{	
-    		Log::error("Uh-oh, we got the following error: " . $response->getErrorMessage());
-    	    //echo ("Uh-oh, we got the following error: " . $response->getErrorMessage());
-    	    //error_log($response->getLog());
-    	}
+ //    	    Log::info(print_r($response,TRUE));
+ //    	    //echo "<pre>".print_r($response,TRUE)."</pre>\n";
+ //    	    //echo $reg['email'];
+ //    	}
+ //    	else
+ //    	{	
+ //    		Log::error("Uh-oh, we got the following error: " . $response->getErrorMessage());
+ //    	    //echo ("Uh-oh, we got the following error: " . $response->getErrorMessage());
+ //    	    //error_log($response->getLog());
+ //    	}
 
-    }
+ //    }
 
     public function getCustomerRecord($UID)
     {
@@ -759,7 +774,7 @@ class GigyaCBController extends CBController {
     	}
     }
 
-	public function createCustomerRecord($UID, $setInputData, $childArray)
+	public function updateCustomerRecord($UID, $setInputData, $childArray, $areaInterestData)
     {
     	//$method = "accounts.search";
     	$method = "accounts.initRegistration";
@@ -775,7 +790,7 @@ class GigyaCBController extends CBController {
     	$response = $request->send();
 
     	$regtoken="";
-    	// dd($response);
+    	
     	if($response->getErrorCode()==0)
 	    {
 	        // echo "Success";
@@ -809,8 +824,11 @@ class GigyaCBController extends CBController {
 	    	$childData['child.feeding'] = $childArray['feeding'];
 
 	    	$child = $childData;
+	    	$interestitem=[];
+	    	foreach ($areaInterestData as $key => $value) {
+	    		$interestItem['areaOfInterest.'.$key] = $value;
+ 	    	}
 
-	    	// dd($child);
 
 	    	$method = "accounts.search";
 	    	// $method = "accounts.getAccountInfo";
@@ -828,6 +846,7 @@ class GigyaCBController extends CBController {
 	            	$request = new GSRequest($this->gigya_api_key,$this->gigya_secret_key,$method2,null,true,$this->gigya_user_key);
 	            	$request->setParam("regToken",$regtoken);
 					$request->setparam("data", json_encode($child));
+					$request->setparam("data", json_encode($interestItem));
 	            	$request->setParam("profile",json_encode($setInputData));
 
 	            	$response = $request->send();
@@ -836,7 +855,6 @@ class GigyaCBController extends CBController {
 	            	    // echo "Success";
 	            	    $response = $response->getResponseText();
 	            	    $response = json_decode($response, true);
-
 	            	    echo "<pre>".print_r($response,TRUE)."</pre>\n";
 	            	    echo $reg['email'];
 
@@ -847,18 +865,143 @@ class GigyaCBController extends CBController {
 	            	    error_log($response->getLog());
 	            	}
 
-	            }
+	        }
 	            // dd($response);
 		        // return $response;
-		    }
-	    	else
-		    {
+		}
+    	else
+	    {
 
-		        echo ("Uh-oh, we got the following error: " . $response->getErrorMessage());
-		        error_log($response->getLog());
-		    }
+	        echo ("Uh-oh, we got the following error: " . $response->getErrorMessage());
+	        error_log($response->getLog());
+	    }
+	}
+
+	public function postAddSave() {
+		$this->cbLoader();
+		if(!CRUDBooster::isCreate() && $this->global_privilege==FALSE) {
+			CRUDBooster::insertLog(trans('crudbooster.log_try_add_save',['name'=>Request::input($this->title_field),'module'=>CRUDBooster::getCurrentModule()->name ]));
+			CRUDBooster::redirect(CRUDBooster::adminPath(),trans("crudbooster.denied_access"));
 		}
 
-    }
+		$this->validation();
+		$this->input_assignment();		
+
+		if(Schema::hasColumn($this->table, 'created_at'))
+		{
+		    $this->arr['created_at'] = date('Y-m-d H:i:s');
+		}
+
+		$this->hook_before_add($this->arr);
+
+
+		$this->arr[$this->primary_key] = $id = CRUDBooster::newId($this->table);	
+		dd($this->arr);	
+		DB::table($this->table)->insert($this->arr);		
+
+
+		//Looping Data Input Again After Insert
+		foreach($this->data_inputan as $ro) {
+			$name = $ro['name'];
+			if(!$name) continue;
+
+			$inputdata = Request::get($name);
+
+			//Insert Data Checkbox if Type Datatable
+			if($ro['type'] == 'checkbox') {
+				if($ro['relationship_table']) {
+					$datatable = explode(",",$ro['datatable'])[0];
+					$foreignKey2 = CRUDBooster::getForeignKey($datatable,$ro['relationship_table']);
+					$foreignKey = CRUDBooster::getForeignKey($this->table,$ro['relationship_table']);
+					DB::table($ro['relationship_table'])->where($foreignKey,$id)->delete();
+
+					if($inputdata) {
+						$relationship_table_pk = CB::pk($ro['relationship_table']);
+						foreach($inputdata as $input_id) {
+							DB::table($ro['relationship_table'])->insert([
+								$relationship_table_pk=>CRUDBooster::newId($ro['relationship_table']),
+								$foreignKey=>$id,
+								$foreignKey2=>$input_id
+								]);
+						}
+					}
+
+				}
+			}
+
+
+			if($ro['type'] == 'select2') {
+				if($ro['relationship_table']) {
+					$datatable = explode(",",$ro['datatable'])[0];
+					$foreignKey2 = CRUDBooster::getForeignKey($datatable,$ro['relationship_table']);
+					$foreignKey = CRUDBooster::getForeignKey($this->table,$ro['relationship_table']);
+					DB::table($ro['relationship_table'])->where($foreignKey,$id)->delete();
+
+					if($inputdata) {
+						foreach($inputdata as $input_id) {
+							$relationship_table_pk = CB::pk($row['relationship_table']);
+							DB::table($ro['relationship_table'])->insert([
+								$relationship_table_pk=>CRUDBooster::newId($ro['relationship_table']),
+								$foreignKey=>$id,
+								$foreignKey2=>$input_id
+								]);
+						}
+					}
+
+				}
+			}
+
+			if($ro['type']=='child') {
+				$name = str_slug($ro['label'],'');
+				$columns = $ro['columns'];				
+				$count_input_data = count(Request::get($name.'-'.$columns[0]['name']))-1;
+				$child_array = [];
+
+				for($i=0;$i<=$count_input_data;$i++) {
+					$fk = $ro['foreign_key'];
+					$column_data = [];
+					$column_data[$fk] = $id;
+					foreach($columns as $col) {
+						$colname = $col['name'];
+						$column_data[$colname] = Request::get($name.'-'.$colname)[$i];
+					}
+					$child_array[] = $column_data;
+				}	
+				$childtable = CRUDBooster::parseSqlTable($ro['table'])['table'];
+				DB::table($childtable)->insert($child_array);
+			}
+			
+		}
+
+
+		$this->hook_after_add($this->arr[$this->primary_key]);
+
+
+		$this->return_url = ($this->return_url)?$this->return_url:Request::get('return_url');
+
+		//insert log
+		CRUDBooster::insertLog(trans("crudbooster.log_add",['name'=>$this->arr[$this->title_field],'module'=>CRUDBooster::getCurrentModule()->name]));
+
+		if($this->return_url) {
+			if(Request::get('submit') == trans('crudbooster.button_save_more')) {
+				CRUDBooster::redirect(Request::server('HTTP_REFERER'),trans("crudbooster.alert_add_data_success"),'success');
+			}else{
+				CRUDBooster::redirect($this->return_url,trans("crudbooster.alert_add_data_success"),'success');
+			}
+
+		}else{
+			if(Request::get('submit') == trans('crudbooster.button_save_more')) {
+				CRUDBooster::redirect(CRUDBooster::mainpath('add'),trans("crudbooster.alert_add_data_success"),'success');
+			}else{
+				CRUDBooster::redirect(CRUDBooster::mainpath(),trans("crudbooster.alert_add_data_success"),'success');
+			}
+		}
+	}
+
+	public function hook_before_addscreen() {
+
+	}
+
+}
 
 
