@@ -713,13 +713,30 @@ class GigyaCBController extends CBController {
 					}
 
 					$tempId[] = $child_array[$i]['id'];
-					unset($child_array[$i]['id']);
+					//unset($child_array[$i]['id']);
 
 					DB::table($childtable) 
 					->where('id', $tempId[$i])
 					->update($child_array[$i]);
 	
 				}
+
+
+				$currentids = array_pluck($child_array,"id");
+				
+				$newids =  DB::table($childtable)->where($fk,'=',$id)->pluck('id')->toArray();
+				
+
+				$array3 = array_diff($newids,$currentids);
+
+				if (isset($array3))
+				{
+					DB::table($childtable)
+					->whereIn('id', $array3)
+					->delete();
+				}
+
+
 			}
 
 		}//end foreach
