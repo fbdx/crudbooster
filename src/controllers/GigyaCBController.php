@@ -538,31 +538,28 @@ class GigyaCBController extends CBController {
 			}
 		}
 
-		if(isset($interest)) {
+		DB::table('gigya_area_interest')->where('customerid', '=', $id)->delete();
 
+		if(isset($interest)){
 			try {			
 				foreach($interest as $interest2)
 				{
-					foreach ($interest2 as $key => $value) {
-						// if(isset($child)){
-							DB::table('gigya_area_interest')
-			                    ->where('UID', $UID)
-			                    ->update([$key => $value]);
-						// }
-					}
+					$interest2["customerid"] = $id;
+					DB::table("gigya_area_interest")->insert([
+	                            $interest2
+	                ]);
+
 				}
 			}
 			catch (\Exception $e)
 			{
-				foreach ($interest as $key => $value) {
-						// if(isset($child)){
-						DB::table('gigya_area_interest')
-		                    ->where('UID', $UID)
-		                    ->update([$key => $value]);
-					// }
-				}
+				$interest["customerid"] = $id;
+				DB::table("gigya_area_interest")->insert([
+                            $interest
+                ]);
 			}
 		}
+
 
 		if(!CRUDBooster::isRead() && $this->global_privilege==FALSE || $this->button_edit==FALSE) {
 			CRUDBooster::insertLog(trans("crudbooster.log_try_edit",['name'=>$row->{$this->title_field},'module'=>CRUDBooster::getCurrentModule()->name]));
@@ -887,13 +884,25 @@ class GigyaCBController extends CBController {
 		    	$ci++;
 			}
 
+			$interestItems = DB::table('gigya_area_interest')->where('customerid',$parentid)->get();
+
 
 	    	$child["child"] = $childData;
 	    	//dd(json_encode($child));
 
 
-	    	/*$interestitem=[];
-	    	foreach ($areaInterestData as $key => $value) {
+	    	$interestData=[];
+	    	$ci = 0;
+
+	    	foreach ($interestItems as $interestItem) {
+			    $interestData[$ci]['interestCode'] = $interestItem->interestCode;
+		    	$interestData[$ci]['answerDetails'] = $interestItem->answerDetails;
+		    	$ci++;
+			}
+
+			//dd($interestData);
+			$child["areaOfInterest"] = $interestData;
+	    	/*foreach ($areaInterestData as $key => $value) {
 	    		$interestItem['areaOfInterest.'.$key] = $value;
  	    	}*/
 
