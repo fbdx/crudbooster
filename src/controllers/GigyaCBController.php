@@ -525,12 +525,13 @@ class GigyaCBController extends CBController {
 
 		DB::table('gigya_child')->where('customerid', '=', $id)->delete();
 
-		if(isset($child)){
+		if(!is_null($child)){
 			//try {			
+
 				foreach($child as $child2)
 				{
 					
-					if (isset($child2['customerid'])) {
+					if (!isset($child2['customerid'])) {
 					      $child2["customerid"] = intval($id);
 					};
 					
@@ -553,12 +554,14 @@ class GigyaCBController extends CBController {
 
 		DB::table('gigya_area_interest')->where('customerid', '=', $id)->delete();
 
-		if(isset($interest)){
+		if(!is_null($interest)){
 			try {			
 				foreach($interest as $interest2)
 				{
-					if (isset($interest2['customerid']))
+
+					if (!isset($interest2['customerid']))
 						$interest2["customerid"] = $id;
+					
 					DB::table("gigya_area_interest")->insert([
 	                            $interest2
 	                ]);
@@ -567,7 +570,7 @@ class GigyaCBController extends CBController {
 			}
 			catch (\Exception $e)
 			{
-				if (isset($interest['customerid']))
+				if (!isset($interest['customerid']))
 					$interest["customerid"] = $id;
 				DB::table("gigya_area_interest")->insert([
                             $interest
@@ -929,6 +932,7 @@ class GigyaCBController extends CBController {
 		    	$interestData[$ci]['answerDetails'] = $interestItem->answerDetails;
 		    	$ci++;
 			}
+
 
 			//dd($interestData);
 			$child["areaOfInterest"] = $interestData;
