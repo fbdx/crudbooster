@@ -496,10 +496,16 @@ class GigyaCBController extends CBController {
 	public function getEdit($id){
 		$this->cbLoader();
 		$row             = DB::table($this->table)->where($this->primary_key,$id)->first();
-		$response = $this->getCustomerRecord($row->UID);
+		$response = $this->getCustomerRecord($row->UID,$row->email);
 		$results = $response['results'];
+		
 		// dd($results);
 		$UID = $results[0]['UID'];
+		if($row->UID == NULL){
+			DB::table('gigya_customer')
+                    ->where('email', $row->email)
+                    ->update(['UID'=>$UID]);
+		}
 		$profile = $results[0]['profile'];
 		$child = $results[0]['data']['child'];
 		$interest = $results[0]['data']['areaOfInterest'];
@@ -806,17 +812,15 @@ class GigyaCBController extends CBController {
 
  //    }
 
-    public function getCustomerRecord($UID)
+    public function getCustomerRecord($UID,$email)
     {
     	$method = "accounts.search";
     	$request = new GSRequest($this->gigya_api_key,$this->gigya_secret_key,$method,null,true,$this->gigya_user_key);
-
     	// $request->setParam("UID",$UID);
     	// $request->setParam("include","profile,data");
-    	$request->setParam("query","SELECT * FROM emailAccounts WHERE UID='$UID'");
+    	$request->setParam("query","SELECT * FROM emailAccounts WHERE UID='$UID' OR profile.email ='$email'");
 
 	    $response = $request->send();
-	    // dd($response);
 
     	if($response->getErrorCode()==0)
     	{
@@ -973,6 +977,7 @@ class GigyaCBController extends CBController {
 	}
 
 	public function postAddSave() {
+		
 		$this->cbLoader();
 		if(!CRUDBooster::isCreate() && $this->global_privilege==FALSE) {
 			CRUDBooster::insertLog(trans('crudbooster.log_try_add_save',['name'=>Request::input($this->title_field),'module'=>CRUDBooster::getCurrentModule()->name ]));
@@ -989,10 +994,8 @@ class GigyaCBController extends CBController {
 
 		$this->hook_before_add($this->arr);
 
-
 		$this->arr[$this->primary_key] = $id = CRUDBooster::newId($this->table);	
-		dd($this->arr);	
-		DB::table($this->table)->insert($this->arr);		
+		DB::table($this->table)->insert($this->arr);
 
 
 		//Looping Data Input Again After Insert
@@ -1001,6 +1004,7 @@ class GigyaCBController extends CBController {
 			if(!$name) continue;
 
 			$inputdata = Request::get($name);
+			$setInputData[$name] = $inputdata;
 
 			//Insert Data Checkbox if Type Datatable
 			if($ro['type'] == 'checkbox') {
@@ -1062,15 +1066,25 @@ class GigyaCBController extends CBController {
 					}
 					$child_array[] = $column_data;
 				}	
+				
 				$childtable = CRUDBooster::parseSqlTable($ro['table'])['table'];
-				DB::table($childtable)->insert($child_array);
+				// DB::table($childtable)->insert($child_array);
+				
+				if($childtable == 'gigya_child'){
+					$childData = $child_array;
+				}
+
+
+				// if($childtable=='gigya_area_interest'){
+				// 	$areaInterestData = $child_array;
+				// }
 			}
 			
 		}
 
+		$this->createCustomerRecord($setInputData);
 
 		$this->hook_after_add($this->arr[$this->primary_key]);
-
 
 		$this->return_url = ($this->return_url)?$this->return_url:Request::get('return_url');
 
@@ -1091,6 +1105,127 @@ class GigyaCBController extends CBController {
 				CRUDBooster::redirect(CRUDBooster::mainpath(),trans("crudbooster.alert_add_data_success"),'success');
 			}
 		}
+	}
+
+	public function createCustomerRecord($setInputData)
+    {
+    	$removeKeys = array("UID","children", "sample_request", "careline_detail","area_of_interest");
+		foreach ($removeKeys as $key) {
+			unset($setInputData[$key]);
+		}
+
+		// $removeKeys = array("id","customerid");
+
+		// foreach ($removeKeys as $key) {
+		// 	unset($childData[0][$key]);
+		// }
+
+		// dd($setInputData);
+
+    	// dd($setInputData, $childData[0]);
+
+    	//$method = "accounts.search";
+    	$method = "accounts.initRegistration";
+
+    	// $request = new GSRequest($apiKey,$secretKey,$method);
+    	$request = new GSRequest($this->gigya_api_key,$this->gigya_secret_key,$method,null,true,$this->gigya_user_key);
+
+    	//$request->setParam("query","select * from accounts LIMIT 50");
+    	$request->setParam("isLite",true);
+    	$request->setParam("callback","testcall");
+    	// $request->setParam("openCursor",true);
+
+    	$response = $request->send();
+
+    	$regtoken="";
+    	
+    	if($response->getErrorCode()==0)
+	    {
+	        // echo "Success";
+	        $response = $response->getResponseText();
+	        $response = json_decode($response, true);
+
+	        echo "<pre>".print_r($response,TRUE)."</pre>\n";
+	        $regtoken = $response["regToken"];
+	    }
+    	else
+	    {
+	        echo ("Uh-oh, we got the following error: " . $response->getErrorMessage());
+	        error_log($response->getLog());
+	    }
+
+	    if ($regtoken!="")
+        {
+        	// dd($childArray);
+	    	// dd($UID, $setInputData);
+	    	$setInputData['phones'] = array("number"=>$setInputData['phones']);
+
+	    	// $childData['child.firstName'] = $childArray['firstName'];
+	    	// $childData['child.birthDate'] = $childArray['birthDate'];
+	    	// $childData['child.birthDateReliability'] = $childArray['birthDateReliability'];
+	    	// $childData['child.feeding'] = $childArray['feeding'];
+
+	    	// $child = $childData;
+	    	// $interestitem=[];
+	    	// foreach ($areaInterestData as $key => $value) {
+	    	// 	$interestItem['areaOfInterest.'.$key] = $value;
+ 	    // 	}
+
+ 	    	$email = $setInputData['email'];
+
+	    	$method = "accounts.search";
+	    	// $method = "accounts.getAccountInfo";
+	    	$request = new GSRequest($this->gigya_api_key,$this->gigya_secret_key,$method,null,true,$this->gigya_user_key);
+	    	$request->setParam("query","SELECT * FROM emailAccounts WHERE profile.email='$email'");
+	    	// $request->setParam("UID",$UID);
+	    	$response = $request->send();
+
+
+	    	if($response->getErrorCode()==0)
+		   	{
+	            $response = $response->getResponseText();
+	            $response = json_decode($response, true);
+
+	            if (empty($response['results'])) {
+
+	            	$method2 = "accounts.setAccountInfo";
+	            	$request = new GSRequest($this->gigya_api_key,$this->gigya_secret_key,$method2,null,true,$this->gigya_user_key);
+	            	$request->setParam("regToken",$regtoken);
+					// $request->setparam("data", json_encode($child));
+					// $request->setparam("data", json_encode($interestItem));
+	            	$request->setParam("profile",json_encode($setInputData));
+
+	            	$response = $request->send();
+	            	if($response->getErrorCode()==0)
+	            	{
+	            	    // echo "Success";
+	            	    $response = $response->getResponseText();
+	            	    $response = json_decode($response, true);
+	            	    echo "<pre>".print_r($response,TRUE)."</pre>\n";
+	            	    echo $reg['email'];
+
+	            	}
+	            	else
+	            	{	
+	            	    echo ("Uh-oh, we got the following error: " . $response->getErrorMessage());
+	            	    error_log($response->getLog());
+	            	}
+	            }
+	            else
+	            {
+	            	dd('email already exists in gigya database');
+	            }
+
+	        }
+	            // dd($response);
+		        // return $response;
+		}
+    	else
+	    {
+
+	        echo ("Uh-oh, we got the following error: " . $response->getErrorMessage());
+	        error_log($response->getLog());
+	    }
 	}
 
 	public function hook_before_addscreen() {
