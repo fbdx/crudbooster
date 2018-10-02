@@ -517,23 +517,50 @@ class GigyaCBController extends CBController {
 			}
 		}
 
-		$childTable = DB::table('gigya_child')->where('UID',$UID)->first();
-		// dd($child,$childTable);
+		DB::table('gigya_child')->where('customerid', '=', $id)->delete();
 		if(isset($child)){
-			foreach ($child as $key => $value) {
-				// if(isset($child)){
-					DB::table('gigya_child')
-	                    ->where('UID', $UID)
-	                    ->update([$key => $value]);
-				// }
+			try {			
+				foreach($child as $child2)
+				{
+					$child2["customerid"] = $id;
+					DB::table("gigya_child")->insert([
+	                            $child2
+	                ]);
+
+				}
+			}
+			catch (\Exception $e)
+			{
+				$child["customerid"] = $id;
+				DB::table("gigya_child")->insert([
+                            $child
+                ]);
 			}
 		}
 
 		if(isset($interest)) {
-			foreach ($interest as $key => $value) {
-				DB::table('gigya_area_interest')
-                    ->where('UID', $UID)
-                    ->update([$key => $value]);
+
+			try {			
+				foreach($interest as $interest2)
+				{
+					foreach ($interest2 as $key => $value) {
+						// if(isset($child)){
+							DB::table('gigya_area_interest')
+			                    ->where('UID', $UID)
+			                    ->update([$key => $value]);
+						// }
+					}
+				}
+			}
+			catch (\Exception $e)
+			{
+				foreach ($interest as $key => $value) {
+						// if(isset($child)){
+						DB::table('gigya_area_interest')
+		                    ->where('UID', $UID)
+		                    ->update([$key => $value]);
+					// }
+				}
 			}
 		}
 
@@ -648,12 +675,17 @@ class GigyaCBController extends CBController {
 				$tempId = array();
 				$name = str_slug($ro['label'],'');
 				$columns = $ro['columns'];
-				$count_input_data = !empty(Request::get($name.'-'.$columns[0]['name']))-1;
+				if (!empty(Request::get($name.'-'.$columns[0]['name'])))
+					$count_input_data = count(Request::get($name.'-'.$columns[0]['name']))-1;
+				else
+					$count_input_data = -1;
 				$child_array = [];
 				$childtable = CRUDBooster::parseSqlTable($ro['table'])['table'];				
 				$fk = $ro['foreign_key'];
 				$childtablePK = CB::pk($childtable);
 				// dd($childtablePK);
+				//dd($count_input_data);
+
 				for($i=0;$i<=$count_input_data;$i++) {
 					
 					$column_data = [];
@@ -690,13 +722,6 @@ class GigyaCBController extends CBController {
 					->where('id', $tempId[$i])
 					->update($child_array[$i]);
 	
-				}
-				if($childtable == 'gigya_child'){
-					$childData = $child_array;
-				}
-
-				if($childtable=='gigya_area_interest'){
-					$areaInterestData = $child_array;
 				}
 			}
 
@@ -841,16 +866,36 @@ class GigyaCBController extends CBController {
 	  //   	$childData['child']{'feeding'} = childArray['feeding'];
 
 
-	    	$childData['child.firstName'] = $childArray['firstName'];
-	    	$childData['child.birthDate'] = $childArray['birthDate'];
-	    	$childData['child.birthDateReliability'] = $childArray['birthDateReliability'];
-	    	$childData['child.feeding'] = $childArray['feeding'];
+	    	
 
-	    	$child = $childData;
-	    	$interestitem=[];
+			$itemParent = DB::table('gigya_customer')->where('UID',$UID)->first();
+
+			if (isset($itemParent))
+				$parentid = $itemParent->id;
+
+			//dd($parentid);
+
+			$childItems = DB::table('gigya_child')->where('customerid',$parentid)->get();
+	    	
+	    	$childData = [];
+	    	$ci = 0;
+			foreach ($childItems as $childItem) {
+			    $childData[$ci]['firstName'] = $childItem->firstName;
+		    	$childData[$ci]['birthDate'] = $childItem->birthDate;
+		    	$childData[$ci]['birthDateReliability'] = $childItem->birthDateReliability;
+		    	$childData[$ci]['feeding'] = $childItem->feeding;
+		    	$ci++;
+			}
+
+
+	    	$child["child"] = $childData;
+	    	//dd(json_encode($child));
+
+
+	    	/*$interestitem=[];
 	    	foreach ($areaInterestData as $key => $value) {
 	    		$interestItem['areaOfInterest.'.$key] = $value;
- 	    	}
+ 	    	}*/
 
 
 	    	$method = "accounts.search";
@@ -869,7 +914,8 @@ class GigyaCBController extends CBController {
 	            	$request = new GSRequest($this->gigya_api_key,$this->gigya_secret_key,$method2,null,true,$this->gigya_user_key);
 	            	$request->setParam("regToken",$regtoken);
 					$request->setparam("data", json_encode($child));
-					$request->setparam("data", json_encode($interestItem));
+					//dd(json_encode($child));
+					//$request->setparam("data", json_encode($interestItem));
 	            	$request->setParam("profile",json_encode($setInputData));
 
 	            	$response = $request->send();
