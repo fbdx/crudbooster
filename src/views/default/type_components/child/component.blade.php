@@ -494,6 +494,7 @@
 							$columns_tbody = [];
 							$data_child = DB::table($form['table'])
 							->where($form['foreign_key'],$id);
+
 							foreach($form['columns'] as $i=>$c) {
 								$data_child->addselect($form['table'].'.'.$c['name']);
 
@@ -509,12 +510,21 @@
 										$data_child->join($join_table,$join_table.'.id','=',$c['name']);
 										$data_child->addselect($join_table.'.'.$join_field.' as '.$join_table.'_'.$join_field);										
 									}
-								}								
-								
+								}
 							}
 
 							$data_child = $data_child->orderby($form['table'].'.id','desc')->get();
+							//dd($data_child);
 							foreach($data_child as $d):							
+								//dump($d->birthDateReliability);
+								if ($d->birthDateReliability == 0) {
+									$d->birthDateReliability = 'Have Child';
+								} 
+
+								if ($d->birthDateReliability == 4) {
+									$d->birthDateReliability = 'Pregnant';
+								} 
+
 						?>
 						<tr>
 							@foreach($form['columns'] as $col)

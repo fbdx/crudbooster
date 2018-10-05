@@ -70,16 +70,6 @@ class GigyaCBController extends CBController {
 		  CONSTRAINT `gigya_child_ibfk_1` FOREIGN KEY (`customerid`) REFERENCES `gigya_customer` (`id`)
 			)"));
 
-		// $table = DB::insert(DB::raw("create table $childTableName (
-  //                                       id int NOT NULL AUTO_INCREMENT,
-  //                                       UID varchar(255) NOT NULL,
-  //                                       firstName varchar(255) NOT NULL,
-  //                                       birthDate DATE,
-  //                                       birthDateReliability INT,
-  //                                       feeding varchar(255),
-  //                                       customer_id
-  //                                       PRIMARY KEY (id)
-  //                                   )"));
 		return $table;
 	}
 
@@ -714,7 +704,7 @@ class GigyaCBController extends CBController {
 
 					$child_array[] = $column_data;
 					// dd($child_array);
-					if($child_array[$i]['id'] == NULL){
+					if($child_array[$i]['id'] == NULL) {
 						
 						$customer_array[] = $row;
 
@@ -728,15 +718,35 @@ class GigyaCBController extends CBController {
 						unset($child_array['id']);
 						$lastId = CRUDBooster::newId($childtable);
 						$child_array[$i]['id'] = $lastId;
+
+						if($childtable == 'gigya_child'){
+							foreach ($child_array as $key) {
+				                if(strpos($key['birthDateReliability'], 'Pregnant') !== false){
+				                	$child_array[$i]['birthDateReliability'] = 4;
+				                } else {
+				                	$child_array[$i]['birthDateReliability'] = 0;
+				                }
+				            }
+				        }
 						DB::table($childtable)->insert($child_array);
 					}
 
+					if($childtable == 'gigya_child'){
+						foreach ($child_array as $key) {
+			                if((strpos($key['birthDateReliability'], 'Pregnant') !== false || $key['birthDateReliability']) == 4){
+			                	$child_array[$i]['birthDateReliability'] = 4;
+			                } else {
+			                	$child_array[$i]['birthDateReliability'] = 0;
+			                }
+			            }
+			        }
+
 					$tempId[] = $child_array[$i]['id'];
 					//unset($child_array[$i]['id']);
-
 					DB::table($childtable) 
 					->where('id', $tempId[$i])
 					->update($child_array[$i]);
+					
 	
 				}
 
@@ -1310,8 +1320,6 @@ class GigyaCBController extends CBController {
 	            }
 
 	        }
-	            // dd($response);
-		        // return $response;
 		}
     	else
 	    {
@@ -1322,6 +1330,10 @@ class GigyaCBController extends CBController {
 	}
 
 	public function hook_before_addscreen() {
+
+	}
+
+	public function hook_child_query($child_array) {
 
 	}
 
