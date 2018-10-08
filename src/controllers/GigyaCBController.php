@@ -22,6 +22,7 @@ use Schema;
 use JsValidator;
 use GSSDK;
 use GSRequest;
+use Redirect;
 
 class GigyaCBController extends CBController {
 	
@@ -499,10 +500,6 @@ class GigyaCBController extends CBController {
 		$profile = $results[0]['profile'];
 		$child = $results[0]['data']['child'];
 		$interest = $results[0]['data']['areaOfInterest'];
-		// $row->firstName = $profile['firstName'];
-		// $row->email = $profile['email'];
-		// $row->address = $profile['address'];
-		// dd($profile['phones']['number']);
 		$mobileNumber = $profile['phones']['number'];
 
 		foreach ($profile as $key => $value) {
@@ -1008,9 +1005,9 @@ class GigyaCBController extends CBController {
 			CRUDBooster::redirect(CRUDBooster::adminPath(),trans("crudbooster.denied_access"));
 		}
 
+
 		$this->validation();
 		$this->input_assignment();		
-
 		if(Schema::hasColumn($this->table, 'created_at'))
 		{
 		    $this->arr['created_at'] = date('Y-m-d H:i:s');
@@ -1190,102 +1187,91 @@ class GigyaCBController extends CBController {
 			unset($setInputData[$key]);
 		}
 
-		// unset($childData[0]['customerid']);
-		// foreach ($removeKeys as $key) {
-		// 	unset($childData[0][$key]);
-		// }
-
-		// dd($setInputData);
-
-    	// dd($setInputData, $childData[0]);
-
-    	//$method = "accounts.search";
-    	$method = "accounts.initRegistration";
-
-    	// $request = new GSRequest($apiKey,$secretKey,$method);
-    	$request = new GSRequest($this->gigya_api_key,$this->gigya_secret_key,$method,null,true,$this->gigya_user_key);
-
-    	//$request->setParam("query","select * from accounts LIMIT 50");
-    	$request->setParam("isLite",true);
-    	$request->setParam("callback","testcall");
-    	// $request->setParam("openCursor",true);
-
-    	$response = $request->send();
-
-    	$regtoken="";
-    	
-    	if($response->getErrorCode()==0)
+		$method = "accounts.search";
+		$request = new GSRequest($this->gigya_api_key,$this->gigya_secret_key,$method,null,true,$this->gigya_user_key);
+		$request->setParam("query","SELECT * FROM emailAccounts WHERE profile.email='$email'");
+		$response = $request->send();
+		// dd($response);
+		if($response->getErrorCode()==0)
 	    {
-	        // echo "Success";
-	        $response = $response->getResponseText();
-	        $response = json_decode($response, true);
+	    	$response = $response->getResponseText();
+	    	$response = json_decode($response, true);
 
-	        echo "<pre>".print_r($response,TRUE)."</pre>\n";
-	        $regtoken = $response["regToken"];
-	    }
-    	else
-	    {
-	        echo ("Uh-oh, we got the following error: " . $response->getErrorMessage());
-	        error_log($response->getLog());
-	    }
+	    	if (empty($response['results'])) {
+	    		dd('its empty');
+	    		
+            	$method = "accounts.initRegistration";
 
-	    if ($regtoken!="")
-        {
+            	// $request = new GSRequest($apiKey,$secretKey,$method);
+            	$request = new GSRequest($this->gigya_api_key,$this->gigya_secret_key,$method,null,true,$this->gigya_user_key);
 
-	    	// dd($UID, $setInputData);
-	    	$setInputData['phones'] = array("number"=>$setInputData['phones']);
+            	//$request->setParam("query","select * from accounts LIMIT 50");
+            	$request->setParam("isLite",true);
+            	$request->setParam("callback","testcall");
+            	// $request->setParam("openCursor",true);
 
-	    	if($UID != NULL)
-				$itemParent = DB::table('gigya_customer')->where('UID',$UID)->first();
-			else
-				$itemParent = DB::table('gigya_customer')->where('email',$email)->first();
-			
-			if (isset($itemParent))
-				$parentid = $itemParent->id;
+            	$response = $request->send();
 
-			$childItems = DB::table('gigya_child')->where('customerid',$parentid)->get();
+            	$regtoken="";
+            	
+            	if($response->getErrorCode()==0)
+        	    {
+        	        // echo "Success";
+        	        $response = $response->getResponseText();
+        	        $response = json_decode($response, true);
 
-	    	$childData = [];
-	    	$ci = 0;
-			foreach ($childItems as $childItem) {
-			    $childData[$ci]['firstName'] = $childItem->firstName;
-		    	$childData[$ci]['birthDate'] = $childItem->birthDate;
-		    	$childData[$ci]['birthDateReliability'] = $childItem->birthDateReliability;
-		    	$childData[$ci]['feeding'] = $childItem->feeding;
-		    	$ci++;
-			}
+        	        echo "<pre>".print_r($response,TRUE)."</pre>\n";
+        	        $regtoken = $response["regToken"];
+        	    }
+            	else
+        	    {
+        	        echo ("Uh-oh, we got the following error: " . $response->getErrorMessage());
+        	        error_log($response->getLog());
+        	    }
 
-			$interestItems = DB::table('gigya_area_interest')->where('customerid',$parentid)->get();
+        	    if ($regtoken!="")
+                {
+
+        	    	// dd($UID, $setInputData);
+        	    	$setInputData['phones'] = array("number"=>$setInputData['phones']);
+
+        	    	if($UID != NULL)
+        				$itemParent = DB::table('gigya_customer')->where('UID',$UID)->first();
+        			else
+        				$itemParent = DB::table('gigya_customer')->where('email',$email)->first();
+        			
+        			if (isset($itemParent))
+        				$parentid = $itemParent->id;
+
+        			$childItems = DB::table('gigya_child')->where('customerid',$parentid)->get();
+
+        	    	$childData = [];
+        	    	$ci = 0;
+        			foreach ($childItems as $childItem) {
+        			    $childData[$ci]['firstName'] = $childItem->firstName;
+        		    	$childData[$ci]['birthDate'] = $childItem->birthDate;
+        		    	$childData[$ci]['birthDateReliability'] = $childItem->birthDateReliability;
+        		    	$childData[$ci]['feeding'] = $childItem->feeding;
+        		    	$ci++;
+        			}
+
+        			$interestItems = DB::table('gigya_area_interest')->where('customerid',$parentid)->get();
 
 
-	    	$child["child"] = $childData;
-	    	//dd(json_encode($child));
+        	    	$child["child"] = $childData;
+        	    	//dd(json_encode($child));
 
-	    	$interestData=[];
-	    	$ci = 0;
+        	    	$interestData=[];
+        	    	$ci = 0;
 
-	    	foreach ($interestItems as $interestItem) {
-			    $interestData[$ci]['interestCode'] = $interestItem->interestCode;
-		    	$interestData[$ci]['answerDetails'] = $interestItem->answerDetails;
-		    	$ci++;
-			}
+        	    	foreach ($interestItems as $interestItem) {
+        			    $interestData[$ci]['interestCode'] = $interestItem->interestCode;
+        		    	$interestData[$ci]['answerDetails'] = $interestItem->answerDetails;
+        		    	$ci++;
+        			}
 
-			//dd($interestData);
-			$child["areaOfInterest"] = $interestData;
 
-	    	$method = "accounts.search";
-	    	// $method = "accounts.getAccountInfo";
-	    	$request = new GSRequest($this->gigya_api_key,$this->gigya_secret_key,$method,null,true,$this->gigya_user_key);
-	    	$request->setParam("query","SELECT * FROM emailAccounts WHERE profile.email='$email'");
-	    	// $request->setParam("UID",$UID);
-	    	$response = $request->send();
-
-	    	if($response->getErrorCode()==0)
-		   	{
-	            $response = $response->getResponseText();
-	            $response = json_decode($response, true);
-
-	            if (empty($response['results'])) {
+        			$child["areaOfInterest"] = $interestData;
 
 	            	$method2 = "accounts.setAccountInfo";
 	            	$request = new GSRequest($this->gigya_api_key,$this->gigya_secret_key,$method2,null,true,$this->gigya_user_key);
@@ -1346,22 +1332,19 @@ class GigyaCBController extends CBController {
 	            	    echo ("Uh-oh, we got the following error: " . $response->getErrorMessage());
 	            	    error_log($response->getLog());
 	            	}
-	            }
-	            else
-	            {
-	            	dd('email already exists in gigya database');
-	            }
-
-	        }
-	            // dd($response);
-		        // return $response;
-		}
+	        	}
+	    	}
+	    	else
+		    {
+		    	dd('Email exists in Gigya');
+		    }
+	    }
     	else
 	    {
-
 	        echo ("Uh-oh, we got the following error: " . $response->getErrorMessage());
 	        error_log($response->getLog());
 	    }
+
 	}
 
 	public function hook_before_addscreen() {
