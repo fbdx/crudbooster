@@ -488,13 +488,13 @@ class GigyaCBController extends CBController {
 		$row             = DB::table($this->table)->where($this->primary_key,$id)->first();
 		$response = $this->getCustomerRecord($row->UID,$row->email);
 		$results = $response['results'];
-		
-		// dd($results);
+		// dd($row->email);
 		$UID = $results[0]['UID'];
+		$email = $row->email;
 		if($row->UID == NULL){
 			DB::table('gigya_customer')
-                    ->where('email', $row->email)
-                    ->update(['UID'=>$UID]);
+                    ->where('email', $email)
+                    ->update(['UID' => $UID]);
 		}
 		$profile = $results[0]['profile'];
 		$child = $results[0]['data']['child'];
@@ -1291,18 +1291,51 @@ class GigyaCBController extends CBController {
 	            	$request = new GSRequest($this->gigya_api_key,$this->gigya_secret_key,$method2,null,true,$this->gigya_user_key);
 	            	$request->setParam("regToken",$regtoken);
 					$request->setparam("data", json_encode($child));
-					// $request->setparam("data", json_encode($interestItem));
 	            	$request->setParam("profile",json_encode($setInputData));
 
 	            	$response = $request->send();
-	            	// dd($response);
+	            	// dump($response);
+	            	usleep(500000);
 	            	if($response->getErrorCode()==0)
 	            	{
 	            	    // echo "Success";
 	            	    $response = $response->getResponseText();
 	            	    $response = json_decode($response, true);
-	            	    echo "<pre>".print_r($response,TRUE)."</pre>\n";
-	            	    echo $reg['email'];
+	            	    $method = "accounts.search";
+	            	    // $method = "accounts.getAccountInfo";
+	            	    $request = new GSRequest($this->gigya_api_key,$this->gigya_secret_key,$method,null,true,$this->gigya_user_key);
+	            	    $request->setParam("query","SELECT UID FROM emailAccounts WHERE profile.email='$email'");
+
+	            	    $response = $request->send();
+	            	    // dump($response);
+		            	    
+	            	    if($response->getErrorCode()==0)
+	            	    {
+	            	        // echo "Success";
+	            	        $response = $response->getResponseText();
+	            	        $response = json_decode($response, true);
+	            	        
+	            	        $UID = $response['results'][0]['UID'];
+	            	        // dd($UID);
+	            	        DB::table('gigya_customer')
+				                ->where('email', $email)
+				                ->update(['UID' => $UID]);
+	            	        // echo "<pre>".print_r($response,TRUE)."</pre>\n";
+	            	        // echo $reg['email'];
+
+	            	    }
+	            	    else
+	            	    {	
+	            	    	if($response->getErrorCode()==500001)
+	            	    		abort(500, 'General Server Error');
+	            	    	
+	            	        echo ("Uh-oh, we got the following error: " . $response->getErrorMessage());
+	            	        error_log($response->getLog());
+	            	    }
+
+
+	            	    // echo "<pre>".print_r($response,TRUE)."</pre>\n";
+	            	    // echo $reg['email'];
 
 	            	}
 	            	else
@@ -1320,6 +1353,8 @@ class GigyaCBController extends CBController {
 	            }
 
 	        }
+	            // dd($response);
+		        // return $response;
 		}
     	else
 	    {
