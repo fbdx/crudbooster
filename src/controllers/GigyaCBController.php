@@ -492,11 +492,11 @@ class GigyaCBController extends CBController {
 		// dd($row->email);
 		$UID = $results[0]['UID'];
 		$email = $row->email;
-		if($row->UID == NULL){
-			DB::table('gigya_customer')
-                    ->where('email', $email)
-                    ->update(['UID' => $UID]);
-		}
+		// if($row->UID == NULL){
+		// 	DB::table('gigya_customer')
+  //                   ->where('email', $email)
+  //                   ->update(['UID' => $UID]);
+		// }
 		$profile = $results[0]['profile'];
 		$child = $results[0]['data']['child'];
 		$interest = $results[0]['data']['areaOfInterest'];
@@ -1015,171 +1015,181 @@ class GigyaCBController extends CBController {
 
 		$this->hook_before_add($this->arr);
 
-		$this->arr[$this->primary_key] = $id = CRUDBooster::newId($this->table);	
-		DB::table($this->table)->insert($this->arr);
+		// $this->searchAccount()
+		// $searchEmail = $this->arr['email'];
+		$searchEmail = $this->searchEmailAccount($this->arr['email']);
+		if($searchEmail == true) {
+
+			// dd('email no exist');
+			$this->arr[$this->primary_key] = $id = CRUDBooster::newId($this->table);	
+			DB::table($this->table)->insert($this->arr);
 
 
-		//Looping Data Input Again After Insert
-		foreach($this->data_inputan as $ro) {
-			$name = $ro['name'];
-			if(!$name) continue;
+			//Looping Data Input Again After Insert
+			foreach($this->data_inputan as $ro) {
+				$name = $ro['name'];
+				if(!$name) continue;
 
-			$inputdata = Request::get($name);
-			$setInputData[$name] = $inputdata;
+				$inputdata = Request::get($name);
+				$setInputData[$name] = $inputdata;
 
-			//Insert Data Checkbox if Type Datatable
-			if($ro['type'] == 'checkbox') {
-				if($ro['relationship_table']) {
-					$datatable = explode(",",$ro['datatable'])[0];
-					$foreignKey2 = CRUDBooster::getForeignKey($datatable,$ro['relationship_table']);
-					$foreignKey = CRUDBooster::getForeignKey($this->table,$ro['relationship_table']);
-					DB::table($ro['relationship_table'])->where($foreignKey,$id)->delete();
+				//Insert Data Checkbox if Type Datatable
+				if($ro['type'] == 'checkbox') {
+					if($ro['relationship_table']) {
+						$datatable = explode(",",$ro['datatable'])[0];
+						$foreignKey2 = CRUDBooster::getForeignKey($datatable,$ro['relationship_table']);
+						$foreignKey = CRUDBooster::getForeignKey($this->table,$ro['relationship_table']);
+						DB::table($ro['relationship_table'])->where($foreignKey,$id)->delete();
 
-					if($inputdata) {
-						$relationship_table_pk = CB::pk($ro['relationship_table']);
-						foreach($inputdata as $input_id) {
-							DB::table($ro['relationship_table'])->insert([
-								$relationship_table_pk=>CRUDBooster::newId($ro['relationship_table']),
-								$foreignKey=>$id,
-								$foreignKey2=>$input_id
-								]);
+						if($inputdata) {
+							$relationship_table_pk = CB::pk($ro['relationship_table']);
+							foreach($inputdata as $input_id) {
+								DB::table($ro['relationship_table'])->insert([
+									$relationship_table_pk=>CRUDBooster::newId($ro['relationship_table']),
+									$foreignKey=>$id,
+									$foreignKey2=>$input_id
+									]);
+							}
 						}
+
 					}
-
 				}
-			}
 
 
-			if($ro['type'] == 'select2') {
-				if($ro['relationship_table']) {
-					$datatable = explode(",",$ro['datatable'])[0];
-					$foreignKey2 = CRUDBooster::getForeignKey($datatable,$ro['relationship_table']);
-					$foreignKey = CRUDBooster::getForeignKey($this->table,$ro['relationship_table']);
-					DB::table($ro['relationship_table'])->where($foreignKey,$id)->delete();
+				if($ro['type'] == 'select2') {
+					if($ro['relationship_table']) {
+						$datatable = explode(",",$ro['datatable'])[0];
+						$foreignKey2 = CRUDBooster::getForeignKey($datatable,$ro['relationship_table']);
+						$foreignKey = CRUDBooster::getForeignKey($this->table,$ro['relationship_table']);
+						DB::table($ro['relationship_table'])->where($foreignKey,$id)->delete();
 
-					if($inputdata) {
-						foreach($inputdata as $input_id) {
-							$relationship_table_pk = CB::pk($row['relationship_table']);
-							DB::table($ro['relationship_table'])->insert([
-								$relationship_table_pk=>CRUDBooster::newId($ro['relationship_table']),
-								$foreignKey=>$id,
-								$foreignKey2=>$input_id
-								]);
+						if($inputdata) {
+							foreach($inputdata as $input_id) {
+								$relationship_table_pk = CB::pk($row['relationship_table']);
+								DB::table($ro['relationship_table'])->insert([
+									$relationship_table_pk=>CRUDBooster::newId($ro['relationship_table']),
+									$foreignKey=>$id,
+									$foreignKey2=>$input_id
+									]);
+							}
 						}
+
 					}
-
 				}
-			}
 
-			if($ro['type']=='child') {
-				
-
-				$tempId = array();
-				$name = str_slug($ro['label'],'');
-				$columns = $ro['columns'];
-				if (!empty(Request::get($name.'-'.$columns[0]['name'])))
-					$count_input_data = count(Request::get($name.'-'.$columns[0]['name']))-1;
-				else
-					$count_input_data = -1;
-				$child_array = [];
-				$childtable = CRUDBooster::parseSqlTable($ro['table'])['table'];				
-				$fk = $ro['foreign_key'];
-				$childtablePK = CB::pk($childtable);
-				// dd($childtablePK);
-				//dd($count_input_data);
-
-				for($i=0;$i<=$count_input_data;$i++) {
+				if($ro['type']=='child') {
 					
-					$column_data = [];
-					// $column_data[$childtablePK] = $lastId;
-					$column_data[$fk] = $id;
-					foreach($columns as $col) {
-						$colname = $col['name'];
-						$column_data[$colname] = Request::get($name.'-'.$colname)[$i];
-					}
 
-					$child_array[] = $column_data;
-					// dd($child_array);
-					if($child_array[$i]['id'] == NULL){
+					$tempId = array();
+					$name = str_slug($ro['label'],'');
+					$columns = $ro['columns'];
+					if (!empty(Request::get($name.'-'.$columns[0]['name'])))
+						$count_input_data = count(Request::get($name.'-'.$columns[0]['name']))-1;
+					else
+						$count_input_data = -1;
+					$child_array = [];
+					$childtable = CRUDBooster::parseSqlTable($ro['table'])['table'];				
+					$fk = $ro['foreign_key'];
+					$childtablePK = CB::pk($childtable);
+					// dd($childtablePK);
+					//dd($count_input_data);
+
+					for($i=0;$i<=$count_input_data;$i++) {
 						
-						$customer_array[] = $row;
-
-						$test = (array) $customer_array[$i];
-
-						foreach($child_array as $key => $value)
-						{
-							$newArray = array_merge($child_array[$key],$test);
+						$column_data = [];
+						// $column_data[$childtablePK] = $lastId;
+						$column_data[$fk] = $id;
+						foreach($columns as $col) {
+							$colname = $col['name'];
+							$column_data[$colname] = Request::get($name.'-'.$colname)[$i];
 						}
 
-						unset($child_array['id']);
-						$lastId = CRUDBooster::newId($childtable);
-						$child_array[$i]['id'] = $lastId;
-						DB::table($childtable)->insert($child_array);
+						$child_array[] = $column_data;
+						// dd($child_array);
+						if($child_array[$i]['id'] == NULL){
+							
+							$customer_array[] = $row;
+
+							$test = (array) $customer_array[$i];
+
+							foreach($child_array as $key => $value)
+							{
+								$newArray = array_merge($child_array[$key],$test);
+							}
+
+							unset($child_array['id']);
+							$lastId = CRUDBooster::newId($childtable);
+							$child_array[$i]['id'] = $lastId;
+							DB::table($childtable)->insert($child_array);
+						}
+
+						$tempId[] = $child_array[$i]['id'];
+						//unset($child_array[$i]['id']);
+
+						DB::table($childtable) 
+						->where('id', $tempId[$i])
+						->update($child_array[$i]);
+		
 					}
 
-					$tempId[] = $child_array[$i]['id'];
-					//unset($child_array[$i]['id']);
 
-					DB::table($childtable) 
-					->where('id', $tempId[$i])
-					->update($child_array[$i]);
-	
+					$currentids = array_pluck($child_array,"id");
+					
+					$newids =  DB::table($childtable)->where($fk,'=',$id)->pluck('id')->toArray();
+					
+
+					$array3 = array_diff($newids,$currentids);
+
+					if (isset($array3))
+					{
+						DB::table($childtable)
+						->whereIn('id', $array3)
+						->delete();
+					}
+					if($childtable == 'gigya_child'){
+						$childData = $child_array;
+						// $childData[$c] = $childData;
+					}
+
+					if($childtable=='gigya_area_interest'){
+						$areaInterestData = $child_array;
+					}
 				}
-
-
-				$currentids = array_pluck($child_array,"id");
 				
-				$newids =  DB::table($childtable)->where($fk,'=',$id)->pluck('id')->toArray();
-				
-
-				$array3 = array_diff($newids,$currentids);
-
-				if (isset($array3))
-				{
-					DB::table($childtable)
-					->whereIn('id', $array3)
-					->delete();
-				}
-				if($childtable == 'gigya_child'){
-					$childData = $child_array;
-					// $childData[$c] = $childData;
-				}
-
-				if($childtable=='gigya_area_interest'){
-					$areaInterestData = $child_array;
-				}
 			}
-			
-		}
 
-		$this->createCustomerRecord($setInputData,$childData,$areaInterestData);
+			$this->createCustomerRecord($setInputData,$childData,$areaInterestData);
 
-		$this->hook_after_add($this->arr[$this->primary_key]);
+			$this->hook_after_add($this->arr[$this->primary_key]);
 
-		$this->return_url = ($this->return_url)?$this->return_url:Request::get('return_url');
+			$this->return_url = ($this->return_url)?$this->return_url:Request::get('return_url');
 
-		//insert log
-		CRUDBooster::insertLog(trans("crudbooster.log_add",['name'=>$this->arr[$this->title_field],'module'=>CRUDBooster::getCurrentModule()->name]));
+			//insert log
+			CRUDBooster::insertLog(trans("crudbooster.log_add",['name'=>$this->arr[$this->title_field],'module'=>CRUDBooster::getCurrentModule()->name]));
 
-		if($this->return_url) {
-			if(Request::get('submit') == trans('crudbooster.button_save_more')) {
-				CRUDBooster::redirect(Request::server('HTTP_REFERER'),trans("crudbooster.alert_add_data_success"),'success');
+			if($this->return_url) {
+				if(Request::get('submit') == trans('crudbooster.button_save_more')) {
+					CRUDBooster::redirect(Request::server('HTTP_REFERER'),trans("crudbooster.alert_add_data_success"),'success');
+				}else{
+					CRUDBooster::redirect($this->return_url,trans("crudbooster.alert_add_data_success"),'success');
+				}
+
 			}else{
-				CRUDBooster::redirect($this->return_url,trans("crudbooster.alert_add_data_success"),'success');
+				if(Request::get('submit') == trans('crudbooster.button_save_more')) {
+					CRUDBooster::redirect(CRUDBooster::mainpath('add'),trans("crudbooster.alert_add_data_success"),'success');
+				}else{
+					CRUDBooster::redirect(CRUDBooster::mainpath(),trans("crudbooster.alert_add_data_success"),'success');
+				}
 			}
 
-		}else{
-			if(Request::get('submit') == trans('crudbooster.button_save_more')) {
-				CRUDBooster::redirect(CRUDBooster::mainpath('add'),trans("crudbooster.alert_add_data_success"),'success');
-			}else{
-				CRUDBooster::redirect(CRUDBooster::mainpath(),trans("crudbooster.alert_add_data_success"),'success');
-			}
+		} //searchemail
+		else {
+			dd('email exist');
 		}
 	}
 
 	public function createCustomerRecord($setInputData,$childData,$areaInterestData)
     {
-    	// dd($setInputData,$childData);
     	$email = $setInputData['email'];
 
     	$removeKeys = array("UID","children", "sample_request", "careline_detail","area_of_interest");
@@ -1187,19 +1197,18 @@ class GigyaCBController extends CBController {
 			unset($setInputData[$key]);
 		}
 
-		$method = "accounts.search";
-		$request = new GSRequest($this->gigya_api_key,$this->gigya_secret_key,$method,null,true,$this->gigya_user_key);
-		$request->setParam("query","SELECT * FROM emailAccounts WHERE profile.email='$email'");
-		$response = $request->send();
-		// dd($response);
-		if($response->getErrorCode()==0)
-	    {
-	    	$response = $response->getResponseText();
-	    	$response = json_decode($response, true);
+		// $method = "accounts.search";
+		// $request = new GSRequest($this->gigya_api_key,$this->gigya_secret_key,$method,null,true,$this->gigya_user_key);
+		// $request->setParam("query","SELECT * FROM emailAccounts WHERE profile.email='$email'");
+		// $response = $request->send();
+		// // dd($response);
+		// if($response->getErrorCode()==0)
+	 //    {
+	    	// $response = $response->getResponseText();
+	    	// $response = json_decode($response, true);
 
-	    	if (empty($response['results'])) {
-	    		dd('its empty');
-	    		
+	    	// if (empty($response['results'])) {
+
             	$method = "accounts.initRegistration";
 
             	// $request = new GSRequest($apiKey,$secretKey,$method);
@@ -1333,18 +1342,45 @@ class GigyaCBController extends CBController {
 	            	    error_log($response->getLog());
 	            	}
 	        	}
+	    	// }
+	    // 	else
+		   //  {
+		   //  	dd('mati here');
+		   //  	return redirect()->back();
+		   //  	// dd('Email exists in Gigya');
+		   //  }
+	    // // }
+    	// else
+	    // {
+	    //     echo ("Uh-oh, we got the following error: " . $response->getErrorMessage());
+	    //     error_log($response->getLog());
+	    // }
+	}
+
+	public function searchEmailAccount($email)
+	{
+		$method = "accounts.search";
+		$request = new GSRequest($this->gigya_api_key,$this->gigya_secret_key,$method,null,true,$this->gigya_user_key);
+		$request->setParam("query","SELECT * FROM emailAccounts WHERE profile.email='$email'");
+		$response = $request->send();
+		if($response->getErrorCode()==0)
+	    {
+	    	$response = $response->getResponseText();
+	    	$response = json_decode($response, true);
+
+	    	if (!empty($response['results'])) {
+	    		return false;
+	    	} else {
+	    		return true;	
 	    	}
-	    	else
-		    {
-		    	dd('Email exists in Gigya');
-		    }
+	    	// dd($response);
+	    	
 	    }
-    	else
+	    else
 	    {
 	        echo ("Uh-oh, we got the following error: " . $response->getErrorMessage());
 	        error_log($response->getLog());
 	    }
-
 	}
 
 	public function hook_before_addscreen() {
