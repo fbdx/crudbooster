@@ -89,7 +89,7 @@ class GigyaCBController extends CBController {
 				  PRIMARY KEY (`id`),
 				  KEY `customerid` (`customerid`)
 				)"));
-
+		
 		return $table;
 	}
 
@@ -1184,7 +1184,7 @@ class GigyaCBController extends CBController {
 
 		} //searchemail
 		else {
-			dd('email exist');
+			return back()->with('status', 'Email '.$this->arr['email'].' already exists in Gigya');
 		}
 	}
 
@@ -1373,7 +1373,6 @@ class GigyaCBController extends CBController {
 	    	} else {
 	    		return true;	
 	    	}
-	    	// dd($response);
 	    	
 	    }
 	    else

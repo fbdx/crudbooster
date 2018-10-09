@@ -3,6 +3,14 @@
         
         <div >
 
+          @if (session('status'))
+              <div class="alert alert-danger">
+                  <p style="text-align: center;">
+                  {{ session('status') }}  
+                  </p>
+              </div>
+          @endif
+
         @if(CRUDBooster::getCurrentMethod() != 'getProfile' && $button_cancel)
           @if(g('return_url'))
           <p><a title='Return' href='{{g("return_url")}}'><i class='fa fa-chevron-circle-left '></i> &nbsp; {{trans("crudbooster.form_back_to_list",['module'=>CRUDBooster::getCurrentModule()->name])}}</a></p>       
@@ -62,9 +70,7 @@
                                  
                               @endif
                             </div>
-                          </div>                             
-                              
-                          
+                          </div>
 
                         </div><!-- /.box-footer-->
 
