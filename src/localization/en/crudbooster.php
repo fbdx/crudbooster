@@ -88,6 +88,7 @@ return [
 
     'action_show_data' => 'Show Data',
     'action_add_data' => 'Add Data',
+    'action_add_campaign' => 'Add Campaign',
     'action_delete_selected' => 'Delete Selected',
 
     'action_label' => 'Action',
