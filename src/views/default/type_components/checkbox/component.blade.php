@@ -25,7 +25,7 @@
                 ?>
                 <div class="checkbox {{$disabled}}">
                     <label>
-                        <input type="checkbox" {{$disabled}} {{$checked}} name="{{$name}}[]" value="{{$val}}"> {{$label}}
+                        <input type="checkbox" {{$disabled}} {{$checked}} name="{{$name}}[]" data-toggle="toggle" value="{{$val}}"> {{$label}}
                     </label>
                 </div>
             @endforeach
@@ -69,11 +69,11 @@
                 foreach ($selects_data as $d) {
                     $checked = (is_array($value) && in_array($d->id, $value)) ? "checked" : "";
                     echo "
-												<div data-val='$val' class='checkbox $disabled'>
-												  <label>
-												    <input type='checkbox' $disabled $checked name='".$name."[]' value='".$d->id."'> ".$d->{$datatable_field}."								    
-												  </label>
-												</div>";
+                                                <div data-val='$val' class='checkbox $disabled'>
+                                                  <label>
+                                                    <input type='checkbox' $disabled $checked name='".$name."[]' value='".$d->id."'> ".$d->{$datatable_field}."                                 
+                                                  </label>
+                                                </div>";
                 }
             } else {
                 @$value = explode(';', $value);
@@ -84,11 +84,11 @@
                     if ($val == '' || ! $d->id) continue;
 
                     echo "
-												<div data-val='$val' class='checkbox $disabled'>
-												  <label>
-												    <input type='checkbox' $disabled $checked name='".$name."[]' value='".$d->id."'> ".$val." 								    
-												  </label>
-												</div>";
+                                                <div data-val='$val' class='checkbox $disabled'>
+                                                  <label>
+                                                    <input type='checkbox' $disabled $checked name='".$name."[]' value='".$d->id."'> ".$val."                                   
+                                                  </label>
+                                                </div>";
                 }
             }
 
@@ -103,11 +103,11 @@
                     $checked = (is_array($value) && in_array($val, $value)) ? "checked" : "";
                     //if($val == '' || !$d->id) continue;
                     echo "
-												<div data-val='$val' class='checkbox $disabled'>
-												  <label>
-												    <input type='checkbox' $disabled $checked name='".$name."[]' value='$q->value'> ".$q->label." 								    
-												  </label>
-												</div>";
+                                                <div data-val='$val' class='checkbox $disabled'>
+                                                  <label>
+                                                    <input type='checkbox' $disabled $checked name='".$name."[]' value='$q->value'> ".$q->label."                                   
+                                                  </label>
+                                                </div>";
                 }
             }
         }
