@@ -78,6 +78,38 @@
 				})
 			}
 
+			var dateToday = new Date();
+
+			$("#childrenbirthDateReliability").change(function () {
+
+				var k = $(this).val(); 
+	            k = k.toLowerCase().replace(/ /g,'');
+	            console.log(k);
+
+	            if(k == 'pregnant')
+	            {
+	            	$('.expectedDatePicker').daterangepicker({					
+						singleDatePicker: true,
+	        			showDropdowns: true,
+	        			minDate: dateToday,
+						format:'YYYY-MM-DD'
+					})
+	            	
+	            }
+	            
+	            if(k == 'childisborn')
+	            {
+	            	$('.expectedDatePicker').daterangepicker({					
+						singleDatePicker: true,
+	        			showDropdowns: true,
+	        			maxDate: dateToday,
+						format:'YYYY-MM-DD'
+					})
+	            }
+	        
+	        });
+
+
 			if($(".datetimepicker").length > 0) {
 				$(".datetimepicker").daterangepicker({
 					minDate: '1900-01-01',

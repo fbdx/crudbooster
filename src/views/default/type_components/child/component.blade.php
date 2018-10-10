@@ -6,7 +6,9 @@
 		$('#form-group-{{$name}} .select2').select2();		
 	})
 </script>
-<div class='form-group {{$header_group_class}}' id='form-group-{{$name}}'>								
+<div class='form-group {{$header_group_class}}' id='form-group-{{$name}}'>
+
+	{{-- {{dump($form)}} --}}
 	
 	@if($form['columns'])						
 	<div class="col-sm-12">
@@ -25,9 +27,14 @@
 						<div class="panel-body child-form-area">
 							@foreach($form['columns'] as $col)	
 							<?php $name_column = $name.$col['name'];?>
-							<div class='form-group'>
+							<div class='form-group testtest'>
 								@if($col['type']!='hidden')
-								<label class="control-label col-sm-2">{{$col['label']}}
+								{{-- {{dump($col)}} --}}
+								@if($col['name']=='birthDate')
+									<label class="control-label col-sm-2" id="birthDateLabel">{{$col['label']}}
+								@else
+									<label class="control-label col-sm-2">{{$col['label']}}
+								@endif
 								@if(!empty($col['required'])) 
 								<span class="text-danger" title="This field is required">*</span> 
 								@endif
@@ -64,14 +71,24 @@
 										<?php endif;?>
 
 									@elseif($col['type']=='datetime')	
-											<div class="input-group">  			
+									{{-- {{dd($col)}} --}}
+									@if($col['name']=='birthDate')
+										<div class="input-group">  			
+										{{-- $name_column == childrenbirthDate --}}
+											<span class="input-group-addon"><a href='javascript:void(0)' onclick='$("#{{$name_column}}").data("datepicker").toggle()' id="birthdate"><i class='fa fa-calendar'></i></a></span>
+											{{-- <p></p> --}}
+											<input type='text' title="{{$form['label']}}" readonly {{$required}} {{$readonly}} {!!$placeholder!!} {{$disabled}} class='form-control notfocus expectedDatePicker' name="{{$name_column}}" id="{{$name_column}}" value='{{$value}}'/>	
+
+										</div>
+									@else
+										<div class="input-group">  			
+										
+											<span class="input-group-addon"><a href='javascript:void(0)' onclick='$("#{{$name_column}}").data("daterangepicker").toggle()'><i class='fa fa-calendar'></i></a></span>
 											
-												<span class="input-group-addon"><a href='javascript:void(0)' onclick='$("#{{$name_column}}").data("daterangepicker").toggle()'><i class='fa fa-calendar'></i></a></span>
-												
-												<input type='text' title="{{$form['label']}}" readonly {{$required}} {{$readonly}} {!!$placeholder!!} {{$disabled}} class='form-control notfocus datetimepicker' name="{{$name_column}}" id="{{$name_column}}" value='{{$value}}'/>	
+											<input type='text' title="{{$form['label']}}" readonly {{$required}} {{$readonly}} {!!$placeholder!!} {{$disabled}} class='form-control notfocus datetimepicker' name="{{$name_column}}" id="{{$name_column}}" value='{{$value}}'/>	
 
-
-											</div>	
+										</div>	
+									@endif
 
 									@elseif($col['type']=='datamodal')			
 											
@@ -251,35 +268,54 @@
 										}
 
 								    </script>
-
 									@elseif($col['type']=='select')
-									<select id='{{$name_column}}' name='child-{{$col["name"]}}' class='form-control select2 {{$col['required']?"required":""}}' 										
-										{{($col['readonly']===true)?"readonly":""}} 
-										>
-										<option value=''>{{trans('crudbooster.text_prefix_option')}} {{$col['label']}}</option>
-										<?php 
-											if($col['datatable']) {
-												$tableJoin = explode(',',$col['datatable'])[0];
-												$titleField = explode(',',$col['datatable'])[1];
-												$data = CRUDBooster::get($tableJoin,NULL,"$titleField ASC");
-												foreach($data as $d) {
-													echo "<option value='$d->id'>".$d->$titleField."</option>";
-												}
-											}else{
-												$data = explode(';' , $col['dataenum']); 
-												foreach($data as $d) {
-													$enum = explode('|',$d);
-													if(count($enum)==2) {
-														$opt_value = $enum[0];
-														$opt_label = $enum[1];
+									{{-- ID Target Column: childrenbirthDateReliability --}}
+									{{-- {{dump($col)}} --}}
+										{{-- @if($form['table'] == 'gigya_child' && $col['name'] == 'birthDateReliability')
+											<select id='childrenbirthDateReliability' name='child-{{$col["name"]}}' class='form-control select2 {{$col['required']?"required":""}}'
+											{{($col['readonly']===true)?"readonly":""}} ">
+
+												<option value=''>{{trans('crudbooster.text_prefix_option')}} {{$col['label']}}</option>
+												<option value="childborn">Child is Born</option>
+												<option value="pregnant">Pregnante</option>
+												 
+											</select>
+										@else --}}
+											<select id='{{$name_column}}' name='child-{{$col["name"]}}' class='form-control select2 {{$col['required']?"required":""}}'
+											{{($col['readonly']===true)?"readonly":""}} ">
+
+												<option value=''>{{trans('crudbooster.text_prefix_option')}} {{$col['label']}}</option>
+												<?php
+													if($col['datatable']) {
+														$tableJoin = explode(',',$col['datatable'])[0];
+														$titleField = explode(',',$col['datatable'])[1];
+														$data = CRUDBooster::get($tableJoin,NULL,"$titleField ASC");
+														foreach($data as $d) {
+															echo "<option value='$d->id'>".$d->$titleField."</option>";
+															//dump($d);
+														}
 													}else{
-														$opt_value = $opt_label = $enum[0];
-													}
-													echo "<option value='$opt_value'>$opt_label</option>";
-												}
-											}											
-										?>										
-									</select>
+														$data = explode(';' , $col['dataenum']);
+
+														foreach($data as $d) {
+															$enum = explode('|',$d);
+															if(count($enum)==2) {
+																$opt_value = $enum[0];
+																$opt_label = $enum[1];
+															}else{
+																$opt_value = $opt_label = $enum[0];
+															}
+															//dd($opt_label, $opt_value);
+															//$option_value[] = $opt_value;
+															echo "<option value='$opt_value'>$opt_label</option>";
+														}
+
+													}											
+												?>
+											</select>
+											<div class="test2"></div>
+										{{-- @endif --}}
+
 									@elseif($col['type']=='hidden')
 										<input type="{{$col['type']}}" id="{{$name.$col["name"]}}" name="child-{{$name.$col["name"]}}" value="{{$col["value"]}}">
 									@elseif($col['type']=='hiddendate')
@@ -582,7 +618,7 @@
 
 						<?php endforeach;?>
 
-						@if(count($data_child)==0)
+						@if(count($data_child)==0) 
 						<tr class="trNull">
 							<td colspan="{{count($form['columns'])+1}}" align="center">{{trans('crudbooster.table_data_not_found')}}</td>
 						</tr>
