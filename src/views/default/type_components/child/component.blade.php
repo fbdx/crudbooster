@@ -77,15 +77,15 @@
 										{{-- $name_column == childrenbirthDate --}}
 											<span class="input-group-addon"><a href='javascript:void(0)' onclick='$("#{{$name_column}}").data("datepicker").toggle()' id="birthdate"><i class='fa fa-calendar'></i></a></span>
 											{{-- <p></p> --}}
-											<input type='text' title="{{$form['label']}}" readonly {{$required}} {{$readonly}} {!!$placeholder!!} {{$disabled}} class='form-control notfocus expectedDatePicker' name="{{$name_column}}" id="{{$name_column}}" value='{{$value}}'/>	
-
+											<input type='text' title="{{$form['label']}}" readonly {{$required}} {{$readonly}} {!!$placeholder!!} {{$disabled}} class='form-control notfocus expectedDatePicker {{$col['required']?"required":""}}' name="{{$name_column}}" id="{{$name_column}}" value='{{$value}}'/>	
+		
 										</div>
 									@else
 										<div class="input-group">  			
 										
 											<span class="input-group-addon"><a href='javascript:void(0)' onclick='$("#{{$name_column}}").data("daterangepicker").toggle()'><i class='fa fa-calendar'></i></a></span>
 											
-											<input type='text' title="{{$form['label']}}" readonly {{$required}} {{$readonly}} {!!$placeholder!!} {{$disabled}} class='form-control notfocus datetimepicker' name="{{$name_column}}" id="{{$name_column}}" value='{{$value}}'/>	
+											<input type='text' title="{{$form['label']}}" readonly {{$required}} {{$readonly}} {!!$placeholder!!} {{$disabled}} class='form-control notfocus datetimepicker {{$col['required']?"required":""}} ' name="{{$name_column}}" id="{{$name_column}}" value='{{$value}}'/>	
 
 										</div>	
 									@endif
@@ -315,6 +315,27 @@
 											</select>
 											<div class="test2"></div>
 										{{-- @endif --}}
+
+									<script>
+										$(document).ready(function () {
+									        // $("#childrenbirthDateReliability").change(function () {
+									        //     // var k = $(this).val(); 
+									        //     // k = k.toLowerCase().replace(/ /g,'');
+									        //     // console.log(k);
+
+									        //     if($(this).val() == 'Pregnant')
+									        //     {
+									            	
+									        //     }
+									        //     else
+									        //     {
+									        //     	console.log("child is born");
+									        //     }
+
+									        
+									        // });
+									    });
+									</script>
 
 									@elseif($col['type']=='hidden')
 										<input type="{{$col['type']}}" id="{{$name.$col["name"]}}" name="child-{{$name.$col["name"]}}" value="{{$col["value"]}}">
@@ -554,7 +575,7 @@
 							foreach($data_child as $d):							
 								//dump($d->birthDateReliability);
 								if ($d->birthDateReliability == 0) {
-									$d->birthDateReliability = 'Have Child';
+									$d->birthDateReliability = 'Child is Born';
 								} 
 
 								if ($d->birthDateReliability == 4) {
