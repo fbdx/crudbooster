@@ -89,7 +89,7 @@ class GigyaCBController extends CBController {
 				  PRIMARY KEY (`id`),
 				  KEY `customerid` (`customerid`)
 				)"));
-		
+
 		return $table;
 	}
 
@@ -714,36 +714,41 @@ class GigyaCBController extends CBController {
 
 						unset($child_array['id']);
 						$lastId = CRUDBooster::newId($childtable);
+						// dump($lastId);
 						$child_array[$i]['id'] = $lastId;
 
 						if($childtable == 'gigya_child'){
 							foreach ($child_array as $key) {
 				                if(strpos($key['birthDateReliability'], 'Pregnant') !== false){
 				                	$child_array[$i]['birthDateReliability'] = 4;
-				                } else {
+				                } elseif ($key['birthDateReliability'] == 'Child is Born') {
 				                	$child_array[$i]['birthDateReliability'] = 0;
 				                }
 				            }
 				        }
-						DB::table($childtable)->insert($child_array);
+				        // dump($child_array[$i]);
+				        $childArray[$i] = $child_array[$i];
+						DB::table($childtable)->insert($child_array[$i]);
+					} 
+					else {
+						if($childtable == 'gigya_child'){
+							foreach ($child_array as $key) {
+				                if((strpos($key['birthDateReliability'], 'Pregnant') !== false || $key['birthDateReliability']) == 4){
+				                	$child_array[$i]['birthDateReliability'] = 4;
+				                } elseif ($key['birthDateReliability'] == 'Child is Born') {
+				                	$child_array[$i]['birthDateReliability'] = 0;
+				                } 
+				            }
+				        }
+
+						$tempId[] = $child_array[$i]['id'];
+						// dump($tempId[$i]);
+
+						// unset($child_array[$i]['id']);
+						DB::table($childtable) 
+						->where('id', $tempId[$i])
+						->update($child_array[$i]);
 					}
-
-					if($childtable == 'gigya_child'){
-						foreach ($child_array as $key) {
-			                if((strpos($key['birthDateReliability'], 'Pregnant') !== false || $key['birthDateReliability']) == 4){
-			                	$child_array[$i]['birthDateReliability'] = 4;
-			                } else {
-			                	$child_array[$i]['birthDateReliability'] = 0;
-			                }
-			            }
-			        }
-
-					$tempId[] = $child_array[$i]['id'];
-					//unset($child_array[$i]['id']);
-					DB::table($childtable) 
-					->where('id', $tempId[$i])
-					->update($child_array[$i]);
-					
 	
 				}
 
@@ -752,7 +757,6 @@ class GigyaCBController extends CBController {
 				
 				$newids =  DB::table($childtable)->where($fk,'=',$id)->pluck('id')->toArray();
 				
-
 				$array3 = array_diff($newids,$currentids);
 
 				if (isset($array3))
@@ -762,27 +766,23 @@ class GigyaCBController extends CBController {
 					->delete();
 				}
 
-
 			}
 
 		}//end foreach
-		// dd($UID,$setInputData);
 
-		// $setInputData = array_diff($setInputData, ["UID","children", "sample_request", "careline_detail"]);
-		// dd($setInputData);
 		$removeKeys = array("UID","children", "sample_request", "careline_detail","area_of_interest");
 		foreach ($removeKeys as $key) {
 			unset($setInputData[$key]);
 		}
 
-		$childArray = $childData[0];
+		// $childArray = $childData[0];
 		unset($childArray['customerid']);
 
 		$areaInterestData = $areaInterestData[0];
 		unset($areaInterestData['customerid']);
 
 		// dd($childArray);
-
+		// dd($UID,$setInputData,$childArray,$areaInterestData);
 		$this->updateCustomerRecord($UID,$setInputData,$childArray,$areaInterestData);
 
 		$this->hook_after_edit($id);
@@ -802,35 +802,6 @@ class GigyaCBController extends CBController {
 			}
 		}
 	}
-
-	// public function updateCustomerRecord($UID, $setInputData)
- //    {
-            	
- //    	$method2 = "accounts.setAccountInfo";
- //    	$request = new GSRequest($this->gigya_api_key,$this->gigya_secret_key,$method2,null,true,$this->gigya_user_key);
- //    	$request->setParam("UID",$UID);
- //    	$request->setParam("profile",json_encode($setInputData));
-
- //    	$response = $request->send();
- //    	// dd($response);
- //    	if($response->getErrorCode()==0)
- //    	{
- //    	    // echo "Success";
- //    	    $response = $response->getResponseText();
- //    	    $response = json_decode($response, true);
-
- //    	    Log::info(print_r($response,TRUE));
- //    	    //echo "<pre>".print_r($response,TRUE)."</pre>\n";
- //    	    //echo $reg['email'];
- //    	}
- //    	else
- //    	{	
- //    		Log::error("Uh-oh, we got the following error: " . $response->getErrorMessage());
- //    	    //echo ("Uh-oh, we got the following error: " . $response->getErrorMessage());
- //    	    //error_log($response->getLog());
- //    	}
-
- //    }
 
     public function getCustomerRecord($UID,$email)
     {
@@ -862,6 +833,7 @@ class GigyaCBController extends CBController {
 
 	public function updateCustomerRecord($UID, $setInputData, $childArray, $areaInterestData)
     {
+
     	//$method = "accounts.search";
     	$method = "accounts.initRegistration";
 
@@ -874,7 +846,6 @@ class GigyaCBController extends CBController {
     	// $request->setParam("openCursor",true);
 
     	$response = $request->send();
-
     	$regtoken="";
     	
     	if($response->getErrorCode()==0)
@@ -902,8 +873,6 @@ class GigyaCBController extends CBController {
 	  //   	$childData['child']{'birthDate'} = $childArray['birthDate'];
 			// $childData['child']{'birthDateReliability'} = childArray['birthDateReliability'];
 	  //   	$childData['child']{'feeding'} = childArray['feeding'];
-
-
 	    	
 
 			$itemParent = DB::table('gigya_customer')->where('UID',$UID)->first();
@@ -955,7 +924,6 @@ class GigyaCBController extends CBController {
 	    	$request->setParam("query","SELECT * FROM emailAccounts WHERE UID='$UID'");
 	    	// $request->setParam("UID",$UID);
 	    	$response = $request->send();
-
 	    	if($response->getErrorCode()==0)
 		   	{
 	            $response = $response->getResponseText();
@@ -972,7 +940,6 @@ class GigyaCBController extends CBController {
 	            	$response = $request->send();
 	            	if($response->getErrorCode()==0)
 	            	{
-	            	    // echo "Success";
 	            	    $response = $response->getResponseText();
 	            	    $response = json_decode($response, true);
 	            	    echo "<pre>".print_r($response,TRUE)."</pre>\n";
@@ -1079,7 +1046,6 @@ class GigyaCBController extends CBController {
 
 				if($ro['type']=='child') {
 					
-
 					$tempId = array();
 					$name = str_slug($ro['label'],'');
 					$columns = $ro['columns'];
@@ -1106,7 +1072,7 @@ class GigyaCBController extends CBController {
 
 						$child_array[] = $column_data;
 						// dd($child_array);
-						if($child_array[$i]['id'] == NULL){
+						if($child_array[$i]['id'] == NULL) {
 							
 							$customer_array[] = $row;
 
@@ -1119,25 +1085,49 @@ class GigyaCBController extends CBController {
 
 							unset($child_array['id']);
 							$lastId = CRUDBooster::newId($childtable);
+							// dump($lastId);
 							$child_array[$i]['id'] = $lastId;
-							DB::table($childtable)->insert($child_array);
-						}
 
-						$tempId[] = $child_array[$i]['id'];
-						//unset($child_array[$i]['id']);
+							if($childtable == 'gigya_child'){
+								foreach ($child_array as $key) {
+					                if(strpos($key['birthDateReliability'], 'Pregnant') !== false){
+					                	$child_array[$i]['birthDateReliability'] = 4;
+					                } elseif ($key['birthDateReliability'] == 'Child is Born') {
+					                	$child_array[$i]['birthDateReliability'] = 0;
+					                }
+					            }
+					        }
+					        // dump($child_array[$i]);
+					        $childArray[$i] = $child_array[$i];
+							DB::table($childtable)->insert($child_array[$i]);
+						} 
+						// else {
+						// 	if($childtable == 'gigya_child'){
+						// 		foreach ($child_array as $key) {
+					 //                if((strpos($key['birthDateReliability'], 'Pregnant') !== false || $key['birthDateReliability']) == 4){
+					 //                	$child_array[$i]['birthDateReliability'] = 4;
+					 //                } elseif ($key['birthDateReliability'] == 'Child is Born') {
+					 //                	$child_array[$i]['birthDateReliability'] = 0;
+					 //                } 
+					 //            }
+					 //        }
 
-						DB::table($childtable) 
-						->where('id', $tempId[$i])
-						->update($child_array[$i]);
-		
+						// 	$tempId[] = $child_array[$i]['id'];
+						// 	// dump($tempId[$i]);
+
+						// 	// unset($child_array[$i]['id']);
+						// 	DB::table($childtable) 
+						// 	->where('id', $tempId[$i])
+						// 	->update($child_array[$i]);
+						// }
+					
 					}
 
-
+					// dump($childArray);
 					$currentids = array_pluck($child_array,"id");
 					
 					$newids =  DB::table($childtable)->where($fk,'=',$id)->pluck('id')->toArray();
 					
-
 					$array3 = array_diff($newids,$currentids);
 
 					if (isset($array3))
@@ -1145,20 +1135,11 @@ class GigyaCBController extends CBController {
 						DB::table($childtable)
 						->whereIn('id', $array3)
 						->delete();
-					}
-					if($childtable == 'gigya_child'){
-						$childData = $child_array;
-						// $childData[$c] = $childData;
-					}
-
-					if($childtable=='gigya_area_interest'){
-						$areaInterestData = $child_array;
-					}
-				}
+					}}
 				
 			}
-
-			$this->createCustomerRecord($setInputData,$childData,$areaInterestData);
+			// die();
+			$this->createCustomerRecord($setInputData,$childArray,$areaInterestData);
 
 			$this->hook_after_add($this->arr[$this->primary_key]);
 
@@ -1188,7 +1169,7 @@ class GigyaCBController extends CBController {
 		}
 	}
 
-	public function createCustomerRecord($setInputData,$childData,$areaInterestData)
+	public function createCustomerRecord($setInputData,$childArray,$areaInterestData)
     {
     	$email = $setInputData['email'];
 
@@ -1197,164 +1178,138 @@ class GigyaCBController extends CBController {
 			unset($setInputData[$key]);
 		}
 
-		// $method = "accounts.search";
-		// $request = new GSRequest($this->gigya_api_key,$this->gigya_secret_key,$method,null,true,$this->gigya_user_key);
-		// $request->setParam("query","SELECT * FROM emailAccounts WHERE profile.email='$email'");
-		// $response = $request->send();
-		// // dd($response);
-		// if($response->getErrorCode()==0)
-	 //    {
-	    	// $response = $response->getResponseText();
-	    	// $response = json_decode($response, true);
+    	$method = "accounts.initRegistration";
 
-	    	// if (empty($response['results'])) {
+    	// $request = new GSRequest($apiKey,$secretKey,$method);
+    	$request = new GSRequest($this->gigya_api_key,$this->gigya_secret_key,$method,null,true,$this->gigya_user_key);
 
-            	$method = "accounts.initRegistration";
+    	//$request->setParam("query","select * from accounts LIMIT 50");
+    	$request->setParam("isLite",true);
+    	$request->setParam("callback","testcall");
+    	// $request->setParam("openCursor",true);
 
-            	// $request = new GSRequest($apiKey,$secretKey,$method);
-            	$request = new GSRequest($this->gigya_api_key,$this->gigya_secret_key,$method,null,true,$this->gigya_user_key);
+    	$response = $request->send();
 
-            	//$request->setParam("query","select * from accounts LIMIT 50");
-            	$request->setParam("isLite",true);
-            	$request->setParam("callback","testcall");
-            	// $request->setParam("openCursor",true);
+    	$regtoken="";
+    	
+    	if($response->getErrorCode()==0)
+	    {
+	        // echo "Success";
+	        $response = $response->getResponseText();
+	        $response = json_decode($response, true);
 
-            	$response = $request->send();
+	        echo "<pre>".print_r($response,TRUE)."</pre>\n";
+	        $regtoken = $response["regToken"];
+	    }
+    	else
+	    {
+	        echo ("Uh-oh, we got the following error: " . $response->getErrorMessage());
+	        error_log($response->getLog());
+	    }
 
-            	$regtoken="";
-            	
-            	if($response->getErrorCode()==0)
+	    if ($regtoken!="")
+        {
+
+	    	$setInputData['phones'] = array("number"=>$setInputData['phones']);
+
+	    	if($UID != NULL)
+				$itemParent = DB::table('gigya_customer')->where('UID',$UID)->first();
+			else
+				$itemParent = DB::table('gigya_customer')->where('email',$email)->first();
+			
+			if (isset($itemParent))
+				$parentid = $itemParent->id;
+
+			$childItems = DB::table('gigya_child')->where('customerid',$parentid)->get();
+
+	    	$childData = [];
+	    	$ci = 0;
+			foreach ($childItems as $childItem) {
+			    $childData[$ci]['firstName'] = $childItem->firstName;
+		    	$childData[$ci]['birthDate'] = $childItem->birthDate;
+		    	$childData[$ci]['birthDateReliability'] = $childItem->birthDateReliability;
+		    	$childData[$ci]['feeding'] = $childItem->feeding;
+		    	$ci++;
+			}
+
+			$interestItems = DB::table('gigya_area_interest')->where('customerid',$parentid)->get();
+
+
+	    	$child["child"] = $childData;
+	    	//dd(json_encode($child));
+
+	    	$interestData=[];
+	    	$ci = 0;
+
+	    	foreach ($interestItems as $interestItem) {
+			    $interestData[$ci]['interestCode'] = $interestItem->interestCode;
+		    	$interestData[$ci]['answerDetails'] = $interestItem->answerDetails;
+		    	$ci++;
+			}
+
+
+			$child["areaOfInterest"] = $interestData;
+
+        	$method2 = "accounts.setAccountInfo";
+        	$request = new GSRequest($this->gigya_api_key,$this->gigya_secret_key,$method2,null,true,$this->gigya_user_key);
+        	$request->setParam("regToken",$regtoken);
+			$request->setparam("data", json_encode($child));
+        	$request->setParam("profile",json_encode($setInputData));
+
+        	$response = $request->send();
+        	// dump($response);
+        	usleep(500000);
+        	if($response->getErrorCode()==0)
+        	{
+        	    // echo "Success";
+        	    $response = $response->getResponseText();
+        	    $response = json_decode($response, true);
+        	    $method = "accounts.search";
+        	    // $method = "accounts.getAccountInfo";
+        	    $request = new GSRequest($this->gigya_api_key,$this->gigya_secret_key,$method,null,true,$this->gigya_user_key);
+        	    $request->setParam("query","SELECT UID FROM emailAccounts WHERE profile.email='$email'");
+
+        	    $response = $request->send();
+        	    // dump($response);
+            	    
+        	    if($response->getErrorCode()==0)
         	    {
         	        // echo "Success";
         	        $response = $response->getResponseText();
         	        $response = json_decode($response, true);
+        	        
+        	        $UID = $response['results'][0]['UID'];
+        	        // dd($UID);
+        	        DB::table('gigya_customer')
+		                ->where('email', $email)
+		                ->update(['UID' => $UID]);
+        	        // echo "<pre>".print_r($response,TRUE)."</pre>\n";
+        	        // echo $reg['email'];
 
-        	        echo "<pre>".print_r($response,TRUE)."</pre>\n";
-        	        $regtoken = $response["regToken"];
         	    }
-            	else
-        	    {
+        	    else
+        	    {	
+        	    	if($response->getErrorCode()==500001)
+        	    		abort(500, 'General Server Error');
+        	    	
         	        echo ("Uh-oh, we got the following error: " . $response->getErrorMessage());
         	        error_log($response->getLog());
         	    }
 
-        	    if ($regtoken!="")
-                {
 
-        	    	// dd($UID, $setInputData);
-        	    	$setInputData['phones'] = array("number"=>$setInputData['phones']);
+        	    // echo "<pre>".print_r($response,TRUE)."</pre>\n";
+        	    // echo $reg['email'];
 
-        	    	if($UID != NULL)
-        				$itemParent = DB::table('gigya_customer')->where('UID',$UID)->first();
-        			else
-        				$itemParent = DB::table('gigya_customer')->where('email',$email)->first();
-        			
-        			if (isset($itemParent))
-        				$parentid = $itemParent->id;
-
-        			$childItems = DB::table('gigya_child')->where('customerid',$parentid)->get();
-
-        	    	$childData = [];
-        	    	$ci = 0;
-        			foreach ($childItems as $childItem) {
-        			    $childData[$ci]['firstName'] = $childItem->firstName;
-        		    	$childData[$ci]['birthDate'] = $childItem->birthDate;
-        		    	$childData[$ci]['birthDateReliability'] = $childItem->birthDateReliability;
-        		    	$childData[$ci]['feeding'] = $childItem->feeding;
-        		    	$ci++;
-        			}
-
-        			$interestItems = DB::table('gigya_area_interest')->where('customerid',$parentid)->get();
-
-
-        	    	$child["child"] = $childData;
-        	    	//dd(json_encode($child));
-
-        	    	$interestData=[];
-        	    	$ci = 0;
-
-        	    	foreach ($interestItems as $interestItem) {
-        			    $interestData[$ci]['interestCode'] = $interestItem->interestCode;
-        		    	$interestData[$ci]['answerDetails'] = $interestItem->answerDetails;
-        		    	$ci++;
-        			}
-
-
-        			$child["areaOfInterest"] = $interestData;
-
-	            	$method2 = "accounts.setAccountInfo";
-	            	$request = new GSRequest($this->gigya_api_key,$this->gigya_secret_key,$method2,null,true,$this->gigya_user_key);
-	            	$request->setParam("regToken",$regtoken);
-					$request->setparam("data", json_encode($child));
-	            	$request->setParam("profile",json_encode($setInputData));
-
-	            	$response = $request->send();
-	            	// dump($response);
-	            	usleep(500000);
-	            	if($response->getErrorCode()==0)
-	            	{
-	            	    // echo "Success";
-	            	    $response = $response->getResponseText();
-	            	    $response = json_decode($response, true);
-	            	    $method = "accounts.search";
-	            	    // $method = "accounts.getAccountInfo";
-	            	    $request = new GSRequest($this->gigya_api_key,$this->gigya_secret_key,$method,null,true,$this->gigya_user_key);
-	            	    $request->setParam("query","SELECT UID FROM emailAccounts WHERE profile.email='$email'");
-
-	            	    $response = $request->send();
-	            	    // dump($response);
-		            	    
-	            	    if($response->getErrorCode()==0)
-	            	    {
-	            	        // echo "Success";
-	            	        $response = $response->getResponseText();
-	            	        $response = json_decode($response, true);
-	            	        
-	            	        $UID = $response['results'][0]['UID'];
-	            	        // dd($UID);
-	            	        DB::table('gigya_customer')
-				                ->where('email', $email)
-				                ->update(['UID' => $UID]);
-	            	        // echo "<pre>".print_r($response,TRUE)."</pre>\n";
-	            	        // echo $reg['email'];
-
-	            	    }
-	            	    else
-	            	    {	
-	            	    	if($response->getErrorCode()==500001)
-	            	    		abort(500, 'General Server Error');
-	            	    	
-	            	        echo ("Uh-oh, we got the following error: " . $response->getErrorMessage());
-	            	        error_log($response->getLog());
-	            	    }
-
-
-	            	    // echo "<pre>".print_r($response,TRUE)."</pre>\n";
-	            	    // echo $reg['email'];
-
-	            	}
-	            	else
-	            	{	
-	            		if($response->getErrorCode()==500001)
-	            			abort(500, 'General Server Error');
-	            		
-	            	    echo ("Uh-oh, we got the following error: " . $response->getErrorMessage());
-	            	    error_log($response->getLog());
-	            	}
-	        	}
-	    	// }
-	    // 	else
-		   //  {
-		   //  	dd('mati here');
-		   //  	return redirect()->back();
-		   //  	// dd('Email exists in Gigya');
-		   //  }
-	    // // }
-    	// else
-	    // {
-	    //     echo ("Uh-oh, we got the following error: " . $response->getErrorMessage());
-	    //     error_log($response->getLog());
-	    // }
+        	}
+        	else
+        	{	
+        		if($response->getErrorCode()==500001)
+        			abort(500, 'General Server Error');
+        		
+        	    echo ("Uh-oh, we got the following error: " . $response->getErrorMessage());
+        	    error_log($response->getLog());
+        	}
+    	}
 	}
 
 	public function searchEmailAccount($email)
