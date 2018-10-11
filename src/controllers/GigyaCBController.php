@@ -769,7 +769,6 @@ class GigyaCBController extends CBController {
 			}
 
 		}//end foreach
-
 		$removeKeys = array("UID","children", "sample_request", "careline_detail","area_of_interest");
 		foreach ($removeKeys as $key) {
 			unset($setInputData[$key]);
@@ -1098,29 +1097,12 @@ class GigyaCBController extends CBController {
 					            }
 					        }
 					        // dump($child_array[$i]);
-					        $childArray[$i] = $child_array[$i];
+							if($childtable == 'gigya_child'){
+					        	$childArray[$i] = $child_array[$i];
+							}
 							DB::table($childtable)->insert($child_array[$i]);
 						} 
-						// else {
-						// 	if($childtable == 'gigya_child'){
-						// 		foreach ($child_array as $key) {
-					 //                if((strpos($key['birthDateReliability'], 'Pregnant') !== false || $key['birthDateReliability']) == 4){
-					 //                	$child_array[$i]['birthDateReliability'] = 4;
-					 //                } elseif ($key['birthDateReliability'] == 'Child is Born') {
-					 //                	$child_array[$i]['birthDateReliability'] = 0;
-					 //                } 
-					 //            }
-					 //        }
-
-						// 	$tempId[] = $child_array[$i]['id'];
-						// 	// dump($tempId[$i]);
-
-						// 	// unset($child_array[$i]['id']);
-						// 	DB::table($childtable) 
-						// 	->where('id', $tempId[$i])
-						// 	->update($child_array[$i]);
-						// }
-					
+						
 					}
 
 					// dump($childArray);
@@ -1139,6 +1121,7 @@ class GigyaCBController extends CBController {
 				
 			}
 			// die();
+			// dd($childArray);
 			$this->createCustomerRecord($setInputData,$childArray,$areaInterestData);
 
 			$this->hook_after_add($this->arr[$this->primary_key]);
