@@ -135,6 +135,15 @@ $name = str_slug($form['label'], '');
                                                            class='form-control {{$col['required']?"required":""}}'
                                                             {{($col['readonly']===true)?"readonly":""}}
                                                     />
+                                                @elseif($col['type']=='datetime')   
+                                                    <div class="input-group">           
+                                                    
+                                                        <span class="input-group-addon"><a href='javascript:void(0)' onclick='$("#{{$name_column}}").data("daterangepicker").toggle()'><i class='fa fa-calendar'></i></a></span>
+                                                        
+                                                        <input type='text' title="{{$form['label']}}" readonly {{$required}} {{$readonly}} {!!$placeholder!!} {{$disabled}} class='form-control notfocus datetimepicker' name="{{$name_column}}" id="{{$name_column}}" value='{{$value}}'/> 
+
+
+                                                    </div>  
                                                 @elseif($col['type']=='textarea')
                                                     <textarea id='{{$name_column}}' name='child-{{$col["name"]}}'
                                                               class='form-control {{$col['required']?"required":""}}' {{($col['readonly']===true)?"readonly":""}} ></textarea>
