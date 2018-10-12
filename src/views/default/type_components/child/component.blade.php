@@ -72,9 +72,9 @@ $name = str_slug($form['label'], '');
                                                         <input type="hidden" class="input-id">
                                                         <input type="text" class="form-control input-label {{$col['required']?"required":""}}" readonly>
                                                         <span class="input-group-btn">
-								        <button class="btn btn-primary" onclick="showModal{{$name_column}}()" type="button"><i
+                                        <button class="btn btn-primary" onclick="showModal{{$name_column}}()" type="button"><i
                                                     class='fa fa-search'></i> {{trans('crudbooster.datamodal_browse_data')}}</button>
-								      </span>
+                                      </span>
                                                     </div><!-- /input-group -->
 
                                                     @push('bottom')
@@ -135,15 +135,6 @@ $name = str_slug($form['label'], '');
                                                            class='form-control {{$col['required']?"required":""}}'
                                                             {{($col['readonly']===true)?"readonly":""}}
                                                     />
-                                                @elseif($col['type']=='datetime')   
-                                                    <div class="input-group">           
-                                                    
-                                                        <span class="input-group-addon"><a href='javascript:void(0)' onclick='$("#{{$name_column}}").data("daterangepicker").toggle()'><i class='fa fa-calendar'></i></a></span>
-                                                        
-                                                        <input type='text' title="{{$form['label']}}" readonly {{$required}} {{$readonly}} {!!$placeholder!!} {{$disabled}} class='form-control notfocus datetimepicker' name="{{$name_column}}" id="{{$name_column}}" value='{{$value}}'/> 
-
-
-                                                    </div>  
                                                 @elseif($col['type']=='textarea')
                                                     <textarea id='{{$name_column}}' name='child-{{$col["name"]}}'
                                                               class='form-control {{$col['required']?"required":""}}' {{($col['readonly']===true)?"readonly":""}} ></textarea>
@@ -156,9 +147,9 @@ $name = str_slug($form['label'], '');
                                                         <input type="hidden" class="input-id">
                                                         <input type="text" class="form-control input-label {{$col['required']?"required":""}}" readonly>
                                                         <span class="input-group-btn">
-								        <button class="btn btn-primary" id="btn-upload-{{$name_column}}" onclick="showFakeUpload{{$name_column}}()"
+                                        <button class="btn btn-primary" id="btn-upload-{{$name_column}}" onclick="showFakeUpload{{$name_column}}()"
                                                 type="button"><i class='fa fa-search'></i> {{trans('crudbooster.datamodal_browse_file')}}</button>
-								      </span>
+                                      </span>
                                                     </div><!-- /input-group -->
 
                                                     <div id="loading-{{$name_column}}" class='text-info' style="display: none">
@@ -350,7 +341,17 @@ $name = str_slug($form['label'], '');
                                                 @elseif($col['type']=='hidden')
                                                     <input type="{{$col['type']}}" id="{{$name.$col["name"]}}" name="child-{{$name.$col["name"]}}"
                                                            value="{{$col["value"]}}">
+                                                @elseif($col['type']=='datetime')   
+                                                    <div class="input-group">           
+                                                    
+                                                        <span class="input-group-addon"><a href='javascript:void(0)' onclick='$("#{{$name_column}}").data("daterangepicker").toggle()'><i class='fa fa-calendar'></i></a></span>
+                                                        
+                                                        <input type='text' title="{{$form['label']}}" readonly {{$required}} {{$readonly}} {!!$placeholder!!} {{$disabled}} class='form-control notfocus datetimepicker' name="{{$name_column}}" id="{{$name_column}}" value='{{$value}}'/> 
+
+
+                                                    </div>  
                                                 @endif
+
 
                                                 @if($col['help'])
                                                     <div class='help-block'>
@@ -368,10 +369,10 @@ $name = str_slug($form['label'], '');
                                             foreach ($form['columns'] as $c) {
                                                 if (strpos($formula, "[".$c['name']."]") !== false) {
                                                     $script_onchange .= "
-											$('#$name$c[name]').change(function() {
-												$formula_function_name();
-											});
-											";
+                                            $('#$name$c[name]').change(function() {
+                                                $formula_function_name();
+                                            });
+                                            ";
                                                 }
                                                 $formula = str_replace("[".$c['name']."]", "\$('#".$name.$c['name']."').val()", $formula);
                                             }
@@ -394,6 +395,7 @@ $name = str_slug($form['label'], '');
 
                                     @push('bottom')
                                         <script type="text/javascript">
+
                                             var currentRow = null;
 
                                             function resetForm{{$name}}() {
@@ -471,7 +473,13 @@ $name = str_slug($form['label'], '');
                                                 @elseif($c['type']=='radio')
                                                     trRow += "<td class='{{$c['name']}}'><span class='td-label'>" + $('.{{$name.$c["name"]}}:checked').val() + "</span>" +
                                                     "<input type='hidden' name='{{$name}}-{{$c['name']}}[]' value='" + $('.{{$name.$c["name"]}}:checked').val() + "'/>" +
+                                                    "</td>";    
+                                                @elseif($c['type']=='checkbox')
+                                                {
+                                                    trRow += "<td class='{{$c['name']}}'>" + ($('#{{$name.$c["name"]}}').prop("checked")?$('#{{$name.$c["name"]}}').val():'') +
+                                                    "<input type='hidden' name='{{$name}}-{{$c['name']}}[]' value='" + ($('#{{$name.$c["name"]}}').prop("checked")?$('#{{$name.$c["name"]}}').val():'') + "'/>" +
                                                     "</td>";
+                                                }
                                                 @elseif($c['type']=='datamodal')
                                                     trRow += "<td class='{{$c['name']}}'><span class='td-label'>" + $('#{{$name.$c["name"]}} .input-label').val() + "</span>" +
                                                     "<input type='hidden' name='{{$name}}-{{$c['name']}}[]' value='" + $('#{{$name.$c["name"]}} .input-id').val() + "'/>" +
