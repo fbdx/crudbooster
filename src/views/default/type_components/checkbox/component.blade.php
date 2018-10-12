@@ -25,7 +25,7 @@
                 ?>
                 <div class="checkbox {{$disabled}}">
                     <label>
-                        <input type="checkbox" {{$disabled}} {{$checked}} name="{{$name}}[]" data-toggle="toggle" value="{{$val}}"> {{$label}}
+                        <input type="checkbox" {{$disabled}} {{$checked}} name="{{$name}}[]" data-toggle="toggle" value="{{$val}}"> <!--{{$label}}-->
                     </label>
                 </div>
             @endforeach
