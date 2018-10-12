@@ -7,7 +7,6 @@
 	})
 </script>
 <div class='form-group {{$header_group_class}}' id='form-group-{{$name}}'>
-
 	{{-- {{dump($form)}} --}}
 	
 	@if($form['columns'])						
@@ -523,7 +522,9 @@
 							</script>
 						</div>
 						<div class="panel-footer" align="right">
-							<input type='button' class='btn btn-default' id="btn-reset-form-{{$name}}" onclick="resetForm{{$name}}()" value='Reset Form'/>
+							@if(strpos(CRUDBooster::mainpath(), 'gigyacustomer') != true)
+								<input type='button' class='btn btn-default' id="btn-reset-form-{{$name}}" onclick="resetForm{{$name}}()" value='Reset Form'/>
+							@endif
 							<input type='button' id='btn-add-table-{{$name}}' class='btn btn-primary' onclick="addToTable{{$name}}()" value='Add To Table'/>
 						</div>
 					</div>
@@ -632,7 +633,9 @@
 									<a href='/admin/mainmerge/edit/{{$mainmerge_id}}' onclick='editRow{{$name}}(this)' class='btn btn-warning btn-xs'><i class='fa fa-pencil'></i></a>
 								@else --}}
 									<a href='#panel-form-{{$name}}' onclick='editRow{{$name}}(this)' class='btn btn-warning btn-xs'><i class='fa fa-pencil'></i></a>
-									<a href='javascript:void(0)' onclick='deleteRow{{$name}}(this)' class='btn btn-danger btn-xs'><i class='fa fa-trash'></i></a>
+									@if(strpos(CRUDBooster::mainpath(), 'gigyacustomer') != true)
+										<a href='javascript:void(0)' onclick='deleteRow{{$name}}(this)' class='btn btn-danger btn-xs'><i class='fa fa-trash'></i></a>
+									@endif
 								{{-- @endif --}}
 							</td>					
 						</tr>
