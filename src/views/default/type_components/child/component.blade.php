@@ -138,6 +138,10 @@ $name = str_slug($form['label'], '');
                                                 @elseif($col['type']=='textarea')
                                                     <textarea id='{{$name_column}}' name='child-{{$col["name"]}}'
                                                               class='form-control {{$col['required']?"required":""}}' {{($col['readonly']===true)?"readonly":""}} ></textarea>
+                                                @elseif($col['type']=='checkbox')
+                                                    <label>
+                                                        <input id='{{$name_column}}' type="checkbox" {{$disabled}} {{$checked}} name="child-{{$col['name']}}[]" data-toggle="toggle" value="Yes"> <!--{{$label}}-->
+                                                    </label>
                                                 @elseif($col['type']=='upload')
                                                     <div id='{{$name_column}}' class="input-group">
                                                         <input type="hidden" class="input-id">
