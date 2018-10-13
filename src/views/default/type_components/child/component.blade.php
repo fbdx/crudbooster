@@ -428,6 +428,15 @@ $name = str_slug($form['label'], '');
                                                 @elseif($c['type']=='datamodal')
                                                 $('#{{$name.$c["name"]}} .input-label').val(p.find(".{{$c['name']}} .td-label").text());
                                                 $('#{{$name.$c["name"]}} .input-id').val(p.find(".{{$c['name']}} input").val());
+                                                @elseif($c['type']=='checkbox')
+
+                                                    if (p.find(".{{$c['name']}} input").val()!='')
+                                                    {
+                                                        $('#{{$name.$c["name"]}}').bootstrapToggle('on');
+                                                    }
+                                                    else
+                                                        $('#{{$name.$c["name"]}}').bootstrapToggle('off');
+                                                   // $('#{{$name.$c["name"]}}').val(p.find(".{{$c['name']}} input").val());
                                                 @elseif($c['type']=='upload')
                                                 @if($c['upload_type']=='image')
                                                 $('#{{$name.$c["name"]}} .input-label').val(p.find(".{{$c['name']}} img").data('label'));
@@ -476,6 +485,7 @@ $name = str_slug($form['label'], '');
                                                     "</td>";    
                                                 @elseif($c['type']=='checkbox')
                                                 {
+
                                                     trRow += "<td class='{{$c['name']}}'>" + ($('#{{$name.$c["name"]}}').prop("checked")?$('#{{$name.$c["name"]}}').val():'') +
                                                     "<input type='hidden' name='{{$name}}-{{$c['name']}}[]' value='" + ($('#{{$name.$c["name"]}}').prop("checked")?$('#{{$name.$c["name"]}}').val():'') + "'/>" +
                                                     "</td>";
