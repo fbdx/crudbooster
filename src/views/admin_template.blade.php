@@ -115,9 +115,21 @@
 
                         @if($button_add && CRUDBooster::isCreate())
                             <a href="{{ CRUDBooster::mainpath('add').'?return_url='.urlencode(Request::fullUrl()).'&parent_id='.g('parent_id').'&parent_field='.$parent_field }}"
-                               id='btn_add_new_data' class="btn btn-sm btn-success" title="{{trans('crudbooster.action_add_campaign')}}"
+                               id='btn_add_new_data' class="btn btn-sm btn-success" 
+                               @if ($add_data_content!=null)
+                               title="{{$add_data_content}}"
+                               @else
+                               title="{{trans('crudbooster.action_add_data')}}"
+                               @endif
+
+
                                >
-                                <i class="fa fa-plus-circle"></i> {{trans('crudbooster.action_add_campaign')}}
+
+                               @if ($add_data_content!=null)
+                                <i class="fa fa-plus-circle"></i> {{$add_data_content}}
+                               @else
+                                <i class="fa fa-plus-circle"></i> {{trans('crudbooster.action_add_data')}}
+                               @endif
                             </a>
                         @endif
                     @endif

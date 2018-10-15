@@ -123,6 +123,8 @@ class CBController extends Controller
 
     public $sidebar_mode = 'normal';
 
+    public $add_data_content = null;
+
     public function cbLoader()
     {
         $this->cbInit();
@@ -169,6 +171,7 @@ class CBController extends Controller
         $this->data['sub_module'] = $this->sub_module;
         $this->data['parent_field'] = (g('parent_field')) ?: $this->parent_field;
         $this->data['parent_id'] = (g('parent_id')) ?: $this->parent_id;
+        $this->data['add_data_content'] = $this->add_data_content;
 
         if ($this->sidebar_mode == 'mini') {
             $this->data['sidebar_mode'] = 'sidebar-mini';
