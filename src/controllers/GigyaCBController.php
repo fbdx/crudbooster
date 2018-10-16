@@ -733,7 +733,7 @@ class GigyaCBController extends CBController {
 					else {
 						if($childtable == 'gigya_child'){
 							foreach ($child_array as $key) {
-				                if((strpos($key['birthDateReliability'], 'Pregnant') !== false || $key['birthDateReliability']) == 4){
+				                if(strpos($key['birthDateReliability'], 'Pregnant') !== false || $key['birthDateReliability'] == 4){
 				                	$child_array[$i]['birthDateReliability'] = 4;
 				                } elseif ($key['birthDateReliability'] == 'Child is Born') {
 				                	$child_array[$i]['birthDateReliability'] = 0;
