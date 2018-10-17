@@ -633,9 +633,9 @@
 									<a href='/admin/mainmerge/edit/{{$mainmerge_id}}' onclick='editRow{{$name}}(this)' class='btn btn-warning btn-xs'><i class='fa fa-pencil'></i></a>
 								@else --}}
 									<a href='#panel-form-{{$name}}' onclick='editRow{{$name}}(this)' class='btn btn-warning btn-xs'><i class='fa fa-pencil'></i></a>
-									@if(strpos(CRUDBooster::mainpath(), 'gigyacustomer') != true)
+									{{-- @if(strpos(CRUDBooster::mainpath(), 'gigyacustomer') != true) --}}
 										<a href='javascript:void(0)' onclick='deleteRow{{$name}}(this)' class='btn btn-danger btn-xs'><i class='fa fa-trash'></i></a>
-									@endif
+									{{-- @endif --}}
 								{{-- @endif --}}
 							</td>					
 						</tr>
