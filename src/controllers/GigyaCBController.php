@@ -47,7 +47,7 @@ class GigyaCBController extends CBController {
                                         firstName varchar(255) NOT NULL,
                                         lastName varchar(255),
                                         email varchar(255) NOT NULL,
-                                        isLite boolean NOT NULL,
+                                        isLite boolean DEFAULT 1,
                                         PRIMARY KEY (id)
                                     )"));
 		return $table;
@@ -501,7 +501,6 @@ class GigyaCBController extends CBController {
 		$child = $results[0]['data']['child'];
 		$interest = $results[0]['data']['areaOfInterest'];
 		$mobileNumber = $profile['phones']['number'];
-
 		foreach ($profile as $key => $value) {
 			if($key == 'phones'){
 				$row->phones = $mobileNumber;
@@ -523,6 +522,12 @@ class GigyaCBController extends CBController {
 					};
 					
 					//dd($child2);
+					if (isset($child2['areaOfInterest'])) {
+						$child2['feeding'] = $child2['areaOfInterest']['interestCode'];
+						unset($child2['areaOfInterest']);
+						// dump($child2);
+					}
+					
 					DB::table("gigya_child")->insert([
 	                            $child2
 	                ]);
@@ -719,9 +724,10 @@ class GigyaCBController extends CBController {
 
 						if($childtable == 'gigya_child'){
 							foreach ($child_array as $key) {
-				                if(strpos($key['birthDateReliability'], 'Pregnant') !== false){
+				                if($key['birthDateReliability'] == 'Pregnant'){
 				                	$child_array[$i]['birthDateReliability'] = 4;
-				                } elseif ($key['birthDateReliability'] == 'Child is Born') {
+				                } 
+				                if ($key['birthDateReliability'] == 'Child is Born') {
 				                	$child_array[$i]['birthDateReliability'] = 0;
 				                }
 				            }
@@ -731,6 +737,7 @@ class GigyaCBController extends CBController {
 						DB::table($childtable)->insert($child_array[$i]);
 					} 
 					else {
+						
 						if($childtable == 'gigya_child'){
 							foreach ($child_array as $key) {
 				                if(strpos($key['birthDateReliability'], 'Pregnant') !== false || $key['birthDateReliability'] == 4){
@@ -889,7 +896,13 @@ class GigyaCBController extends CBController {
 			    $childData[$ci]['firstName'] = $childItem->firstName;
 		    	$childData[$ci]['birthDate'] = $childItem->birthDate;
 		    	$childData[$ci]['birthDateReliability'] = $childItem->birthDateReliability;
-		    	$childData[$ci]['feeding'] = $childItem->feeding;
+		    	if($childData[$ci]['birthDateReliability'] == 4){
+		    		$childData[$ci]['feeding'] = $childItem->feeding;
+		    	}
+		    	elseif($childData[$ci]['birthDateReliability'] == 0){
+		    		$childData[$ci]['areaOfInterest']['interestCode'] = $childItem->feeding;
+		    	}
+
 		    	$ci++;
 			}
 
@@ -937,6 +950,7 @@ class GigyaCBController extends CBController {
 	            	$request->setParam("profile",json_encode($setInputData));
 
 	            	$response = $request->send();
+	            	// dd($response);
 	            	if($response->getErrorCode()==0)
 	            	{
 	            	    $response = $response->getResponseText();
@@ -987,7 +1001,7 @@ class GigyaCBController extends CBController {
 		if($searchEmail == true) {
 
 			// dd('email no exist');
-			$this->arr[$this->primary_key] = $id = CRUDBooster::newId($this->table);	
+			$this->arr[$this->primary_key] = $id = CRUDBooster::newId($this->table);
 			DB::table($this->table)->insert($this->arr);
 
 
@@ -1172,7 +1186,7 @@ class GigyaCBController extends CBController {
     	// $request->setParam("openCursor",true);
 
     	$response = $request->send();
-
+    	// dump($response);
     	$regtoken="";
     	
     	if($response->getErrorCode()==0)
@@ -1211,9 +1225,13 @@ class GigyaCBController extends CBController {
 			    $childData[$ci]['firstName'] = $childItem->firstName;
 		    	$childData[$ci]['birthDate'] = $childItem->birthDate;
 		    	$childData[$ci]['birthDateReliability'] = $childItem->birthDateReliability;
-		    	$childData[$ci]['feeding'] = $childItem->feeding;
-		    	$ci++;
-			}
+		    	if($childData[$ci]['birthDateReliability'] == 4){
+		    		$childData[$ci]['feeding'] = $childItem->feeding;
+		    	}
+		    	elseif($childData[$ci]['birthDateReliability'] == 0){
+		    		$childData[$ci]['areaOfInterest']['interestCode'] = $childItem->feeding;
+		    	}
+		    }
 
 			$interestItems = DB::table('gigya_area_interest')->where('customerid',$parentid)->get();
 
@@ -1253,8 +1271,7 @@ class GigyaCBController extends CBController {
         	    $request->setParam("query","SELECT UID FROM emailAccounts WHERE profile.email='$email'");
 
         	    $response = $request->send();
-        	    // dump($response);
-            	    
+        	    // dd($response);
         	    if($response->getErrorCode()==0)
         	    {
         	        // echo "Success";
