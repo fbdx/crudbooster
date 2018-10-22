@@ -78,11 +78,16 @@
 				})
 			}
 
+			$(function() {
+				$('#current-milk-brand').hide();
+				$('#current-baby-food').hide();
+				$('#child-feeding').hide();
+			});
+
 			var dateToday = new Date();
 
 			$("#childrenbirthDateReliability").change(function () {
-
-				var k = $(this).val(); 
+				var k = $(this).val();
 	            k = k.toLowerCase().replace(/ /g,'');
 	            console.log(k);
 
@@ -94,7 +99,11 @@
 	        			minDate: dateToday,
 						format:'YYYY-MM-DD'
 					})
-	            	
+
+					$('#current-milk-brand').hide();
+					$('#current-baby-food').hide();
+					$('#child-feeding').show();
+					
 	            }
 	            
 	            if(k == 'childisborn')
@@ -105,7 +114,23 @@
 	        			maxDate: dateToday,
 						format:'YYYY-MM-DD'
 					})
+
+					$('#current-milk-brand').show();
+					$('#current-baby-food').show();
+					$('#child-feeding').hide();
 	            }
+
+	            if(k == ''){
+	            	$('#child-feeding').hide();
+	            	$('#current-milk-brand').hide();
+					$('#current-baby-food').hide();
+	            }
+
+	            // var form = "<?= $name ?>";
+	            
+	            // if(form =='children'){
+	            // 	console.log(form);
+	            // }
 	        
 	        });
 

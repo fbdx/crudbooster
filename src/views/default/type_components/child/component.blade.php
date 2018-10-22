@@ -7,8 +7,8 @@
 	})
 </script>
 <div class='form-group {{$header_group_class}}' id='form-group-{{$name}}'>
-	{{-- {{dump($form)}} --}}
-	
+	{{dump($form)}}
+	{{-- {{dump($name)}} --}}
 	@if($form['columns'])						
 	<div class="col-sm-12">
 
@@ -25,8 +25,11 @@
 						<div class="panel-heading"><i class="fa fa-pencil-square-o"></i> Form</div>
 						<div class="panel-body child-form-area">
 							@foreach($form['columns'] as $col)	
-							<?php $name_column = $name.$col['name'];?>
-							<div class='form-group testtest'>
+							<?php 
+								$name_column = $name.$col['name'];
+								$colLabel = str_slug($col['label']);
+							?>
+							<div class='form-group testtest' id="<?php echo $colLabel ?>">
 								@if($col['type']!='hidden')
 								{{-- {{dump($col)}} --}}
 								@if($col['name']=='birthDate')
@@ -269,7 +272,8 @@
 								    </script>
 									@elseif($col['type']=='select')
 									{{-- ID Target Column: childrenbirthDateReliability --}}
-									{{-- {{dump($col)}} --}}
+
+									{{-- {{$col['label']}} --}}
 										{{-- @if($form['table'] == 'gigya_child' && $col['name'] == 'birthDateReliability')
 											<select id='childrenbirthDateReliability' name='child-{{$col["name"]}}' class='form-control select2 {{$col['required']?"required":""}}'
 											{{($col['readonly']===true)?"readonly":""}} ">
@@ -314,27 +318,6 @@
 											</select>
 											<div class="test2"></div>
 										{{-- @endif --}}
-
-									<script>
-										$(document).ready(function () {
-									        // $("#childrenbirthDateReliability").change(function () {
-									        //     // var k = $(this).val(); 
-									        //     // k = k.toLowerCase().replace(/ /g,'');
-									        //     // console.log(k);
-
-									        //     if($(this).val() == 'Pregnant')
-									        //     {
-									            	
-									        //     }
-									        //     else
-									        //     {
-									        //     	console.log("child is born");
-									        //     }
-
-									        
-									        // });
-									    });
-									</script>
 
 									@elseif($col['type']=='hidden')
 										<input type="{{$col['type']}}" id="{{$name.$col["name"]}}" name="child-{{$name.$col["name"]}}" value="{{$col["value"]}}">
