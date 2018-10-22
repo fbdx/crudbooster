@@ -64,6 +64,8 @@ class GigyaCBController extends CBController {
 		  `birthDate` date DEFAULT NULL,
 		  `birthDateReliability` int(11) NULL,
 		  `feeding` varchar(255) DEFAULT NULL,
+		  `interestCode` varchar(255) DEFAULT NULL,
+		  `answerDetails` varchar(255) DEFAULT NULL,
 		  `customerid` int(11) NOT NULL,
 		  `sex` int(11) DEFAULT NULL,
 		  PRIMARY KEY (`id`),
@@ -499,6 +501,7 @@ class GigyaCBController extends CBController {
 		// }
 		$profile = $results[0]['profile'];
 		$child = $results[0]['data']['child'];
+		// dd($child);
 		$interest = $results[0]['data']['areaOfInterest'];
 		$mobileNumber = $profile['phones']['number'];
 		foreach ($profile as $key => $value) {
@@ -523,7 +526,8 @@ class GigyaCBController extends CBController {
 					
 					//dd($child2);
 					if (isset($child2['areaOfInterest'])) {
-						$child2['feeding'] = $child2['areaOfInterest']['interestCode'];
+						$child2['interestCode'] = $child2['areaOfInterest']['interestCode'];
+						$child2['answerDetails'] = $child2['areaOfInterest']['answerDetails'];
 						unset($child2['areaOfInterest']);
 						// dump($child2);
 					}
@@ -889,6 +893,7 @@ class GigyaCBController extends CBController {
 			//dd($parentid);
 
 			$childItems = DB::table('gigya_child')->where('customerid',$parentid)->get();
+			// dd($childItems);
 	    	
 	    	$childData = [];
 	    	$ci = 0;
@@ -900,9 +905,9 @@ class GigyaCBController extends CBController {
 		    		$childData[$ci]['feeding'] = $childItem->feeding;
 		    	}
 		    	elseif($childData[$ci]['birthDateReliability'] == 0){
-		    		$childData[$ci]['areaOfInterest']['interestCode'] = $childItem->feeding;
+		    		$childData[$ci]['areaOfInterest']['interestCode'] = $childItem->interestCode;
+		    		$childData[$ci]['areaOfInterest']['answerDetails'] = $childItem->answerDetails;
 		    	}
-
 		    	$ci++;
 			}
 
@@ -928,7 +933,7 @@ class GigyaCBController extends CBController {
 	    	/*foreach ($areaInterestData as $key => $value) {
 	    		$interestItem['areaOfInterest.'.$key] = $value;
  	    	}*/
-
+ 	    	// dd($child);
 
 	    	$method = "accounts.search";
 	    	// $method = "accounts.getAccountInfo";
@@ -987,7 +992,7 @@ class GigyaCBController extends CBController {
 
 
 		$this->validation();
-		$this->input_assignment();		
+		$this->input_assignment();
 		if(Schema::hasColumn($this->table, 'created_at'))
 		{
 		    $this->arr['created_at'] = date('Y-m-d H:i:s');
@@ -995,8 +1000,6 @@ class GigyaCBController extends CBController {
 
 		$this->hook_before_add($this->arr);
 
-		// $this->searchAccount()
-		// $searchEmail = $this->arr['email'];
 		$searchEmail = $this->searchEmailAccount($this->arr['email']);
 		if($searchEmail == true) {
 
@@ -1229,7 +1232,8 @@ class GigyaCBController extends CBController {
 		    		$childData[$ci]['feeding'] = $childItem->feeding;
 		    	}
 		    	elseif($childData[$ci]['birthDateReliability'] == 0){
-		    		$childData[$ci]['areaOfInterest']['interestCode'] = $childItem->feeding;
+		    		$childData[$ci]['areaOfInterest']['interestCode'] = $childItem->interestCode;
+		    		$childData[$ci]['areaOfInterest']['answerDetails'] = $childItem->answerDetails;
 		    	}
 		    }
 
