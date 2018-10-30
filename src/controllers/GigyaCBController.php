@@ -124,13 +124,31 @@ class GigyaCBController extends CBController {
 	public function getIndex() 
 	{
 		$this->cbLoader();
-
+		// dd($this);
 		$module = CRUDBooster::getCurrentModule();
 		// $testPath = CRUDBooster::mainpath();
 
 		if(!CRUDBooster::isView() && $this->global_privilege==FALSE) {
 			CRUDBooster::insertLog(trans('crudbooster.log_try_view',['module'=>$module->name]));
 			CRUDBooster::redirect(CRUDBooster::adminPath(),trans('crudbooster.denied_access'));
+		}
+
+		if(Request::get('parent_table')) {
+			$parentTablePK = CB::pk(g('parent_table'));
+			$data['parent_table'] = DB::table(Request::get('parent_table'))->where($parentTablePK,Request::get('parent_id'))->first();
+			if(Request::get('foreign_key')) {
+				$data['parent_field'] = Request::get('foreign_key');
+			}else{
+				$data['parent_field'] = CB::getTableForeignKey(g('parent_table'),$this->table);	
+			}
+
+			if($parent_field) {
+				foreach($this->columns_table as $i=>$col) {
+					if($col['name'] == $parent_field) {
+						unset($this->columns_table[$i]);
+					}
+				}
+			}
 		}
 		
 		$data['table'] 	  = $this->table;
@@ -142,7 +160,18 @@ class GigyaCBController extends CBController {
 
 		$tablePK = $data['table_pk'];
 		$table_columns = CB::getTableColumns($this->table);
-		$result = DB::table($this->table)->select(DB::raw($this->primary_key));
+		// $result = DB::table($this->table)->select(DB::raw($this->primary_key));
+		$result = DB::table($this->table)->select(DB::raw($this->table.".".$this->primary_key));
+		if(Request::get('parent_id')) {
+			$table_parent = $this->table;
+			$table_parent = CRUDBooster::parseSqlTable($table_parent)['table'];
+			$result->where($table_parent.'.'.Request::get('foreign_key'),Request::get('parent_id'));
+		}
+
+		$this->hook_query_index($result);
+		if(in_array('deleted_at', $table_columns)) {
+			$result->where($this->table.'.deleted_at',NULL);
+		}
 
 		//insert table
 		$tableName = 'gigya_customer';
@@ -160,13 +189,19 @@ class GigyaCBController extends CBController {
 		}
 
 		$alias            = array();
+		$join_alias_count = 0;
+		$join_table_temp  = array();
 		$table            = $this->table;
-
 		$columns_table    = $this->columns_table;
 
 		foreach($columns_table as $index => $coltab) {
 
+			$join = @$coltab['join'];
+			$join_where = @$coltab['join_where'];
+			$join_id = @$coltab['join_id'];
 			$field = @$coltab['name'];
+			$join_table_temp[] = $table;
+
 			if(!$field) die('Please make sure there is key `name` in each row of col');
 
 			if(strpos($field, ' as ')!==FALSE) {
@@ -182,10 +217,8 @@ class GigyaCBController extends CBController {
 			// dd(strpos($field),'.');
 
 			if(strpos($field,'.')!==FALSE) {
-				// dd('1');
 				$result->addselect($field);
 			}else{
-				// dd('2');
 				$result->addselect($table.'.'.$field);
 			}
 
@@ -196,28 +229,92 @@ class GigyaCBController extends CBController {
 				$table = $field_array[0];
 			}
 
-			$columns_table[$index]['type_data']	 = CRUDBooster::getFieldType($table,$field);
-			$columns_table[$index]['field']      = $field;
-			$columns_table[$index]['field_raw']  = $field;
-			$columns_table[$index]['field_with'] = $table.'.'.$field;
+			// $columns_table[$index]['type_data']	 = CRUDBooster::getFieldType($table,$field);
+			// $columns_table[$index]['field']      = $field;
+			// $columns_table[$index]['field_raw']  = $field;
+			// $columns_table[$index]['field_with'] = $table.'.'.$field;
 
-			$f = $this->findNameFormType($field);
-			if ($f!==FALSE)
-			{
-				$columns_table[$index]['type_form'] = $f["type"];
-				if($f["type"]=='select')
-				{
-					if (array_key_exists('datatable',$f))
-					{
-						$farr = explode(",",$f["datatable"]);
-						$columns_table[$index]['optionlist'] = DB::table($farr[0])->pluck($farr[1])->toArray();							
-					}
-					else if (array_key_exists('dataenum',$f))
-					{
-						$farr = explode(";",$f["dataenum"]);
-						$columns_table[$index]['optionlist'] = $farr;
+			if($join) {
+
+				$join_exp     = explode(',', $join);
+
+				$join_table  = $join_exp[0];
+				$joinTablePK = CB::pk($join_table);
+				$join_column = $join_exp[1];
+				$join_alias  = str_replace(".", "_", $join_table);
+
+				if(in_array($join_table, $join_table_temp)) {
+					$join_alias_count += 1;
+					$join_alias = $join_table.$join_alias_count;
+				}
+				$join_table_temp[] = $join_table;
+
+				$result->leftjoin($join_table.' as '.$join_alias,$join_alias.(($join_id)? '.'.$join_id:'.'.$joinTablePK),'=',DB::raw($table.'.'.$field. (($join_where) ? ' AND '.$join_where.' ':'') ) );
+				$result->addselect($join_alias.'.'.$join_column.' as '.$join_alias.'_'.$join_column);
+
+				$join_table_columns = CRUDBooster::getTableColumns($join_table);
+				if($join_table_columns) {
+					foreach($join_table_columns as $jtc) {
+						$result->addselect($join_alias.'.'.$jtc.' as '.$join_alias.'_'.$jtc);
 					}
 				}
+
+				$alias[] = $join_alias;
+				$columns_table[$index]['type_data']	 = CRUDBooster::getFieldType($join_table,$join_column);
+				$columns_table[$index]['field']      = $join_alias.'_'.$join_column;
+				$columns_table[$index]['field_with'] = $join_alias.'.'.$join_column;
+				$columns_table[$index]['field_raw']  = $join_column;
+
+				@$join_table1  = $join_exp[2];
+				@$joinTable1PK = CB::pk($join_table1);
+				@$join_column1 = $join_exp[3];
+				@$join_alias1  = $join_table1;
+
+				if($join_table1 && $join_column1) {
+
+					if(in_array($join_table1, $join_table_temp)) {
+						$join_alias_count += 1;
+						$join_alias1 = $join_table1.$join_alias_count;
+					}
+
+					$join_table_temp[] = $join_table1;
+
+					$result->leftjoin($join_table1.' as '.$join_alias1,$join_alias1.'.'.$joinTable1PK,'=',$join_alias.'.'.$join_column);
+					$result->addselect($join_alias1.'.'.$join_column1.' as '.$join_column1.'_'.$join_alias1);
+					$alias[] = $join_alias1;
+					$columns_table[$index]['type_data']	 = CRUDBooster::getFieldType($join_table1,$join_column1);
+					$columns_table[$index]['field']      = $join_column1.'_'.$join_alias1;
+					$columns_table[$index]['field_with'] = $join_alias1.'.'.$join_column1;
+					$columns_table[$index]['field_raw']  = $join_column1;
+				}
+
+			}else{
+
+				$result->addselect($table.'.'.$field);
+				$columns_table[$index]['type_data']	 = CRUDBooster::getFieldType($table,$field);
+				$columns_table[$index]['field']      = $field;
+				$columns_table[$index]['field_raw']  = $field;
+				$columns_table[$index]['field_with'] = $table.'.'.$field;
+
+				$f = $this->findNameFormType($field);
+				if ($f!==FALSE)
+				{
+					$columns_table[$index]['type_form'] = $f["type"];
+					if($f["type"]=='select')
+					{
+						if (array_key_exists('datatable',$f))
+						{
+							$farr = explode(",",$f["datatable"]);
+							$columns_table[$index]['optionlist'] = DB::table($farr[0])->pluck($farr[1])->toArray();							
+						}
+						else if (array_key_exists('dataenum',$f))
+						{
+							$farr = explode(";",$f["dataenum"]);
+							$columns_table[$index]['optionlist'] = $farr;
+						}
+					}
+				}
+
 			}
 		} //end foreach
 
@@ -845,6 +942,11 @@ class GigyaCBController extends CBController {
     {
 
     	//$method = "accounts.search";
+    	// $newids =  DB::table($childtable)->where($fk,'=',$id)->pluck('id')->toArray();
+    	$state = DB::table('state')->select('name')->where('id','=',$setInputData['state'])->first();
+    	$state = (array) $state;
+    	$setInputData['state'] = $state['name'];
+
     	$method = "accounts.initRegistration";
 
     	// $request = new GSRequest($apiKey,$secretKey,$method);
@@ -1172,6 +1274,9 @@ class GigyaCBController extends CBController {
 	public function createCustomerRecord($setInputData,$childArray,$areaInterestData)
     {
     	$email = $setInputData['email'];
+    	$state = DB::table('state')->select('name')->where('id','=',$setInputData['state'])->first();
+    	$state = (array) $state;
+    	$setInputData['state'] = $state['name'];
 
     	$removeKeys = array("UID","children", "sample_request", "careline_detail","area_of_interest");
 		foreach ($removeKeys as $key) {
