@@ -82,6 +82,13 @@
 				$('#current-milk-brand').hide();
 				$('#current-baby-food').hide();
 				$('#child-feeding').hide();
+				var a = $("#reasonnotsuitable").val();
+				if(a == 'Others'){
+					$("#remarks").prop('readonly',false); //adminmainmergecontroller
+				} else{
+					$("#remarks").prop('readonly',true); //adminmainmergecontroller
+				}
+				console.log(a);
 			});
 
 			var dateToday = new Date();
@@ -133,6 +140,24 @@
 	            // }
 	        
 	        });
+
+	        $("#reasonnotsuitable").change(function() {
+				var v = $(this).val();
+				v = v.toLowerCase().replace(/ /g,'');
+				console.log(v);
+				// if(v !== 'others'){
+				// 	$("#remarks").hide();
+				// }
+
+				if(v == 'others'){
+					$("#remarks").prop('readonly',false); //adminmainmergecontroller
+					$("#remarks").prop('required',true);
+				} else {
+					$("#remarks").prop('readonly',true);
+					$("#remarks").val('');
+				}
+
+			});
 
 
 			if($(".datetimepicker").length > 0) {
