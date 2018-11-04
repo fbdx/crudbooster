@@ -7,7 +7,7 @@
 	})
 </script>
 <div class='form-group {{$header_group_class}}' id='form-group-{{$name}}'>
-	{{dump($form)}}
+	{{-- {{dump($form)}} --}}
 	{{-- {{dump($name)}} --}}
 	@if($form['columns'])						
 	<div class="col-sm-12">
