@@ -1223,7 +1223,8 @@ class CBController extends Controller
                 }
 
                 $childtable = CRUDBooster::parseSqlTable($ro['table'])['table'];
-                DB::table($childtable)->insert($child_array);
+                if (($count_input_data)>0)   
+                    DB::table($childtable)->insert($child_array);
             }
         }
 
