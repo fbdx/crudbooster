@@ -54,6 +54,7 @@
 <script>
     var ASSET_URL = "{{asset('/')}}";
     var APP_NAME = "{{Session::get('appname')}}";
+	var APP_FAVICON = "{{Session::get('favicon')}}";
     var ADMIN_PATH = '{{url(config("crudbooster.ADMIN_PATH")) }}';
     var NOTIFICATION_JSON = "{{route('NotificationsControllerGetLatestJson')}}";
     var NOTIFICATION_INDEX = "{{route('NotificationsControllerGetIndex')}}";

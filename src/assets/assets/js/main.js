@@ -30,7 +30,8 @@
 				Notification.requestPermission();
 			}else{
 				var notification = new Notification(APP_NAME+' Notification', {
-				icon:'https://cdn1.iconfinder.com/data/icons/CrystalClear/32x32/actions/agt_announcements.png',
+				//icon:'https://cdn1.iconfinder.com/data/icons/CrystalClear/32x32/actions/agt_announcements.png',
+                icon: ASSET_URL + '/' + APP_FAVICON,
 				body: text,
 				'tag' : text
 				});
