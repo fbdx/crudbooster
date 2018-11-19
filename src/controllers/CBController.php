@@ -1218,7 +1218,21 @@ class CBController extends Controller {
 		$this->hook_before_add($this->arr);
 
 
-		$this->arr[$this->primary_key] = $id = CRUDBooster::newId($this->table);		
+		$this->arr[$this->primary_key] = $id = CRUDBooster::newId($this->table);
+
+		$pregWeek = $this->arr['pregnancyweek'];
+
+		if($pregWeek >= 0 && $pregWeek <= 12)
+		    $trimester = '1st';
+		elseif($pregWeek >= 13 && $pregWeek <= 26)
+		    $trimester = '2nd';
+		elseif($pregWeek >= 27 && $pregWeek <= 40)
+		    $trimester = '3rd';
+		else
+			$trimester = "";
+
+		$this->arr['trimester'] =  $trimester;
+				
 		DB::table($this->table)->insert($this->arr);		
 
 
@@ -1372,7 +1386,20 @@ class CBController extends Controller {
 		}
 		
 
-		$this->hook_before_edit($this->arr,$id);		
+		$this->hook_before_edit($this->arr,$id);
+		$pregWeek = $this->arr['pregnancyweek'];
+
+		if($pregWeek >= 0 && $pregWeek <= 12)
+		    $trimester = '1st';
+		elseif($pregWeek >= 13 && $pregWeek <= 26)
+		    $trimester = '2nd';
+		elseif($pregWeek >= 27 && $pregWeek <= 40)
+		    $trimester = '3rd';
+		else
+			$trimester = "";
+
+		$this->arr['trimester'] =  $trimester;
+
 		DB::table($this->table)->where($this->primary_key,$id)->update($this->arr);		
 
 		//Looping Data Input Again After Insert
@@ -1505,7 +1532,6 @@ class CBController extends Controller {
 
 		$this->hook_after_edit($id);
 
-
 		$this->return_url = ($this->return_url)?$this->return_url:Request::get('return_url');
 
 		//insert log
@@ -1530,7 +1556,6 @@ class CBController extends Controller {
 			CRUDBooster::insertLog(trans("crudbooster.log_try_delete",['name'=>$row->{$this->title_field},'module'=>CRUDBooster::getCurrentModule()->name]));
 			CRUDBooster::redirect(CRUDBooster::adminPath(),trans('crudbooster.denied_access'));
 		}
-
 
 		//insert log
 		CRUDBooster::insertLog(trans("crudbooster.log_delete",['name'=>$row->{$this->title_field},'module'=>CRUDBooster::getCurrentModule()->name]));
