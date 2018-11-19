@@ -51,6 +51,14 @@
 <script src="{{ asset ('vendor/crudbooster/assets/adminlte/plugins/datatables/jquery.dataTables.min.js')}}"></script>
 <script src="{{ asset ('vendor/crudbooster/assets/adminlte/plugins/datatables/dataTables.bootstrap.min.js')}}"></script>
 
+<script src="{{ asset ('vendor/crudbooster/assets/js/jquery.doubleScroll.js') }}"></script>	
+<script type="text/javascript">
+	$(document).ready(function() {
+		$('#tablebody').doubleScroll({contentElement: $('#table_dashboard'), resetOnWindowResize: true});
+		//$('#tablebody').stickyTableHeaders({ scrollableArea: $(".box-body")[0], "fixedOffset": 2 });
+	});
+</script>
+
 <script>
     var ASSET_URL = "{{asset('/')}}";
     var APP_NAME = "{{Session::get('appname')}}";
