@@ -2,6 +2,14 @@
 
 @section('content')
 
+	<script src="{{ asset ('vendor/crudbooster/assets/js/jquery.doubleScroll.js') }}"></script>	
+	<script type="text/javascript">
+	  $(document).ready(function() {
+		 $('#tablebody').doubleScroll({contentElement: $('#table_dashboard'), resetOnWindowResize: true});
+		 //$('#tablebody').stickyTableHeaders({ scrollableArea: $(".box-body")[0], "fixedOffset": 2 });
+	  });
+	</script>
+
     @if($index_statistic)
         <div id='box-statistic' class='row'>
             @foreach($index_statistic as $stat)
