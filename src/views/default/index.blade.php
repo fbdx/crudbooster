@@ -133,9 +133,12 @@
             <br style="clear:both"/>
 
         </div>
-        <div class="box-body table-responsive no-padding">
-            @include("crudbooster::default.table")
-        </div>
+        <div class="wrapper1">
+			<div class="div1"></div>
+		</div>
+		<div id="tablebody" class="box-body table-responsive no-padding">
+			@include("crudbooster::default.table")
+		</div>  
     </div>
 
     @if(!is_null($post_index_html) && !empty($post_index_html))
