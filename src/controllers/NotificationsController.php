@@ -59,7 +59,7 @@ class NotificationsController extends CBController
     public function getRead($id)
     {
         DB::table('cms_notifications')->where('id', $id)->update(['is_read' => 1]);
-        $row = DB::table('cms_notifications')->where('id', $id)->first();
+        $row = DB::table('cms_notifications')->where('id', $id)->first();		
 
         return redirect($row->url);
     }

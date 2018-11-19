@@ -108,7 +108,8 @@
 		var total_notification = 0;
     function loader_notification() {       
 
-      $.get(NOTIFICATION_JSON,function(resp) {
+        $.get(NOTIFICATION_JSON, function (resp) {
+            console.log(resp);
           if(resp.total > total_notification) {
             send_notification(NOTIFICATION_NEW,NOTIFICATION_INDEX);
           }
