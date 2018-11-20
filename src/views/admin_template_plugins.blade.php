@@ -60,6 +60,8 @@
 	});
 </script>
 
+<script src="{{ asset ('vendor/crudbooster/assets/js/bootstrap-notifyrestrict.js') }}"></script> 
+
 <script>
     var ASSET_URL = "{{asset('/')}}";
     var APP_NAME = "{{Session::get('appname')}}";

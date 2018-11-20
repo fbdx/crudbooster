@@ -24,6 +24,7 @@
 		}
 
 		function send_notification(text,url) {
+			var lolurl = url;
 			if (Notification.permission !== "granted")
 			{
 				console.log("Request a permission for Chrome Notification");
@@ -43,6 +44,21 @@
 			      location.href = url;    
 			    };
 			}
+
+			console.log(lolurl);
+			$.notify({
+				// options
+				icon: 'glyphicon glyphicon-alert',
+				message: text,
+				url:lolurl,
+				target:'_self'
+			},{
+				// settings
+				type:"warning",
+				restrict:1,
+				allow_dismiss: true,
+				delay:0,
+			});
 		}
 
 		$(function() {		
