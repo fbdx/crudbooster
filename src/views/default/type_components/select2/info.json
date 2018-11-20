@@ -8,6 +8,7 @@
     },
     "optional": {
       "style": "string inline stylesheet",
+      "formclass": "class in form",
       "help": "string help-block",
       "relationship_table": "table relation for many to many. datatable attr is required",
       "datatable_where": "string where condition",

@@ -8,6 +8,7 @@
       "dataquery": "string sql query. Response should label & value"
     },
     "optional": {
+      "formclass": "class in form",
       "style": "string inline stylesheet",
       "help": "string help-block",
       "datatable_where": "string where condition",

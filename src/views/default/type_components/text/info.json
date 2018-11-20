@@ -4,6 +4,7 @@
   "attribute": {
     "optional": {
       "style": "string inline stylesheet",
+      "formclass": "class in form",
       "help": "string help-block",
       "placeholder": "string placeholder",
       "readonly": "boolean",
