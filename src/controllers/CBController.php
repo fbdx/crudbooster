@@ -424,7 +424,7 @@ class CBController extends Controller
                         default:
                             if ($key && $type && $value) {
 								$kfilter = array_search($key, array_column($columns_table, 'name'));
-								$colfilter = $columns_table[$k]
+								$colfilter = $columns_table[$k];
 								if (strpos($colfilter["name"], ' as ') !== false) {
 									$field = substr($colfilter["name"], 0, strpos($colfilter["name"], ' as ')-1);
 									$w->where(DB::raw($field),$type,$value);
