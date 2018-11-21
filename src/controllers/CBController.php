@@ -125,6 +125,8 @@ class CBController extends Controller
 
     public $add_data_content = null;
 
+	public $table_footer = true;
+
     public function cbLoader()
     {
         $this->cbInit();
@@ -625,6 +627,7 @@ class CBController extends Controller
         $html_contents = ['html' => $html_contents, 'data' => $data['result']];
 
         $data['html_contents'] = $html_contents;
+		$data['tablefooter'] = $this->tablefooter;
 
         return view("crudbooster::default.index", $data);
     }

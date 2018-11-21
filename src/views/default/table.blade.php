@@ -145,33 +145,34 @@
                 @endforeach
         </tbody>
 
+		@if ($tablefooter)
+			<tfoot>
+			<tr>
+				<?php if($button_bulk_action):?>
+				<th>&nbsp;</th>
+				<?php endif;?>
 
-        <tfoot>
-        <tr>
-            <?php if($button_bulk_action):?>
-            <th>&nbsp;</th>
-            <?php endif;?>
+				<?php if($show_numbering):?>
+				<th>&nbsp;</th>
+				<?php endif;?>
 
-            <?php if($show_numbering):?>
-            <th>&nbsp;</th>
-            <?php endif;?>
+				<?php
+				foreach ($columns as $col) {
+					if ($col['visible'] === FALSE) continue;
+					$colname = $col['label'];
+					$width = ($col['width']) ?: "auto";
+					echo "<th width='$width'>$colname</th>";
+				}
+				?>
 
-            <?php
-            foreach ($columns as $col) {
-                if ($col['visible'] === FALSE) continue;
-                $colname = $col['label'];
-                $width = ($col['width']) ?: "auto";
-                echo "<th width='$width'>$colname</th>";
-            }
-            ?>
-
-            @if($button_table_action)
-                @if(CRUDBooster::isUpdate() || CRUDBooster::isDelete() || CRUDBooster::isRead())
-                    <th> -</th>
-                @endif
-            @endif
-        </tr>
-        </tfoot>
+				@if($button_table_action)
+					@if(CRUDBooster::isUpdate() || CRUDBooster::isDelete() || CRUDBooster::isRead())
+						<th> -</th>
+					@endif
+				@endif
+			</tr>
+			</tfoot>
+		@endif
     </table>
 
 </form><!--END FORM TABLE-->
