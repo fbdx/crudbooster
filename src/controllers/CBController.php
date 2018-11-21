@@ -266,7 +266,7 @@ class CBController extends Controller
         $join_alias_count = 0;
         $join_table_temp = [];
         $table = $this->table;
-        $columns_table = $this->columns_table;
+        $columns_table = $this->columns_table;		
         foreach ($columns_table as $index => $coltab) {
 
             $join = @$coltab['join'];
@@ -422,8 +422,7 @@ class CBController extends Controller
 
                     switch ($type) {
                         default:
-                            if ($key && $type && $value) {
-								dd($this->col);
+                            if ($key && $type && $value) {								
 								$kfilter = array_search($key, array_column($this->columns_table, 'name'));
 								$colfilter = $this->columns_table[$k];
 								if (strpos($colfilter["name"], ' as ') !== false) {
