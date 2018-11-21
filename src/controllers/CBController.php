@@ -283,7 +283,13 @@ class CBController extends Controller
                 $field = substr($field, strpos($field, ' as ') + 4);
                 $field_with = (array_key_exists('join', $coltab)) ? str_replace(",", ".", $coltab['join']) : $field;
                 $result->addselect(DB::raw($coltab['name']));
-                $columns_table[$index]['type_data'] = 'varchar';
+				
+				//dd($field);
+				if (strpos($field, '_number') !== false)					
+					$columns_table[$index]['type_data'] = 'decimal';
+				else
+					$columns_table[$index]['type_data'] = 'varchar';
+				
                 $columns_table[$index]['field'] = $field;
                 $columns_table[$index]['field_raw'] = $field;
                 $columns_table[$index]['field_with'] = $field_with;
@@ -422,11 +428,19 @@ class CBController extends Controller
 
                     switch ($type) {
                         default:
-                            if ($key && $type && $value) {								
-								$kfilter = array_search($key, array_column($this->columns_table, 'name'));
-								$colfilter = $this->columns_table[$k];
+                            if ($key && $type && $value) {
+								
+								$kfilter = 0;
+								for ($fl = 0; $fl< count($this->columns_table);$fl++)								
+									if (strpos($this->columns_table[$fl]["name"],$key) !== false)
+									{
+										$kfilter = $fl;
+										break;
+									}																	
+								$colfilter = $this->columns_table[$kfilter];
 								if (strpos($colfilter["name"], ' as ') !== false) {
-									$field = substr($colfilter["name"], 0, strpos($colfilter["name"], ' as ')-1);
+									$field = substr($colfilter["name"], 0, strpos($colfilter["name"], ' as '));
+									//dd($type);
 									$w->where(DB::raw($field),$type,$value);
 								}
 								else
@@ -638,7 +652,7 @@ class CBController extends Controller
 
         $data['html_contents'] = $html_contents;
 		$data['tablefooter'] = $this->tablefooter;
-
+				
         return view("crudbooster::default.index", $data);
     }
 
