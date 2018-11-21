@@ -117,7 +117,7 @@
 
 @endif
 
-<div class='form-group {{$header_group_class}} {{ ($errors->first($name))?"has-error":"" }}' id='form-group-{{$name}}' style="{{@$form['style']}}">
+<div class='form-group {{$header_group_class}} {{ ($errors->first($name))?"has-error":"" }} {{@$form["groupclass"]}}' id='form-group-{{$name}}' style="{{@$form['style']}}">
     <label class='control-label col-sm-2'>{{$form['label']}}
         @if($required)
             <span class='text-danger' title='{!! trans('crudbooster.this_field_is_required') !!}'>*</span>

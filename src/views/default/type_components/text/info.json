@@ -3,13 +3,14 @@
   "type": "text",
   "attribute": {
     "optional": {
-      "style": "string inline stylesheet",
-      "formclass": "class in form",
-      "help": "string help-block",
-      "placeholder": "string placeholder",
-      "readonly": "boolean",
-      "disabled": "boolean",
-      "value": "string"
+        "style": "string inline stylesheet",
+        "groupclass": "class in form group",
+        "formclass": "class in form",
+        "help": "string help-block",
+        "placeholder": "string placeholder",
+        "readonly": "boolean",
+        "disabled": "boolean",
+        "value": "string"
     }
   }
 }
