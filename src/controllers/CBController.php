@@ -691,7 +691,7 @@ class CBController extends Controller
             case 'xls':
                 Excel::create($filename, function ($excel) use ($response) {
                     $excel->setTitle($filename)->setCreator("crudbooster.com")->setCompany(CRUDBooster::getSetting('appname'));
-                    $excel->sheet($filename, function ($sheet) use ($response) {
+                    $excel->sheet("Sheet1", function ($sheet) use ($response) {
                         $sheet->setOrientation($paperorientation);
                         $sheet->loadview('crudbooster::export', $response);
                     });
@@ -1815,3 +1815,4 @@ class CBController extends Controller
     {
     }
 }
+?>
