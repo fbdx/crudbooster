@@ -69,7 +69,7 @@
                                             class='fa fa-user'></i> {{trans("crudbooster.label_button_profile")}}</a>
                             </div>
                             <div class="pull-{{ trans('crudbooster.right') }}">
-                                <a title='Lock Screen' href="{{ route('getLockScreen') }}" class='btn btn-default btn-flat'><i class='fa fa-key'></i></a>
+                                <!--<a title='Lock Screen' href="{{ route('getLockScreen') }}" class='btn btn-default btn-flat'><i class='fa fa-key'></i></a>-->
                                 <a href="javascript:void(0)" onclick="swal({
                                         title: '{{trans('crudbooster.alert_want_to_logout')}}',
                                         type:'info',
@@ -82,7 +82,7 @@
                                         }, function(){
                                         location.href = '{{ route("getLogout") }}';
 
-                                        });" title="{{trans('crudbooster.button_logout')}}" class="btn btn-danger btn-flat"><i class='fa fa-power-off'></i></a>
+                                        });" title="{{trans('crudbooster.button_logout')}}" class="btn btn-danger btn-flat"><i class='fa fa-power-off'></i> Logout</a>
                             </div>
                         </li>
                     </ul>
