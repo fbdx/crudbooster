@@ -423,6 +423,7 @@ class CBController extends Controller
                     switch ($type) {
                         default:
                             if ($key && $type && $value) {
+								dd($this->col);
 								$kfilter = array_search($key, array_column($this->columns_table, 'name'));
 								$colfilter = $this->columns_table[$k];
 								if (strpos($colfilter["name"], ' as ') !== false) {
