@@ -63,4 +63,12 @@ class NotificationsController extends CBController
 
         return redirect($row->url);
     }
+	
+	public function getReadall($id)
+    {
+        DB::table('cms_notifications')->where('id_cms_users', CRUDBooster::myId())->update(['is_read' => 1]);
+        $row = DB::table('cms_notifications')->where('id', $id)->first();		
+
+        return redirect($row->url);
+    }
 }
