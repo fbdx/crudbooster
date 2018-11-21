@@ -128,7 +128,7 @@
       $.get(NOTIFICATION_JSON, function (resp) {
           //console.log(resp.items);
           if(resp.total > total_notification) {
-              send_notification(resp.items[0].content, ADMIN_PATH + '/notifications/read/' + resp.items[0].id);
+              send_notification(resp.items[0].content, ADMIN_PATH + '/notifications/readall/' + resp.items[0].id);
           }
 
           $('.notifications-menu #notification_count').text(resp.total);
