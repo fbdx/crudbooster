@@ -128,6 +128,8 @@ class CBController extends Controller
 
 	public $table_footer = true;
 
+	public $force_children = false;
+
     public function cbLoader()
     {
         $this->cbInit();
