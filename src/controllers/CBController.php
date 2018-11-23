@@ -16,6 +16,7 @@ use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
 use Maatwebsite\Excel\Facades\Excel;
 use Schema;
+use DateTime;
 
 class CBController extends Controller
 {
@@ -209,6 +210,14 @@ class CBController extends Controller
             }
         }
     }
+	
+	private function validateDate($date, $format = 'DEFAULT')
+	{
+		if ($format=='DEFAULT') $format = config('crudbooster.PHPDATEFORMAT');					
+		$d = DateTime::createFromFormat($format, $date);		
+		// The Y ( 4 digits year ) returns TRUE for any integer with any number of digits so changing the comparison from == to === fixes the issue.
+		return $d && $d->format($format) === $date;
+	}
 
     public function getIndex()
     {
@@ -283,8 +292,7 @@ class CBController extends Controller
                 $field = substr($field, strpos($field, ' as ') + 4);
                 $field_with = (array_key_exists('join', $coltab)) ? str_replace(",", ".", $coltab['join']) : $field;
                 $result->addselect(DB::raw($coltab['name']));
-				
-				//dd($field);
+								
 				if (strpos($field, '_number') !== false)					
 					$columns_table[$index]['type_data'] = 'decimal';
 				else
@@ -402,16 +410,16 @@ class CBController extends Controller
                 $result->where($table.'.'.$k, $v);
             }
         }
-
+	
+		//dd("is checking");
         $filter_is_orderby = false;
-        if (Request::get('filter_column')) {
-
+        if (Request::get('filter_column')) {			
             $filter_column = Request::get('filter_column');
             $result->where(function ($w) use ($filter_column, $fc) {
                 foreach ($filter_column as $key => $fc) {
 
                     $value = @$fc['value'];
-                    $type = @$fc['type'];
+                    $type = @$fc['type'];										
 
                     if ($type == 'empty') {
                         $w->whereNull($key)->orWhere($key, '');
@@ -422,14 +430,15 @@ class CBController extends Controller
                         continue;
                     }
 
-                    if ($type == 'between') {
+                    if ($type == 'between') {						
                         continue;
                     }
 
                     switch ($type) {
                         default:
-                            if ($key && $type && $value) {
-								
+                            if ($key && $type && $value) {								
+								if ($this->validateDate($value))
+									$value = DateTime::createFromFormat(config('crudbooster.PHPDATEFORMAT'), $value)->format('Y-m-d');
 								$kfilter = 0;
 								for ($fl = 0; $fl< count($this->columns_table);$fl++)								
 									if (strpos($this->columns_table[$fl]["name"],$key) !== false)
@@ -437,10 +446,11 @@ class CBController extends Controller
 										$kfilter = $fl;
 										break;
 									}																	
-								$colfilter = $this->columns_table[$kfilter];
+								$colfilter = $this->columns_table[$kfilter];																								
+								
 								if (strpos($colfilter["name"], ' as ') !== false) {
 									$field = substr($colfilter["name"], 0, strpos($colfilter["name"], ' as '));
-									//dd($type);
+									
 									$w->where(DB::raw($field),$type,$value);
 								}
 								else
@@ -452,6 +462,8 @@ class CBController extends Controller
                             break;
                         case 'like':
                         case 'not like':
+							if ($this->validateDate($value))
+								$value = DateTime::createFromFormat(config('crudbooster.PHPDATEFORMAT'), $value)->format('Y-m-d');						
                             $value = '%'.$value.'%';
                             if ($key && $type && $value) {
                                 $w->where($key, $type, $value);
@@ -461,6 +473,9 @@ class CBController extends Controller
                         case 'not in':
                             if ($value) {
                                 $value = explode(',', $value);
+								for ($l=0;$l<count($value);$l++)
+									if ($this->validateDate($value[$l]))
+										$value[$l] = DateTime::createFromFormat(config('crudbooster.PHPDATEFORMAT'), $value[$l])->format('Y-m-d');
                                 if ($key && $value) {
                                     $w->whereIn($key, $value);
                                 }
@@ -474,6 +489,9 @@ class CBController extends Controller
                 $value = @$fc['value'];
                 $type = @$fc['type'];
                 $sorting = @$fc['sorting'];
+				
+				/*if ($this->validateDate($value))
+						$value = DateTime::createFromFormat(config('crudbooster.PHPDATEFORMAT'), $value)->format('Y-m-d');*/
 
                 if ($sorting != '') {
                     if ($key) {
@@ -483,8 +501,14 @@ class CBController extends Controller
                 }
 
                 if ($type == 'between') {
-                    if ($key && $value) {
-                        $result->whereBetween($key, $value);
+                    if ($key && $value) {		
+						for ($l=0;$l<count($value);$l++)
+							if ($this->validateDate($value[$l]))
+								$value[$l] = DateTime::createFromFormat(config('crudbooster.PHPDATEFORMAT'), $value[$l])->format('Y-m-d');
+						
+						$value[0] = $value[0]." 00:00:00";
+						$value[1] = $value[1]." 23:59:59";						
+                        $result->whereBetween($key, $value);						
                     }
                 } else {
                     continue;
@@ -524,7 +548,7 @@ class CBController extends Controller
             } else {
                 $data['result'] = $result->orderby($this->table.'.'.$this->primary_key, 'desc')->paginate($limit);
             }
-        }
+        }		
 
         $data['columns'] = $columns_table;
 
