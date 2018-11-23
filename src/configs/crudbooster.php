@@ -34,6 +34,10 @@ return [
 
     'IMAGE_EXTENSIONS' => 'jpg,png,jpeg,gif,bmp',
 
+	'DATEFORMAT' => 'YYYY-MM-DD',
+
+	'DATETIMEFORMAT' => 'YYYY-MM-DD HH:mm:ss',
+
     'MAIN_DB_DATABASE' => env('DB_DATABASE'), //Very useful if you use config:cache
 
     'MULTIPLE_DATABASE_MODULE' => [],

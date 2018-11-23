@@ -92,7 +92,7 @@
 					singleDatePicker: true,
         			showDropdowns: true,
         			minDate: '1900-01-01',
-					format:'YYYY-MM-DD'
+                    format: DATEFORMAT
 				})
 			}
 
@@ -106,7 +106,7 @@
 				    timePickerIncrement: 5,
 				    timePickerSeconds: true,
 				    autoApply: true,
-					format:'YYYY-MM-DD HH:mm:ss'
+                    format: DATETIMEFORMAT
 				})
 			}
 
