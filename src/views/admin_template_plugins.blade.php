@@ -67,11 +67,10 @@
     var APP_NAME = "{{Session::get('appname')}}";
 	var APP_FAVICON = "{{Session::get('favicon')}}";
     var ADMIN_PATH = '{{url(config("crudbooster.ADMIN_PATH")) }}';
-	var DATEFORMAT = '{{url(config("crudbooster.DATEFORMAT")) }}';
-	var DATETIMEFORMAT = '{{url(config("crudbooster.DATETIMEFORMAT")) }}';
+	var DATEFORMAT = '{{config("crudbooster.DATEFORMAT") }}';
+	var DATETIMEFORMAT = '{{config("crudbooster.DATETIMEFORMAT") }}';
     var NOTIFICATION_JSON = "{{route('NotificationsControllerGetLatestJson')}}";
     var NOTIFICATION_INDEX = "{{route('NotificationsControllerGetIndex')}}";
-
     var NOTIFICATION_YOU_HAVE = "{{trans('crudbooster.notification_you_have')}}";
     var NOTIFICATION_NOTIFICATIONS = "{{trans('crudbooster.notification_notification')}}";
     var NOTIFICATION_NEW = "{{trans('crudbooster.notification_new')}}";
