@@ -127,8 +127,8 @@ class CBController extends Controller
     public $add_data_content = null;
 
 	public $table_footer = true;
-
-	public $force_children = false;
+	
+    public $force_children = false;	
 
     public function cbLoader()
     {
@@ -910,16 +910,16 @@ class CBController extends Controller
 
     public function validation($id = null)
     {
-
         $request_all = Request::all();
         $array_input = [];
         foreach ($this->data_inputan as $di) {
             $ai = [];
-            $name = $di['name'];
+            $name = $di['name'];			
 
             if (! isset($request_all[$name])) {
                 continue;
             }
+			//echo $di["name"]."<br>";
 
             if ($di['type'] != 'upload') {
                 if (@$di['required']) {
@@ -947,7 +947,8 @@ class CBController extends Controller
             }
             if (@$di['mimes']) {
                 $ai[] = 'mimes:'.$di['mimes'];
-            }
+            }			
+			
             $name = $di['name'];
             if (! $name) {
                 continue;
@@ -956,8 +957,8 @@ class CBController extends Controller
             if ($di['type'] == 'money') {
                 $request_all[$name] = preg_replace('/[^\d-]+/', '', $request_all[$name]);
             }
-
-            if ($di['type'] == 'child') {
+			
+            if ($di['type'] == 'child') {				
                 $slug_name = str_slug($di['label'], '');
                 foreach ($di['columns'] as $child_col) {
                     if (isset($child_col['validation'])) {
@@ -969,8 +970,9 @@ class CBController extends Controller
                         }
 
                         $array_input[$slug_name.'-'.$child_col['name'].'.*'] = $child_col['validation'];
+						
                     }
-                }
+                }				
             }
 
             if (@$di['validation']) {
@@ -1018,8 +1020,25 @@ class CBController extends Controller
                 $array_input[$name] = implode('|', $ai);
             }
         }
-
+		
+		$ai2 = $this->data_inputan;
+		$fc = $this->force_children;
         $validator = Validator::make($request_all, $array_input);
+		$validator->after(function ($validator) use ($request_all,$array_input,$ai2,$fc) {		
+			foreach ($ai2 as $formitem)
+			{
+				if ($formitem["type"]=="child")
+				{
+					$hasarray = false;
+					foreach ($request_all as $req)					
+						if (is_array($req)) $hasarray = true;					
+					
+					if ((!$hasarray)&&($fc))
+						$validator->errors()->add($formitem["name"], 'You need at least on record on '.$formitem["label"]);
+				}
+			}
+
+		});		
 
         if ($validator->fails()) {
             $message = $validator->messages();
