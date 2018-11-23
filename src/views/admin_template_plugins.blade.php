@@ -51,6 +51,10 @@
 <script src="{{ asset ('vendor/crudbooster/assets/adminlte/plugins/datatables/jquery.dataTables.min.js')}}"></script>
 <script src="{{ asset ('vendor/crudbooster/assets/adminlte/plugins/datatables/dataTables.bootstrap.min.js')}}"></script>
 
+<!--BOOTSTRAP SELECT-->
+<link rel="stylesheet" href="{{ asset ('vendor/crudbooster/assets/css/bootstrap-select.min.css')}}">
+<script src="{{ asset ('vendor/crudbooster/assets/js/bootstrap-select.js')}}"></script>
+
 <script src="{{ asset ('vendor/crudbooster/assets/js/jquery.doubleScroll.js') }}"></script>	
 <script type="text/javascript">
 	$(document).ready(function() {
