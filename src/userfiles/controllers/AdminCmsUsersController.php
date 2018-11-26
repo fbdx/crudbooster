@@ -50,4 +50,5 @@ class AdminCmsUsersController extends \crocodicstudio\crudbooster\controllers\CB
 		$data['row']        = CRUDBooster::first('cms_users',CRUDBooster::myId());		
 		$this->cbView('crudbooster::default.form',$data);				
 	}
+
 }
