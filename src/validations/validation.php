@@ -9,7 +9,7 @@
 \Validator::extend('passwordregex', function ($attribute, $value) {
     // This will only accept alpha and spaces. 
     // If you want to accept hyphens use: /^[\pL\s-]+$/u.
-    return preg_match('/^.*(?=.{3,})(?=.*[a-zA-Z])(?=.*[0-9])(?=.*[\d\x])(?=.*[!$#%]).*$/u', $value); 
+    return preg_match('/^(?=.*\d)(?=.*[A-Z])(?=.*[a-z])(?=.*[^\w\d\s:])([^\s]){8,}$/', $value); 
 },'The :attribute should have an Uppercase, lowercase, number and a symbol');
 
 ?>
