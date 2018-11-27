@@ -78,7 +78,7 @@ return [
     */
 
     /* LDAP AUTH BOTH or YES or NO, FOR BOTH AND YES PLS ADD HOST AND DOMAIN*/
-    'LDAP_AUTH' => 'BOTH',
+    'LDAP_AUTH' => 'NO',
     'LDAP_HOST' => '',
     'LDAP_DOMAIN' => '',
 ];
