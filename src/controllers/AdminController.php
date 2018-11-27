@@ -5,6 +5,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Request;
 use Illuminate\Support\Facades\Session;
 use Illuminate\Support\Facades\Validator;
+use Adldap;
 
 class AdminController extends CBController
 {
@@ -57,47 +58,119 @@ class AdminController extends CBController
 
     public function postLogin()
     {
-
-        $validator = Validator::make(Request::all(), [
-            'email' => 'required|email|exists:'.config('crudbooster.USER_TABLE'),
-            'password' => 'required',
-        ]);
-
-        if ($validator->fails()) {
-            $message = $validator->errors()->all();
-
-            return redirect()->back()->with(['message' => implode(', ', $message), 'message_type' => 'danger']);
-        }
+        $isldap = config("crudbooster.LDAP_AUTH");
 
         $email = Request::input("email");
         $password = Request::input("password");
-        $users = DB::table(config('crudbooster.USER_TABLE'))->where("email", $email)->first();
 
-        if (\Hash::check($password, $users->password)) {
-            $priv = DB::table("cms_privileges")->where("id", $users->id_cms_privileges)->first();
+        if (($isldap=='BOTH')||($isldap=='YES'))
+        {
+            $ad = new Adldap\Adldap();    
+            $config = [
+                // Mandatory Configuration Options
+                'hosts'            => explode(' ', config("crudbooster.LDAP_HOST")),
+            ];
 
-            $roles = DB::table('cms_privileges_roles')->where('id_cms_privileges', $users->id_cms_privileges)->join('cms_moduls', 'cms_moduls.id', '=', 'id_cms_moduls')->select('cms_moduls.name', 'cms_moduls.path', 'is_visible', 'is_create', 'is_read', 'is_edit', 'is_delete')->get();
+            $ad->addProvider($config);            
 
-            $photo = ($users->photo) ? asset($users->photo) : asset('vendor/crudbooster/avatar.jpg');
-            Session::put('admin_id', $users->id);
-            Session::put('admin_is_superadmin', $priv->is_superadmin);
-            Session::put('admin_name', $users->name);
-            Session::put('admin_photo', $photo);
-            Session::put('admin_privileges_roles', $roles);
-            Session::put("admin_privileges", $users->id_cms_privileges);
-            Session::put('admin_privileges_name', $priv->name);
-            Session::put('admin_lock', 0);
-            Session::put('theme_color', $priv->theme_color);
-            Session::put("appname", CRUDBooster::getSetting('appname'));
+            try {
+                
+                $provider = $ad->connect();
+                try {                                       
+                    if ($provider->auth()->attempt(config("crudbooster.LDAP_DOMAIN")."\\".$email, $password)) {                        
+                        $users = DB::table(config('crudbooster.USER_TABLE'))->where("name", $email)->first();
+                        if ($users!=null)
+                        {
+                             $priv = DB::table("cms_privileges")->where("id", $users->id_cms_privileges)->first();
 
-            CRUDBooster::insertLog(trans("crudbooster.log_login", ['email' => $users->email, 'ip' => Request::server('REMOTE_ADDR')]));
+                            $roles = DB::table('cms_privileges_roles')->where('id_cms_privileges', $users->id_cms_privileges)->join('cms_moduls', 'cms_moduls.id', '=', 'id_cms_moduls')->select('cms_moduls.name', 'cms_moduls.path', 'is_visible', 'is_create', 'is_read', 'is_edit', 'is_delete')->get();
 
-            $cb_hook_session = new \App\Http\Controllers\CBHook;
-            $cb_hook_session->afterLogin();
+                            $photo = ($users->photo) ? asset($users->photo) : asset('vendor/crudbooster/avatar.jpg');
+                            Session::put('admin_id', $users->id);
+                            Session::put('admin_is_superadmin', $priv->is_superadmin);
+                            Session::put('admin_name', $users->name);
+                            Session::put('admin_photo', $photo);
+                            Session::put('admin_privileges_roles', $roles);
+                            Session::put("admin_privileges", $users->id_cms_privileges);
+                            Session::put('admin_privileges_name', $priv->name);
+                            Session::put('admin_lock', 0);
+                            Session::put('theme_color', $priv->theme_color);
+                            Session::put("appname", CRUDBooster::getSetting('appname'));
 
-            return redirect(CRUDBooster::adminPath());
-        } else {
-            return redirect()->route('getLogin')->with('message', trans('crudbooster.alert_password_wrong'));
+                            CRUDBooster::insertLog(trans("crudbooster.log_login", ['email' => $users->email, 'ip' => Request::server('REMOTE_ADDR')]));
+
+                            $cb_hook_session = new \App\Http\Controllers\CBHook;
+                            $cb_hook_session->afterLogin();
+                        }
+                        else
+                        {
+                            if ($isldap=='YES')
+                                return redirect()->route('getLogin')->with('message', "Failed authentication");
+                            //echo "Failed authentication<br>";
+                        }
+
+                    } else {
+                        // Failed.
+                        if ($isldap=='YES')
+                            return redirect()->route('getLogin')->with('message', "Failed authentication");
+                    }
+                } catch (Adldap\Auth\UsernameRequiredException $e) {
+                    if ($isldap=='YES')
+                            return redirect()->route('getLogin')->with('message', "Failed authentication");
+                } catch (Adldap\Auth\PasswordRequiredException $e) {
+                    if ($isldap=='YES')
+                            return redirect()->route('getLogin')->with('message', "Failed authentication");
+                }
+            } catch (\BindException $e) {
+                if ($isldap=='YES')
+                   return redirect()->route('getLogin')->with('message', "Error connecting to authentication server, please contact admin");
+            }
+
+        }
+
+        if (($isldap!='YES'))
+        {
+            $validator = Validator::make(Request::all(), [
+                'email' => 'required|email|exists:'.config('crudbooster.USER_TABLE'),
+                'password' => 'required',
+            ]);
+
+            if ($validator->fails()) {
+                $message = $validator->errors()->all();
+
+                return redirect()->route('getLogin')->with('message', trans('crudbooster.alert_password_wrong'));
+            }
+
+            //$email = Request::input("email");
+            //$password = Request::input("password");
+            $users = DB::table(config('crudbooster.USER_TABLE'))->where("email", $email)->first();
+
+            if (\Hash::check($password, $users->password)) {
+                $priv = DB::table("cms_privileges")->where("id", $users->id_cms_privileges)->first();
+
+                $roles = DB::table('cms_privileges_roles')->where('id_cms_privileges', $users->id_cms_privileges)->join('cms_moduls', 'cms_moduls.id', '=', 'id_cms_moduls')->select('cms_moduls.name', 'cms_moduls.path', 'is_visible', 'is_create', 'is_read', 'is_edit', 'is_delete')->get();
+
+                $photo = ($users->photo) ? asset($users->photo) : asset('vendor/crudbooster/avatar.jpg');
+                Session::put('admin_id', $users->id);
+                Session::put('admin_is_superadmin', $priv->is_superadmin);
+                Session::put('admin_name', $users->name);
+                Session::put('admin_photo', $photo);
+                Session::put('admin_privileges_roles', $roles);
+                Session::put("admin_privileges", $users->id_cms_privileges);
+                Session::put('admin_privileges_name', $priv->name);
+                Session::put('admin_lock', 0);
+                Session::put('theme_color', $priv->theme_color);
+                Session::put("appname", CRUDBooster::getSetting('appname'));
+
+                CRUDBooster::insertLog(trans("crudbooster.log_login", ['email' => $users->email, 'ip' => Request::server('REMOTE_ADDR')]));
+
+                $cb_hook_session = new \App\Http\Controllers\CBHook;
+                $cb_hook_session->afterLogin();
+
+                return redirect(CRUDBooster::adminPath());
+            } else {
+                return redirect()->route('getLogin')->with('message', trans('crudbooster.alert_password_wrong'));
+            }
         }
     }
 

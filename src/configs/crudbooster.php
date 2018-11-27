@@ -76,4 +76,9 @@ return [
     * NOTE :
     * Make sure yo clear your config cache by using command : php artisan config:clear
     */
+
+    /* LDAP AUTH BOTH or YES or NO, FOR BOTH AND YES PLS ADD HOST AND DOMAIN*/
+    'LDAP_AUTH' => 'BOTH',
+    'LDAP_HOST' => '',
+    'LDAP_DOMAIN' => '',
 ];
