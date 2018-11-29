@@ -69,6 +69,12 @@ class AdminController extends CBController
             $config = [
                 // Mandatory Configuration Options
                 'hosts'            => explode(' ', config("crudbooster.LDAP_HOST")),
+				'use_ssl'          => true,
+				'port' => 636,
+				'custom_options'   => [
+					// See: http://php.net/ldap_set_option
+					LDAP_OPT_X_TLS_REQUIRE_CERT => LDAP_OPT_X_TLS_NEVER
+				]
             ];
 
             $ad->addProvider($config);            
