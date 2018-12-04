@@ -1374,19 +1374,7 @@ class CBController extends Controller {
 		
 
 		$this->hook_before_edit($this->arr,$id);
-		$pregWeek = $this->arr['pregnancyweek'];
-
-		if($pregWeek >= 0 && $pregWeek <= 12)
-		    $trimester = '1st';
-		elseif($pregWeek >= 13 && $pregWeek <= 26)
-		    $trimester = '2nd';
-		elseif($pregWeek >= 27 && $pregWeek <= 40)
-		    $trimester = '3rd';
-		else
-			$trimester = "";
-
-		$this->arr['trimester'] =  $trimester;
-
+		
 		DB::table($this->table)->where($this->primary_key,$id)->update($this->arr);		
 
 		//Looping Data Input Again After Insert
