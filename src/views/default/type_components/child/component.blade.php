@@ -40,10 +40,8 @@
 								$columns_tbody = [];
 								$data_child = DB::table($form['table'])
 								->where($form['foreign_key'],$id);
-
 								foreach($form['columns'] as $i=>$c) {
 									$data_child->addselect($form['table'].'.'.$c['name']);
-
 									if($c['type'] == 'datamodal') {
 										$datamodal_title = explode(',',$c['datamodal_columns'])[0];
 										$datamodal_table = $c['datamodal_table'];
@@ -54,6 +52,7 @@
 											$join_table = explode(',',$c['datatable'])[0];
 											$join_field = explode(',',$c['datatable'])[1];
 											$data_child->join($join_table,$join_table.'.id','=',$c['name']);
+											//$data_child->join($join_table,$join_table.'.name','=',$c['name']); // match by using name instead of id
 											$data_child->addselect($join_table.'.'.$join_field.' as '.$join_table.'_'.$join_field);										
 										}
 									}
@@ -122,7 +121,9 @@
 									@else --}}
 										<a href='#panel-form-{{$name}}' onclick='editRow{{$name}}(this)' class='btn btn-warning btn-xs'><i class='fa fa-pencil'></i></a>
 										{{-- @if(strpos(CRUDBooster::mainpath(), 'gigyacustomer') != true) --}}
+										@if(CRUDBooster::myPrivilegeId() == 1)
 											<a href='javascript:void(0)' onclick='deleteRow{{$name}}(this)' class='btn btn-danger btn-xs'><i class='fa fa-trash'></i></a>
+										@endif
 										{{-- @endif --}}
 									{{-- @endif --}}
 								</td>					
@@ -144,9 +145,11 @@
 					{{-- @if($table != 'customer') --}}
 					<div class='col-sm-12'>
 						<div class="panel panel-default">
-							<div class="panel-heading"><i class="fa fa-pencil-square-o"></i> Form</div>
+							{{-- FORM --}}
+							<div class="panel-heading"><i class="fa fa-pencil-square-o"></i> Form</div> 
 							<div class="panel-body child-form-area">
 								@foreach($form['columns'] as $col)	
+								{{-- {{dump($col)}} --}}
 								<?php 
 									$name_column = $name.$col['name'];
 									$colLabel = str_slug($col['label']);
@@ -392,6 +395,7 @@
 											}
 
 									    </script>
+									    {{-- SELECT --}}
 										@elseif($col['type']=='select')
 										{{-- ID Target Column: childrenbirthDateReliability --}}
 
@@ -406,6 +410,8 @@
 													 
 												</select>
 											@else --}}
+											{{-- {{dump($name_column)}} --}}
+											{{-- {{dump($col["required"])}} --}}
 												<select id='{{$name_column}}' name='child-{{$col["name"]}}' class='form-control select2 {{$col['required']?"required":""}}'
 												{{($col['readonly']===true)?"readonly":""}} ">
 
@@ -488,7 +494,7 @@
 									var currentRow = null;
 
 									function resetForm{{$name}}() {
-										$('#panel-form-{{$name}}').find("input[type=text],input[type=number],select,textarea").val('');
+										$('#panel-form-{{$name}}').find("input[type=text],input[type=number],select,textarea,select2").val('');
 									}
 
 									function deleteRow{{$name}}(t) {
@@ -642,6 +648,7 @@
 					{{-- @if($table != 'customer') --}}
 					<div class='col-sm-12'>
 						<div class="panel panel-default">
+							{{-- FORM --}}
 							<div class="panel-heading"><i class="fa fa-pencil-square-o"></i> Form</div>
 							<div class="panel-body child-form-area">
 								@foreach($form['columns'] as $col)	
@@ -664,6 +671,7 @@
 									@endif
 									<div class="col-sm-8">
 										@if($col['type']=='text')
+										{{-- {{$name_column}} --}}
 										<input id='{{$name_column}}' type='text' {{ ($col['max'])?"maxlength='$col[max]'":"" }} name='child-{{$col["name"]}}' class='form-control {{$col['required']?"required":""}}' 										
 											{{($col['readonly']===true)?"readonly":""}} 
 											/>

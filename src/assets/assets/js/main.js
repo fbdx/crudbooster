@@ -82,6 +82,8 @@
 				$('#current-milk-brand').hide();
 				$('#current-baby-food').hide();
 				$('#child-feeding').hide();
+				$('#reason-not-suitable').hide(); // for admin/customer
+				$('#remarks').hide(); // for admin/customer
 				var a = $("#reasonnotsuitable").val();
 				if(a == 'Others'){
 					$("#remarks").prop('readonly',false); //adminmainmergecontroller
@@ -132,14 +134,32 @@
 	            	$('#current-milk-brand').hide();
 					$('#current-baby-food').hide();
 	            }
-
-	            // var form = "<?= $name ?>";
-	            
-	            // if(form =='children'){
-	            // 	console.log(form);
-	            // }
 	        
 	        });
+
+			$("#childrenswitched").change(function() {
+				var switchVal = $(this).val();
+				console.log(switchVal);
+				if (switchVal == 'No') {
+					$('#reason-not-suitable').show();
+					// $("#childrenreasonnotsuitable").prop('required',true);
+					
+					$("#childrenreasonnotsuitable").change(function(){
+						var notSuitableVal = $(this).val();
+						console.log(notSuitableVal);
+						if(notSuitableVal == 'Others'){
+							$('#remarks').show();
+						}else{
+							$('#remarks').hide();
+						}
+					});
+
+				} else {
+					$('#reason-not-suitable').hide();
+					$("#childrenreasonnotsuitable").prop('required',false);
+					$("#childrenreasonnotsuitable").val('');
+				}
+			});
 
 	        $("#reasonnotsuitable").change(function() {
 				var v = $(this).val();
@@ -158,6 +178,8 @@
 				}
 
 			});
+
+
 
 
 			if($(".datetimepicker").length > 0) {
