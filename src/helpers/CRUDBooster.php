@@ -406,22 +406,26 @@ class CRUDBooster
         switch ($menu->type) {
             case 'Route':
                 $url = route($menu->path);
+                @$menu->url = $url;
                 break;
             default:
             case 'URL':
                 $url = $menu->path;
+                @$menu->url = $url;
                 break;
             case 'Controller & Method':
                 $url = action($menu->path);
+                @$menu->url = $url;
                 break;
             case 'Module':
             case 'Statistic':
                 $url = self::adminPath($menu->path);
+                @$menu->url = $url;
                 break;
-        }
+        }        
+        
 
-        @$menu->url = $url;
-
+        
         return $menu;
     }
 
