@@ -1,6 +1,13 @@
 <?php 
 	$name = str_slug($form['label'],'');
 	$current_path = CRUDBooster::mainpath();
+	foreach ($form['columns'] as $key) {
+		if($key['name']=='m_product'){
+			if($key['dataenum']=='Mom_n_me'){
+				$productname = $key['dataenum'];
+			}
+		}
+	}
 ?>
 <script type="text/javascript">
 	$(function() {
@@ -34,109 +41,226 @@
 									<th width="90px">{{trans('crudbooster.action_label')}}</th>
 							</tr>
 						</thead>
-						<tbody>
 
-							<?php 
-								$columns_tbody = [];
-								$data_child = DB::table($form['table'])
-								->where($form['foreign_key'],$id);
-								foreach($form['columns'] as $i=>$c) {
-									$data_child->addselect($form['table'].'.'.$c['name']);
-									if($c['type'] == 'datamodal') {
-										$datamodal_title = explode(',',$c['datamodal_columns'])[0];
-										$datamodal_table = $c['datamodal_table'];
-										$data_child->join($c['datamodal_table'],$c['datamodal_table'].'.id','=',$c['name']);
-										$data_child->addselect($c['datamodal_table'].'.'.$datamodal_title.' as '.$datamodal_table.'_'.$datamodal_title);
-									}elseif ($c['type'] == 'select') {
-										if($c['datatable']) {
-											$join_table = explode(',',$c['datatable'])[0];
-											$join_field = explode(',',$c['datatable'])[1];
-											$data_child->join($join_table,$join_table.'.id','=',$c['name']);
-											//$data_child->join($join_table,$join_table.'.name','=',$c['name']); // match by using name instead of id
-											$data_child->addselect($join_table.'.'.$join_field.' as '.$join_table.'_'.$join_field);										
+						@if($form['name'] == 'mother')
+
+							<tbody>
+
+								<?php 
+									$columns_tbody = [];
+									$data_child = DB::table($form['table'])
+									->where($form['foreign_key'],$id);
+									foreach($form['columns'] as $i=>$c) {
+										$data_child->addselect($form['table'].'.'.$c['name']);
+										if($c['type'] == 'datamodal') {
+											$datamodal_title = explode(',',$c['datamodal_columns'])[0];
+											$datamodal_table = $c['datamodal_table'];
+											$data_child->join($c['datamodal_table'],$c['datamodal_table'].'.id','=',$c['name']);
+											$data_child->addselect($c['datamodal_table'].'.'.$datamodal_title.' as '.$datamodal_table.'_'.$datamodal_title);
+										}elseif ($c['type'] == 'select') {
+											if($c['datatable']) {
+												$join_table = explode(',',$c['datatable'])[0];
+												$join_field = explode(',',$c['datatable'])[1];
+												$data_child->join($join_table,$join_table.'.id','=',$c['name']);
+												//$data_child->join($join_table,$join_table.'.name','=',$c['name']); // match by using name instead of id
+												$data_child->addselect($join_table.'.'.$join_field.' as '.$join_table.'_'.$join_field);										
+											}
 										}
 									}
-								}
 
-								$data_child = $data_child->orderby($form['table'].'.id','desc')->get();
-								//dd($data_child);
-								foreach($data_child as $d):							
-									//dump($d->birthDateReliability);
-									if ($d->birthDateReliability == 0) {
-										$d->birthDateReliability = 'Child is Born';
-									} 
+									$data_child = $data_child->orderby($form['table'].'.id','desc')->get();
+									//dd($data_child);
+									foreach($data_child as $d):							
+										$dbProdName = $d->m_product;
+										//dump($d->birthDateReliability);
+										if ($d->birthDateReliability == 0) {
+											$d->birthDateReliability = 'Child is Born';
+										} 
 
-									if ($d->birthDateReliability == 4) {
-										$d->birthDateReliability = 'Pregnant';
-									} 
+										if ($d->birthDateReliability == 4) {
+											$d->birthDateReliability = 'Pregnant';
+										} 
 
-							?>
-							<tr>
-								@foreach($form['columns'] as $col)
-									<td class="{{$col['name']}}">
-									<?php 
-										if($col['type'] == 'select') {
-											if($col['datatable']) {
-												$join_table = explode(',',$col['datatable'])[0];
-												$join_field = explode(',',$col['datatable'])[1];
+								?>
+								<tr>
+									@if($dbProdName == 'Mom_n_me')
+									@foreach($form['columns'] as $col)
+										<td class="{{$col['name']}}">
+										<?php 
+											if($col['type'] == 'select') {
+												if($col['datatable']) {
+													$join_table = explode(',',$col['datatable'])[0];
+													$join_field = explode(',',$col['datatable'])[1];
+													echo "<span class='td-label'>";
+													echo $d->{$join_table.'_'.$join_field};
+													echo "</span>";
+													echo "<input type='hidden' name='".$name."-".$col['name']."[]' value='".$d->{$col['name']}."'/>";
+												}
+												if($col['dataenum']) {
+													echo "<span class='td-label'>";
+													echo $d->{$col['name']};
+													echo "</span>";
+													echo "<input type='hidden' name='".$name."-".$col['name']."[]' value='".$d->{$col['name']}."'/>";
+												}
+											}elseif ($col['type']=='datamodal') {
+												$datamodal_title = explode(',',$col['datamodal_columns'])[0];
+												$datamodal_table = $col['datamodal_table'];
 												echo "<span class='td-label'>";
-												echo $d->{$join_table.'_'.$join_field};
+												echo $d->{$datamodal_table.'_'.$datamodal_title};
 												echo "</span>";
 												echo "<input type='hidden' name='".$name."-".$col['name']."[]' value='".$d->{$col['name']}."'/>";
-											}
-											if($col['dataenum']) {
+											}elseif ($col['type']=='upload') {
+												$filename = basename( $d->{$col['name']} );
+												if($col['upload_type']=='image') {
+													echo "<a href='".asset( $d->{$col['name']} )."' data-lightbox='roadtrip'><img data-label='$filename' src='".asset( $d->{$col['name']} )."' width='50px' height='50px'/></a>";
+													echo "<input type='hidden' name='".$name."-".$col['name']."[]' value='".$d->{ $col['name'] }."'/>";
+												}else{
+													echo "<a data-label='$filename' href='".asset( $d->{$col['name']} )."'>$filename</a>";
+													echo "<input type='hidden' name='".$name."-".$col['name']."[]' value='".$d->{ $col['name'] }."'/>";
+												}									
+											}else{
 												echo "<span class='td-label'>";
 												echo $d->{$col['name']};
 												echo "</span>";
 												echo "<input type='hidden' name='".$name."-".$col['name']."[]' value='".$d->{$col['name']}."'/>";
 											}
-										}elseif ($col['type']=='datamodal') {
-											$datamodal_title = explode(',',$col['datamodal_columns'])[0];
-											$datamodal_table = $col['datamodal_table'];
-											echo "<span class='td-label'>";
-											echo $d->{$datamodal_table.'_'.$datamodal_title};
-											echo "</span>";
-											echo "<input type='hidden' name='".$name."-".$col['name']."[]' value='".$d->{$col['name']}."'/>";
-										}elseif ($col['type']=='upload') {
-											$filename = basename( $d->{$col['name']} );
-											if($col['upload_type']=='image') {
-												echo "<a href='".asset( $d->{$col['name']} )."' data-lightbox='roadtrip'><img data-label='$filename' src='".asset( $d->{$col['name']} )."' width='50px' height='50px'/></a>";
-												echo "<input type='hidden' name='".$name."-".$col['name']."[]' value='".$d->{ $col['name'] }."'/>";
-											}else{
-												echo "<a data-label='$filename' href='".asset( $d->{$col['name']} )."'>$filename</a>";
-												echo "<input type='hidden' name='".$name."-".$col['name']."[]' value='".$d->{ $col['name'] }."'/>";
-											}									
-										}else{
-											echo "<span class='td-label'>";
-											echo $d->{$col['name']};
-											echo "</span>";
-											echo "<input type='hidden' name='".$name."-".$col['name']."[]' value='".$d->{$col['name']}."'/>";
-										}
-									?>
-									</td>
-								@endforeach		
-								<td>
-									{{-- @if($table == 'customer')
-										<a href='/admin/mainmerge/edit/{{$mainmerge_id}}' onclick='editRow{{$name}}(this)' class='btn btn-warning btn-xs'><i class='fa fa-pencil'></i></a>
-									@else --}}
-										<a href='#panel-form-{{$name}}' onclick='editRow{{$name}}(this)' class='btn btn-warning btn-xs'><i class='fa fa-pencil'></i></a>
-										{{-- @if(strpos(CRUDBooster::mainpath(), 'gigyacustomer') != true) --}}
-										@if(CRUDBooster::myPrivilegeId() == 1)
-											<a href='javascript:void(0)' onclick='deleteRow{{$name}}(this)' class='btn btn-danger btn-xs'><i class='fa fa-trash'></i></a>
-										@endif
+										?>
+										</td>
+									@endforeach		
+
+									<td>
+										{{-- @if($table == 'customer')
+											<a href='/admin/mainmerge/edit/{{$mainmerge_id}}' onclick='editRow{{$name}}(this)' class='btn btn-warning btn-xs'><i class='fa fa-pencil'></i></a>
+										@else --}}
+											<a href='#panel-form-{{$name}}' onclick='editRow{{$name}}(this)' class='btn btn-warning btn-xs'><i class='fa fa-pencil'></i></a>
+											{{-- @if(strpos(CRUDBooster::mainpath(), 'gigyacustomer') != true) --}}
+											@if(CRUDBooster::myPrivilegeId() == 1)
+												<a href='javascript:void(0)' onclick='deleteRow{{$name}}(this)' class='btn btn-danger btn-xs'><i class='fa fa-trash'></i></a>
+											@endif
+											{{-- @endif --}}
 										{{-- @endif --}}
-									{{-- @endif --}}
-								</td>					
-							</tr>
+									</td>
+									@endif					
+								</tr>
 
-							<?php endforeach;?>
+								<?php endforeach;?>
 
-							@if(count($data_child)==0) 
-							<tr class="trNull">
-								<td colspan="{{count($form['columns'])+1}}" align="center">{{trans('crudbooster.table_data_not_found')}}</td>
-							</tr>
-							@endif
-						</tbody>
+								@if((count($data_child)==0))
+								<tr class="trNull">
+									<td colspan="{{count($form['columns'])+1}}" align="center">{{trans('crudbooster.table_data_not_found')}}</td>
+								</tr>
+								@endif
+							</tbody>
+						@else
+							<tbody>
+
+								<?php 
+									$columns_tbody = [];
+									$data_child = DB::table($form['table'])
+									->where($form['foreign_key'],$id);
+									foreach($form['columns'] as $i=>$c) {
+										$data_child->addselect($form['table'].'.'.$c['name']);
+										if($c['type'] == 'datamodal') {
+											$datamodal_title = explode(',',$c['datamodal_columns'])[0];
+											$datamodal_table = $c['datamodal_table'];
+											$data_child->join($c['datamodal_table'],$c['datamodal_table'].'.id','=',$c['name']);
+											$data_child->addselect($c['datamodal_table'].'.'.$datamodal_title.' as '.$datamodal_table.'_'.$datamodal_title);
+										}elseif ($c['type'] == 'select') {
+											if($c['datatable']) {
+												$join_table = explode(',',$c['datatable'])[0];
+												$join_field = explode(',',$c['datatable'])[1];
+												$data_child->join($join_table,$join_table.'.id','=',$c['name']);
+												//$data_child->join($join_table,$join_table.'.name','=',$c['name']); // match by using name instead of id
+												$data_child->addselect($join_table.'.'.$join_field.' as '.$join_table.'_'.$join_field);										
+											}
+										}
+									}
+
+									$data_child = $data_child->orderby($form['table'].'.id','desc')->get();
+									//dd($data_child);
+									foreach($data_child as $d):							
+										$dbProdName = $d->m_product;
+										//dump($d->birthDateReliability);
+										if ($d->birthDateReliability == 0) {
+											$d->birthDateReliability = 'Child is Born';
+										} 
+
+										if ($d->birthDateReliability == 4) {
+											$d->birthDateReliability = 'Pregnant';
+										} 
+
+								?>
+								<tr>
+									@if($dbProdName !== 'Mom_n_me')
+									@foreach($form['columns'] as $col)
+										<td class="{{$col['name']}}">
+										<?php 
+											if($col['type'] == 'select') {
+												if($col['datatable']) {
+													$join_table = explode(',',$col['datatable'])[0];
+													$join_field = explode(',',$col['datatable'])[1];
+													echo "<span class='td-label'>";
+													echo $d->{$join_table.'_'.$join_field};
+													echo "</span>";
+													echo "<input type='hidden' name='".$name."-".$col['name']."[]' value='".$d->{$col['name']}."'/>";
+												}
+												if($col['dataenum']) {
+													echo "<span class='td-label'>";
+													echo $d->{$col['name']};
+													echo "</span>";
+													echo "<input type='hidden' name='".$name."-".$col['name']."[]' value='".$d->{$col['name']}."'/>";
+												}
+											}elseif ($col['type']=='datamodal') {
+												$datamodal_title = explode(',',$col['datamodal_columns'])[0];
+												$datamodal_table = $col['datamodal_table'];
+												echo "<span class='td-label'>";
+												echo $d->{$datamodal_table.'_'.$datamodal_title};
+												echo "</span>";
+												echo "<input type='hidden' name='".$name."-".$col['name']."[]' value='".$d->{$col['name']}."'/>";
+											}elseif ($col['type']=='upload') {
+												$filename = basename( $d->{$col['name']} );
+												if($col['upload_type']=='image') {
+													echo "<a href='".asset( $d->{$col['name']} )."' data-lightbox='roadtrip'><img data-label='$filename' src='".asset( $d->{$col['name']} )."' width='50px' height='50px'/></a>";
+													echo "<input type='hidden' name='".$name."-".$col['name']."[]' value='".$d->{ $col['name'] }."'/>";
+												}else{
+													echo "<a data-label='$filename' href='".asset( $d->{$col['name']} )."'>$filename</a>";
+													echo "<input type='hidden' name='".$name."-".$col['name']."[]' value='".$d->{ $col['name'] }."'/>";
+												}									
+											}else{
+												echo "<span class='td-label'>";
+												echo $d->{$col['name']};
+												echo "</span>";
+												echo "<input type='hidden' name='".$name."-".$col['name']."[]' value='".$d->{$col['name']}."'/>";
+											}
+										?>
+										</td>
+									@endforeach		
+
+									<td>
+										{{-- @if($table == 'customer')
+											<a href='/admin/mainmerge/edit/{{$mainmerge_id}}' onclick='editRow{{$name}}(this)' class='btn btn-warning btn-xs'><i class='fa fa-pencil'></i></a>
+										@else --}}
+											<a href='#panel-form-{{$name}}' onclick='editRow{{$name}}(this)' class='btn btn-warning btn-xs'><i class='fa fa-pencil'></i></a>
+											{{-- @if(strpos(CRUDBooster::mainpath(), 'gigyacustomer') != true) --}}
+											@if(CRUDBooster::myPrivilegeId() == 1)
+												<a href='javascript:void(0)' onclick='deleteRow{{$name}}(this)' class='btn btn-danger btn-xs'><i class='fa fa-trash'></i></a>
+											@endif
+											{{-- @endif --}}
+										{{-- @endif --}}
+									</td>
+									@endif					
+								</tr>
+
+								<?php endforeach;?>
+
+								@if((count($data_child)==0) || ($dbProdName == 'Mom_n_me'))
+								<tr class="trNull">
+									<td colspan="{{count($form['columns'])+1}}" align="center">{{trans('crudbooster.table_data_not_found')}}</td>
+								</tr>
+								@endif
+							</tbody>
+						@endif
+
 						</table>
 					</div>
 				</div>

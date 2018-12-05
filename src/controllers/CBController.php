@@ -22,6 +22,7 @@ use Schema;
 use JsValidator;
 use GSSDK;
 use GSRequest;
+use DateTime;
 
 
 class CBController extends Controller {
@@ -220,6 +221,7 @@ class CBController extends Controller {
 
 		$this->hook_query_index($result);
 
+
 		if(in_array('deleted_at', $table_columns)) {
 			$result->where($this->table.'.deleted_at',NULL);
 		}
@@ -230,7 +232,7 @@ class CBController extends Controller {
 		$table            = $this->table;
 		$columns_table    = $this->columns_table;
 		foreach($columns_table as $index => $coltab) {
-
+			// dump($coltab);
 			$join = @$coltab['join'];
 			$join_where = @$coltab['join_where'];
 			$join_id = @$coltab['join_id'];
@@ -471,12 +473,15 @@ class CBController extends Controller {
 						$result->orderby($orderby_table.'.'.$k,$v);
 					}
 				}
+
 				$data['result'] = $result->paginate($limit);
 			}else{
+
 				$data['result'] = $result->orderby($this->table.'.'.$this->primary_key,'desc')->paginate($limit);
+
 			}
 		}
-
+		// dd($columns_table);
 		$data['columns'] = $columns_table;
 
 		if($this->index_return) return $data;
@@ -604,7 +609,7 @@ class CBController extends Controller {
 		$data['html_contents'] = $html_contents;
 		$data['limit'] = $result->count();
 		//echo $result->toSql()."<br>";
-
+		// dd($data);
 		return view("crudbooster::default.index",$data);
 	}
 
@@ -1217,7 +1222,7 @@ class CBController extends Controller {
 
 		$this->hook_before_add($this->arr);
 
-
+		dd($this->arr);
 		$this->arr[$this->primary_key] = $id = CRUDBooster::newId($this->table);
 				
 		DB::table($this->table)->insert($this->arr);		
@@ -1347,6 +1352,7 @@ class CBController extends Controller {
 		// if(DB::table('customer')){
 		// 	return view('crudbooster::default.form',compact('id','mainmerge_id','row','page_menu','page_title','command','option_id','option_fields'));	
 		// } else {
+		// dd($id,$row,$page_menu,$page_title,$command,$option_id,$option_fields,$table);
 		return view('crudbooster::default.form',compact('id','row','page_menu','page_title','command','option_id','option_fields','table'));
 		// }
 		
@@ -1374,7 +1380,7 @@ class CBController extends Controller {
 		
 
 		$this->hook_before_edit($this->arr,$id);
-		
+
 		DB::table($this->table)->where($this->primary_key,$id)->update($this->arr);		
 
 		//Looping Data Input Again After Insert
@@ -1451,6 +1457,23 @@ class CBController extends Controller {
 				$fk = $ro['foreign_key'];
 				$childtablePK = CB::pk($childtable);
 
+				$colMatch = array();
+				$row2 = (array) $row;
+				foreach ($this->col as $key => $value) {
+					$val = $value['name'];
+					$colMatch[] = $val;
+
+				}
+
+				$matchRow = [];
+				foreach ($colMatch as $key => $field) {
+					if(array_key_exists($field, $row2)){
+						$matchRow[$field] = $row2[$field];
+					}
+				}
+
+				// dd($newArray2,$colMatch,$row2);
+
 				for($i=0;$i<=$count_input_data;$i++) {
 					
 					$column_data = [];
@@ -1466,20 +1489,22 @@ class CBController extends Controller {
 					if($child_array[$i]['id'] == NULL){
 						
 						if($childtable == 'mainmerge') {
-						$customer_array[] = $row;
 
+						$customer_array[] = $matchRow;
 						$test = (array) $customer_array[$i];
-
 						foreach($child_array as $key => $value)
 						{
 							$newArray = array_merge($child_array[$key],$test);
 						}
-						// var_dump($customer_array);
-						// dd($customer_array,$row);
+						
 						unset($newArray['id']);
-						// dd($child_array);
+
 						$lastId = CRUDBooster::newId($childtable);
 						$newArray['id'] = $lastId;
+						date_default_timezone_set("Asia/Kuala_Lumpur");
+						$date = date('Y-m-d H:i:s');
+						$newArray['m_date'] = $date;
+
 						DB::table($childtable)->insert($newArray);
 						}
 						else {
