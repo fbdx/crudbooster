@@ -84,7 +84,7 @@ class AdminController extends CBController
                 $provider = $ad->connect();
                 try {                                       
                     if ($provider->auth()->attempt(config("crudbooster.LDAP_DOMAIN")."\\".$email, $password)) {                        
-                        $users = DB::table(config('crudbooster.USER_TABLE'))->where("name", $email)->first();
+                        $users = DB::table(config('crudbooster.USER_TABLE'))->where(config('crudbooster.LDAP_DB_FIELD'), $email)->first();                        
                         if ($users!=null)
                         {
                              $priv = DB::table("cms_privileges")->where("id", $users->id_cms_privileges)->first();

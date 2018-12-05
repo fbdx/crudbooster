@@ -81,4 +81,5 @@ return [
     'LDAP_AUTH' => 'NO',
     'LDAP_HOST' => '',
     'LDAP_DOMAIN' => '',
+    'LDAP_DB_FIELD' => 'name',
 ];
