@@ -83,7 +83,7 @@
 				$('#current-baby-food').hide();
 				$('#child-feeding').hide();
 				$('#reason-not-suitable').hide(); // for admin/customer
-				$('#remarks').hide(); // for admin/customer
+				// $('#remarks').hide(); // for admin/customer
 				var a = $("#reasonnotsuitable").val();
 				if(a == 'Others'){
 					$("#remarks").prop('readonly',false); //adminmainmergecontroller
