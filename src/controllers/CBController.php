@@ -1222,7 +1222,6 @@ class CBController extends Controller {
 
 		$this->hook_before_add($this->arr);
 
-		dd($this->arr);
 		$this->arr[$this->primary_key] = $id = CRUDBooster::newId($this->table);
 				
 		DB::table($this->table)->insert($this->arr);		
