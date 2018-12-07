@@ -153,8 +153,8 @@
             @if($form['datatable'])
                 @if($form['relationship_table'])
                     <?php
-                    $select_table = explode(',', $form['datatable'])[0];
-                    $select_title = explode(',', $form['datatable'])[1];
+                    $select_table = explode(',', $form['datatable'])[0];                    
+                    $select_title = explode(',', $form['datatable'])[1];                    
                     $select_where = $form['datatable_where'];
                     $pk = CRUDBooster::findPrimaryKey($select_table);
 
@@ -175,19 +175,31 @@
                         $option_label = $r->{$select_title};
                         $option_value = $r->id;
                         $selected = (is_array($value) && in_array($r->$pk, $value)) ? "selected" : "";
-                        echo "<option $selected value='$option_value'>$option_label</option>";
+
+                        if ($data1!=null)
+                        {
+                            $option_data1 = $r->{$data1};
+                            echo "<option $selected value='$option_value' data-data1='$option_data1'>$option_label</option>";
+                        }
+                        else
+                            echo "<option $selected value='$option_value'>$option_label</option>";
                     }
                     ?>
                 @else
                     @if($form['datatable_ajax'] == false)
                         <option value=''>{{trans('crudbooster.text_prefix_option')}} {{$form['label']}}</option>
                         <?php
-                        $select_table = explode(',', $form['datatable'])[0];
+                        $select_table = explode(',', $form['datatable'])[0];                        
                         $select_title = explode(',', $form['datatable'])[1];
+                        $data1 = $form['data1'];                        
                         $select_where = $form['datatable_where'];
                         $datatable_format = $form['datatable_format'];
                         $select_table_pk = CRUDBooster::findPrimaryKey($select_table);
-                        $result = DB::table($select_table)->select($select_table_pk, $select_title);
+                        if ($data1!=null)
+                            $result = DB::table($select_table)->select($select_table_pk, $select_title,$data1);
+                        else
+                            $result = DB::table($select_table)->select($select_table_pk, $select_title);                            
+                        
                         if ($datatable_format) {
                             $result->addSelect(DB::raw("CONCAT(".$datatable_format.") as $select_title"));
                         }
@@ -203,7 +215,14 @@
                             $option_label = $r->{$select_title};
                             $option_value = $r->$select_table_pk;
                             $selected = ($option_value == $value) ? "selected" : "";
-                            echo "<option $selected value='$option_value'>$option_label</option>";
+
+                            if ($data1!=null)
+                            {
+                                $option_data1 = $r->{$data1};
+                                echo "<option $selected value='$option_value' data-data1='$option_data1'>$option_label</option>";
+                            }
+                            else
+                                echo "<option $selected value='$option_value'>$option_label</option>";
                         }
                         ?>
                     <!--end-datatable-ajax-->

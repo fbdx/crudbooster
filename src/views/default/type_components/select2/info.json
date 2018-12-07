@@ -15,7 +15,8 @@
         "datatable_where": "string where condition",
         "datatable_format": "sql concat alike. e.g : id,' - ',title",
         "datatable_exception": "string value exception",
-        "datatable_ajax": "true or false"
+        "datatable_ajax": "true or false",
+        "data1": "Add a value for data1 or else show as blank"
     }
   }
 }
