@@ -82,7 +82,8 @@
 				$('#current-milk-brand').hide();
 				$('#current-baby-food').hide();
 				$('#child-feeding').hide();
-				$('#reason-not-suitable').hide(); // for admin/customer
+				// $('#reason-not-suitable').hide(); // for admin/customer
+				// console.log(this);
 				// $('#remarks').hide(); // for admin/customer
 				var a = $("#reasonnotsuitable").val();
 				if(a == 'Others'){
@@ -137,29 +138,35 @@
 	        
 	        });
 
-			$("#childrenswitched").change(function() {
+			$("#panel-form-children").ready(function() {
+
+				$('#childrenreasonnotsuitable').prop('disabled',true);
+				$("#childrenswitched").change(function() {
 				var switchVal = $(this).val();
-				console.log(switchVal);
+
 				if (switchVal == 'No') {
-					$('#reason-not-suitable').show();
-					// $("#childrenreasonnotsuitable").prop('required',true);
-					
+					$('#childrenreasonnotsuitable').prop('disabled',false);
+					// $("#childrenreasonnotsuitable").addClass('required');
+
 					$("#childrenreasonnotsuitable").change(function(){
 						var notSuitableVal = $(this).val();
 						console.log(notSuitableVal);
 						if(notSuitableVal == 'Others'){
-							$('#remarks').show();
+							$('#childrenremarks').prop('readonly',false);
 						}else{
-							$('#remarks').hide();
+							$('#childrenremarks').prop('readonly',true);
 						}
 					});
 
 				} else {
-					$('#reason-not-suitable').hide();
-					$("#childrenreasonnotsuitable").prop('required',false);
+					$('#childrenreasonnotsuitable').prop('disabled',true);
 					$("#childrenreasonnotsuitable").val('');
+					$("#childrenreasonnotsuitable").removeClass('required');
+					$('#childrenremarks').prop('readonly','false');
+					$('#childrenremarks').val('');
 				}
-			});
+				});
+			})
 
 	        $("#reasonnotsuitable").change(function() {
 				var v = $(this).val();
