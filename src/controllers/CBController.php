@@ -1279,24 +1279,86 @@ class CBController extends Controller {
 			}
 
 			if($ro['type']=='child') {
+
+				$tempId = array();
 				$name = str_slug($ro['label'],'');
-				$columns = $ro['columns'];				
+				$columns = $ro['columns'];
 				$count_input_data = count(Request::get($name.'-'.$columns[0]['name']))-1;
 				$child_array = [];
+				$childtable = CRUDBooster::parseSqlTable($ro['table'])['table'];				
+				$fk = $ro['foreign_key'];
+				$childtablePK = CB::pk($childtable);
+
+				$colMatch = array();
+				$row2 = (array) $row;
+				foreach ($this->col as $key => $value) {
+					$val = $value['name'];
+					$colMatch[] = $val;
+
+				}
+
+				$matchRow = [];
+				foreach ($colMatch as $key => $field) {
+					if(array_key_exists($field, $row2)){
+						$matchRow[$field] = $row2[$field];
+					}
+				}
+
+				// dd($newArray2,$colMatch,$row2);
 
 				for($i=0;$i<=$count_input_data;$i++) {
-					$fk = $ro['foreign_key'];
+					
 					$column_data = [];
+					// $column_data[$childtablePK] = $lastId;
 					$column_data[$fk] = $id;
 					foreach($columns as $col) {
 						$colname = $col['name'];
 						$column_data[$colname] = Request::get($name.'-'.$colname)[$i];
 					}
-					$child_array[] = $column_data;
-				}	
 
-				$childtable = CRUDBooster::parseSqlTable($ro['table'])['table'];
-				DB::table($childtable)->insert($child_array);
+					$child_array[] = $column_data;
+
+					if($child_array[$i]['id'] == NULL){
+						
+						if($childtable == 'mainmerge') {
+
+						$customer_array[] = $matchRow;
+						$test = (array) $customer_array[$i];
+						foreach($child_array as $key => $value)
+						{
+							$newArray = array_merge($child_array[$key],$test);
+						}
+						
+						unset($newArray['id']);
+
+						$lastId = CRUDBooster::newId($childtable);
+						$newArray['id'] = $lastId;
+						date_default_timezone_set("Asia/Kuala_Lumpur");
+						$date = date('Y-m-d H:i:s');
+						$newArray['m_date'] = $date;
+
+						DB::table($childtable)->insert($newArray);
+						}
+						else {
+							// dd($child_array);
+							unset($child_array['id']);
+							$lastId = CRUDBooster::newId($childtable);
+							$child_array[$i]['id'] = $lastId;
+							DB::table($childtable)->insert($child_array);
+						}
+
+					}
+					// dd($child_array);
+					$tempId[] = $child_array[$i]['id'];
+					unset($child_array[$i]['id']);
+
+					DB::table($childtable) 
+					->where('id', $tempId[$i])
+					->update($child_array[$i]);
+
+				}
+				// dump($tempId);	
+
 			}
 
 
