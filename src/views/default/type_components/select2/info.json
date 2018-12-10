@@ -16,7 +16,9 @@
         "datatable_format": "sql concat alike. e.g : id,' - ',title",
         "datatable_exception": "string value exception",
         "datatable_ajax": "true or false",
-        "data1": "Add a value for data1 or else show as blank"
+        "data1": "Add a value for data1 or else show as blank",
+        "lockchange": "Set this to true if you want a lock change",
+        "lockchangeconfirmapi" :  "Set this is you want to send an API call"
     }
   }
 }

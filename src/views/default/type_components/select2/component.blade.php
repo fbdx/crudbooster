@@ -1,5 +1,7 @@
 @if($form['datatable'])
 
+
+
     @if($form['relationship_table'])
         @push('bottom')
             <script type="text/javascript">
@@ -117,6 +119,40 @@
 
 @endif
 
+@if ($form['lockchange']==true)    
+  <?php
+    $disabled = "disabled='disabled'";
+    if ($col_width)
+    {
+      $array_of_piece = explode('-', $col_width);
+      //dd($array_of_piece);
+      $col_width = $array_of_piece[0]."-".$array_of_piece[1]."-".(intval($array_of_piece[2])-2);
+    }
+    else {
+      $col_width = 'col-sm-8';
+    }
+   ?>
+  @push('bottom')
+      <script type="text/javascript">
+          $(function () {
+            $('#lockchange-{{$name}}').click(function() {
+                var r = confirm("You are changing your dealing assistant from the dealing assistant assigned to you, please confirm");
+                if (r == true) {
+                    $("#{{$name}}").prop("disabled", false);
+                    @if (isset($form['lockchangeconfirmapi']))
+                        var link = "{{$form['lockchangeconfirmapi']}}";
+                        $.get(link, function(data, status){
+                            console.log("Sent confirm ID");
+                        });
+                    @endif
+                }
+            
+            });
+          })
+      </script>
+  @endpush
+@endif
+
 <div class='form-group {{$header_group_class}} {{ ($errors->first($name))?"has-error":"" }} {{@$form["groupclass"]}}' id='form-group-{{$name}}' style="{{@$form['style']}}">
     <label class='control-label col-sm-2'>{{$form['label']}}
         @if($required)
@@ -153,8 +189,8 @@
             @if($form['datatable'])
                 @if($form['relationship_table'])
                     <?php
-                    $select_table = explode(',', $form['datatable'])[0];                    
-                    $select_title = explode(',', $form['datatable'])[1];                    
+                    $select_table = explode(',', $form['datatable'])[0];
+                    $select_title = explode(',', $form['datatable'])[1];
                     $select_where = $form['datatable_where'];
                     $pk = CRUDBooster::findPrimaryKey($select_table);
 
@@ -189,17 +225,17 @@
                     @if($form['datatable_ajax'] == false)
                         <option value=''>{{trans('crudbooster.text_prefix_option')}} {{$form['label']}}</option>
                         <?php
-                        $select_table = explode(',', $form['datatable'])[0];                        
+                        $select_table = explode(',', $form['datatable'])[0];
                         $select_title = explode(',', $form['datatable'])[1];
-                        $data1 = $form['data1'];                        
+                        $data1 = $form['data1'];
                         $select_where = $form['datatable_where'];
                         $datatable_format = $form['datatable_format'];
                         $select_table_pk = CRUDBooster::findPrimaryKey($select_table);
                         if ($data1!=null)
                             $result = DB::table($select_table)->select($select_table_pk, $select_title,$data1);
                         else
-                            $result = DB::table($select_table)->select($select_table_pk, $select_title);                            
-                        
+                            $result = DB::table($select_table)->select($select_table_pk, $select_title);
+
                         if ($datatable_format) {
                             $result->addSelect(DB::raw("CONCAT(".$datatable_format.") as $select_title"));
                         }
@@ -234,10 +270,17 @@
             <!--end-datatable-->
             @endif
         </select>
+
         <div class="text-danger">
             {!! $errors->first($name)?"<i class='fa fa-info-circle'></i> ".$errors->first($name):"" !!}
         </div><!--end-text-danger-->
         <p class='help-block'>{{ @$form['help'] }}</p>
 
     </div>
+    @if ($form['lockchange']==true)
+    <div class="col-sm-2">
+        <a class="btn btn-danger" id="lockchange-{{$name}}" href="#" role="button">Change</a>
+    </div>
+    @endif
+
 </div>
