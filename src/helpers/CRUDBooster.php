@@ -1050,6 +1050,19 @@ class CRUDBooster
         DB::table('cms_logs')->insert($a);
     }
 
+    public static function insertLogOut($description, $userid, $details = '')
+    {
+        $a = [];
+        $a['created_at'] = date('Y-m-d H:i:s');
+        $a['ipaddress'] = $_SERVER['REMOTE_ADDR'];
+        $a['useragent'] = $_SERVER['HTTP_USER_AGENT'];
+        $a['url'] = Request::url();
+        $a['description'] = $description;
+        $a['details'] = $details;
+        $a['id_cms_users'] = $userid;
+        DB::table('cms_logs')->insert($a);
+    }
+
     public static function referer()
     {
         return Request::server('HTTP_REFERER');
