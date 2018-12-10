@@ -140,11 +140,12 @@
                 if (r == true) {
                     $("#{{$name}}").prop("disabled", false);
                     @if (isset($form['lockchangeconfirmapi']))
-                        var link = "{{$form['lockchangeconfirmapi']}}";
+                        var link = "{{$form['lockchangeconfirmapi']}}"+"/"+$("#{{$name}}").val();
                         $.get(link, function(data, status){
                             console.log("Sent confirm ID");
                         });
                     @endif
+                    $("#lockchange-{{$name}}").prop("disabled", "disabled");
                 }
             
             });
