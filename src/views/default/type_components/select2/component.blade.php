@@ -145,7 +145,7 @@
                             console.log("Sent confirm ID");
                         });
                     @endif
-                    $("#lockchange-{{$name}}").prop("disabled", "disabled");
+                    $("#lockchange-{{$name}}").off('click');
                 }
             
             });
