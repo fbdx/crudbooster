@@ -1549,7 +1549,7 @@ class CBController extends Controller {
 
 					if($child_array[$i]['id'] == NULL){
 						
-						if($childtable == 'mainmerge') {
+						if($childtable == 'mainmerge' || $childtable == 'careline_samples_adhoc') {
 
 						$customer_array[] = $matchRow;
 						$test = (array) $customer_array[$i];

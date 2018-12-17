@@ -26,7 +26,7 @@
 		</div>
 		<div class="panel-body">
 
-			@if(strpos($current_path, 'admin/customer') !== false)
+			@if( (strpos($current_path, 'admin/customer') !== false) || (strpos($current_path, 'admin/careline_customer_adhoc') !== false))
 				<div class="panel panel-default">
 					<div class="panel-heading">
 						<i class='fa fa-table'></i> Table Detail
