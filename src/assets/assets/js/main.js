@@ -166,6 +166,36 @@
 					$('#childrenremarks').val('');
 				}
 				});
+			});
+
+			$("#panel-form-mother").ready(function() {
+
+				$('#motherreasonnotsuitable').prop('disabled',true);
+				$("#motherswitched").change(function() {
+				var switchVal = $(this).val();
+
+				if (switchVal == 'No') {
+					$('#motherreasonnotsuitable').prop('disabled',false);
+					// $("#childrenreasonnotsuitable").addClass('required');
+
+					$("#motherreasonnotsuitable").change(function(){
+						var notSuitableVal = $(this).val();
+						console.log(notSuitableVal);
+						if(notSuitableVal == 'Others'){
+							$('#motherremarks').prop('readonly',false);
+						}else{
+							$('#motherremarks').prop('readonly',true);
+						}
+					});
+
+				} else {
+					$('#motherreasonnotsuitable').prop('disabled',true);
+					$("#motherreasonnotsuitable").val('');
+					$("#motherreasonnotsuitable").removeClass('required');
+					$('#motherremarks').prop('readonly','false');
+					$('#motherremarks').val('');
+				}
+				});
 			})
 
 	        $("#reasonnotsuitable").change(function() {
