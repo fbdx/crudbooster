@@ -536,7 +536,7 @@
 											@else --}}
 											{{-- {{dump($name_column)}} --}}
 											{{-- {{dump($col["required"])}} --}}
-												<select id='{{$name_column}}' name='child-{{$col["name"]}}' class='form-control select2 {{$col['required']?"required":""}}'
+												<select id='{{$name_column}}' name='child-{{$col["name"]}}' class='form-control select {{$col['required']?"required":""}}'
 												{{($col['readonly']===true)?"readonly":""}} ">
 
 													<option value=''>{{trans('crudbooster.text_prefix_option')}} {{$col['label']}}</option>
