@@ -23,6 +23,7 @@ use JsValidator;
 use GSSDK;
 use GSRequest;
 use DateTime;
+use Carbon;
 
 
 class CBController extends Controller {
@@ -96,8 +97,6 @@ class CBController extends Controller {
 		$this->cbInit();
 
 		$this->checkHideForm();
-
-
 
 		$this->primary_key 					 = CB::pk($this->table);
 		$this->columns_table                 = $this->col;
@@ -211,7 +210,7 @@ class CBController extends Controller {
 		$tablePK = $data['table_pk'];
 		$table_columns = CB::getTableColumns($this->table);
 		$result = DB::table($this->table)->select(DB::raw($this->table.".".$this->primary_key));
-
+		// dd($result);
 		if(Request::get('parent_id')) {
 			$table_parent = $this->table;
 			$table_parent = CRUDBooster::parseSqlTable($table_parent)['table'];
@@ -481,7 +480,7 @@ class CBController extends Controller {
 
 			}
 		}
-		// dd($columns_table);
+
 		$data['columns'] = $columns_table;
 
 		if($this->index_return) return $data;
@@ -626,6 +625,7 @@ class CBController extends Controller {
 		$papersize			= Request::input('page_size');
 		$paperorientation	= Request::input('page_orientation');
 		$response           = $this->getIndex();
+
 
 		if(Request::input('default_paper_size')) {
 			DB::table('cms_settings')->where('name','default_paper_size')->update(['content'=>$papersize]);
@@ -1549,7 +1549,7 @@ class CBController extends Controller {
 
 					if($child_array[$i]['id'] == NULL){
 						
-						if($childtable == 'mainmerge' || $childtable == 'careline_samples_adhoc') {
+						if($childtable == 'mainmerge') {
 
 						$customer_array[] = $matchRow;
 						$test = (array) $customer_array[$i];
@@ -1732,6 +1732,8 @@ class CBController extends Controller {
 			//Log::error($data_import_column);
 
 			$table_columns = DB::getSchemaBuilder()->getColumnListing($this->table);
+			// Log::error($table_columns);
+			// Log::debug(CRUDBooster::myPrivilegeId());
 
 			$data['table_columns'] = $table_columns;
 			$data['data_import_column'] = $data_import_column;
@@ -1775,6 +1777,7 @@ class CBController extends Controller {
 		$file = storage_path($file);
 
 		$rows = $this->csvToArray($file);
+		// Log::error($rows);
 		$f = $this->import_consignment;
 		//set_time_limit ( 600 );
 		
@@ -1785,9 +1788,8 @@ class CBController extends Controller {
 			$has_created_at = true;
 		}
 
-		
-
 		$data_import_column = array();
+		$uploadNotUpdated = [];
 		foreach($rows as $value) {
 			
 			$a = array();
@@ -1879,37 +1881,68 @@ class CBController extends Controller {
 				else
 				{
 					//Log::error("notinloop");
-					//Log::error($a);
-					if (($a['consigmentno'] != '')||($a['returnreason'] != '')||($a['batchno'] != ''))
-					{
-						$arr = array();
-						foreach ($a as $key => $value)
-							if (($key!=='consigmentno')&&($key!='batchno')&&($key!='created_at')&&($key!='returnreason')&&($key!='m_date'))
-								$arr[] = array($key,'=',$value);
-
-						$checkDB = DB::table($this->table)->where($arr);
-
-						if (isset($a["m_date"]) || array_key_exists("m_date",$a))
+					// Log::error($a);
+					if ( (isset($a['m_product'])) && (isset($a['m_date'])) && (isset($a['email'])) && (isset($a['mobileno'])) && (isset($a['childname'])) && (isset($a['childdob'])) ) {
+						if (($a['consigmentno'] != '')||($a['returnreason'] != '')||($a['batchno'] != ''))
 						{
-							//Log::error("in m_date");
-							$checkDB = $checkDB->whereRaw("m_date <= DATE_ADD(?, INTERVAL 2 MONTH)",$a["m_date"])->whereRaw("m_date >= DATE_SUB(?, INTERVAL 2 MONTH)",$a["m_date"]);
-							//Log::error($checkDB->toSql());
+							$arr = array();
+							foreach ($a as $key => $value){
+								if (($key!=='consigmentno')&&($key!='batchno')&&($key!='created_at')&&($key!='returnreason')&&($key!='m_date'))
+									$arr[] = array($key,'=',$value);
+							}
+
+							$checkDB = DB::table($this->table)->where($arr);
+							// Log::debug($checkDB->toSql());
+
+							// if (isset($a["m_date"]) || array_key_exists("m_date",$a))
+							// {
+							// 	//Log::error("in m_date");
+							// 	$checkDB = $checkDB->whereRaw("m_date <= DATE_ADD(?, INTERVAL 2 MONTH)",$a["m_date"])->whereRaw("m_date >= DATE_SUB(?, INTERVAL 2 MONTH)",$a["m_date"]);
+							// 	//Log::error($checkDB->toSql());
+							// }
+
+							$countCheckDB = $checkDB->update(
+								['consigmentno' => $a['consigmentno'],'batchno' => $a['batchno'],'returnreason'=>$a['returnreason']]
+							);
+							// Log::debug($testCheck);
+							if($countCheckDB == 0){
+								$uploadNotUpdated[] = $a;
+							}
+							$uploadStatus = 'Successful';
+							//Log::error(DB::getQueryLog());
 						}
-						
-						
-						$checkDB->update(
-							['consigmentno' => $a['consigmentno'],'batchno' => $a['batchno'],'returnreason'=>$a['returnreason']]
-						);
-						//Log::error(DB::getQueryLog());
+					} else {
+						$uploadStatus = "Fail to match record";
 					}
 				}
 				Cache::increment('success_'.$file_md5);
 			}catch(\Exception $e) {
 				$e = (string) $e;
+				$uploadStatus = 'Failed';
 				Log::error('Error'.$e);
 				Cache::put('error_'.$file_md5,$e,500);
 			}
 		}
+
+		Log::debug($uploadNotUpdated);
+
+		DB::table('upload_logs')->insert([
+			[
+				'userid' => CRUDBooster::myId(),
+				'status' => $uploadStatus,
+				'created' => Carbon\Carbon::now()
+			]
+		]);
+
+		// $output = fopen("php://output",'w') or die("Can't open php://output");
+		// header("Content-Type:application/csv"); 
+		// header("Content-Disposition:attachment;filename=pressurecsv.csv"); 
+		// fputcsv($output, array('m_product','m_date','email','mobileno','childname','childdob','consignmentno'));
+		// foreach($uploadNotUpdated as $upnot) {
+		//     fputcsv($output, $upnot);
+		// }
+		// fclose($output);
+
 		return response()->json(['status'=>true]);
 	}
 
