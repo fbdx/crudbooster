@@ -45,7 +45,7 @@
 
                 @if(CRUDBooster::myPrivilegeId() == 2)
                     <li>
-                        <a href="/admin/mainmergeoffline/import-data" id='btn_import_data' data-url-parameter='{{$build_query}}' title='Import Data' class="btn btn-sm btn-import-data" style="text-align: left;font-size: 14px;">
+                        <a href="/public/admin/mainmergeoffline/import-data" id='btn_import_data' data-url-parameter='{{$build_query}}' title='Import Data' class="btn btn-sm btn-import-data" style="text-align: left;font-size: 14px;">
                           <i class="fa fa-download"></i> Consignment No. Update
                         </a>
                     </li>
