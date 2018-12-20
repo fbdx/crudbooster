@@ -43,7 +43,13 @@
                     </li>
                 @endforeach
 
-
+                @if(CRUDBooster::myPrivilegeId() == 2)
+                    <li>
+                        <a href="/admin/mainmergeoffline/import-data" id='btn_import_data' data-url-parameter='{{$build_query}}' title='Import Data' class="btn btn-sm btn-import-data" style="text-align: left;font-size: 14px;">
+                          <i class="fa fa-download"></i> Consignment No. Update
+                        </a>
+                    </li>
+                @endif
 
                 @if(CRUDBooster::isSuperadmin())
                     <li class="header">{{ trans('crudbooster.SUPERADMIN') }}</li>
@@ -54,6 +60,8 @@
                             <li class="{{ (Request::is(config('crudbooster.ADMIN_PATH').'/privileges')) ? 'active' : '' }}"><a href='{{Route("PrivilegesControllerGetIndex")}}?m=0'><i class='fa fa-bars'></i> {{ trans('crudbooster.List_Privilege') }}</a></li>
                         </ul>
                     </li>
+
+
 
                     <li class='treeview'>
                         <a href='#'><i class='fa fa-users'></i> <span>{{ trans('crudbooster.Users_Management') }}</span>  <i class="fa fa-angle-{{ trans("crudbooster.right") }} pull-{{ trans("crudbooster.right") }}"></i></a>

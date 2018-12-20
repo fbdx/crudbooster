@@ -15,7 +15,7 @@
 	})
 </script>
 <div class='form-group {{$header_group_class}}' id='form-group-{{$name}}'>
-	{{-- {{dump($form)}} --}}
+	{{-- {{dump($name)}} --}}
 	{{-- {{dump($current_path)}} --}}
 	@if($form['columns'])					
 	<div class="col-sm-12">
@@ -145,7 +145,7 @@
 
 								<?php endforeach;?>
 
-								@if((count($data_child)==0))
+								@if(count($data_child)==0)
 								<tr class="trNull">
 									<td colspan="{{count($form['columns'])+1}}" align="center">{{trans('crudbooster.table_data_not_found')}}</td>
 								</tr>
@@ -253,7 +253,7 @@
 
 								<?php endforeach;?>
 
-								@if((count($data_child)==0) || ($dbProdName == 'Mom_n_me'))
+								@if((count($data_child)==0))
 								<tr class="trNull">
 									<td colspan="{{count($form['columns'])+1}}" align="center">{{trans('crudbooster.table_data_not_found')}}</td>
 								</tr>
