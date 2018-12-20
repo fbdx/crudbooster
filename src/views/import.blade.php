@@ -258,7 +258,7 @@
                                     * File format should be : <b>csv</b><br/>
                                     * Please limit file sizes to a maximum of 5MB. Split large files into smaller parts of necessary<br/>
                                     * Please only use this tool after 7pm on Wednesday and Friday only to maintain data integrity<br/>
-                                    * Please follow the template found <a href="{{'/photos/upload-example.png'}}" target="_blank">here</a><br>
+                                    * Please follow the template found <a href="{{'public/photos/upload-example.png'}}" target="_blank">here</a><br>
                                     * Make sure the date/time format follows the correct format as shown in the template <br>
                                     * Please only include customers who are already inside the 'Offline' tab in Smart Data for this process
                                   @else
