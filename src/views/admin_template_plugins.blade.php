@@ -36,8 +36,8 @@
 <script src="{{ asset('vendor/crudbooster/assets/lightbox/dist/js/lightbox.min.js') }}"></script>
 
 
-<link href="https://gitcdn.github.io/bootstrap-toggle/2.2.2/css/bootstrap-toggle.min.css" rel="stylesheet">
-<script src="https://gitcdn.github.io/bootstrap-toggle/2.2.2/js/bootstrap-toggle.min.js"></script>
+<link href="{{ asset('vendor/crudbooster/assets/css/bootstrap-toggle.min.css') }}" rel="stylesheet">
+<script src="{{ asset('vendor/crudbooster/assets/js/bootstrap-toggle.min.js') }}"></script>
 
 <!--SWEET ALERT-->
 <script src="{{asset('vendor/crudbooster/assets/sweetalert/dist/sweetalert.min.js')}}"></script>
