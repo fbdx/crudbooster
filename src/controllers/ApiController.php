@@ -60,6 +60,7 @@ class ApiController extends Controller
         // DB::enableQueryLog();
 
         $posts = Request::all();
+        $this->hook_before($posts);
         $posts_keys = array_keys($posts);
         $posts_values = array_values($posts);
 
@@ -211,8 +212,7 @@ class ApiController extends Controller
                 $responses_fields[] = $r['name'];
             }
         }
-
-        $this->hook_before($posts);
+        
         if($this->output) {            
             return response()->json($this->output);
         }
