@@ -107,6 +107,7 @@ class AdminController extends CBController
 
                             $cb_hook_session = new \App\Http\Controllers\CBHook;
                             $cb_hook_session->afterLogin();
+                            return redirect(CRUDBooster::adminPath());
                         }
                         else
                         {
