@@ -1753,10 +1753,12 @@ class CBController extends Controller {
 	}
 
 	public function postDoImportChunk() {
+		Log::debug('1st');
 		$this->cbLoader();
 		$file_md5 = md5(Request::get('file'));
+		Log::debug($file_md5);
 		Cache::add('success_'.$file_md5, 0, 60);
-
+		
 		if(Request::get('file') && Request::get('resume')==1) {
 			$total = Session::get('total_data_import');
 			$prog = intval(Cache::get('success_'.$file_md5)) / $total * 100;
