@@ -14,7 +14,7 @@ class AddGooglesdatastudioToStatistics extends Migration
     public function up()
     {
         Schema::table('cms_statistics', function (Blueprint $table) {
-            $table->text('googledatastudio');
+            $table->text('googledatastudio')->nullable();
         });
     }
 
