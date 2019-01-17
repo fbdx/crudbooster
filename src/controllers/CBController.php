@@ -132,8 +132,7 @@ class CBController extends Controller
 
     public function cbLoader()
     {
-        $this->cbInit();
-
+        $this->cbInit();        
         $this->checkHideForm();
 
         $this->primary_key = CB::pk($this->table);

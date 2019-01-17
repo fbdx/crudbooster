@@ -64,9 +64,14 @@ class StatisticBuilderController extends CBController
     public function getDashboard()
     {
         $this->cbLoader();
+        //dd(CRUDBooster::myPrivilegeId());
 
-        $menus = DB::table('cms_menus')->where('is_dashboard', 1)->where('type', 'Statistic')->first();
-
+        $menus = DB::table('cms_menus')->join('cms_menus_privileges','cms_menus.id','=','cms_menus_privileges.id_cms_menus')->where('cms_menus.is_dashboard', 1)->where('cms_menus.type', 'Statistic')->where('cms_menus_privileges.id_cms_privileges', CRUDBooster::myPrivilegeId())->first();
+        //dd($menus);
+        if (!$menus)
+        {
+            return view('crudbooster::home');
+        }        
         $slug = str_replace("statistic_builder/show/", "", $menus->path);
 
         $row = CRUDBooster::first($this->table, ['slug' => $slug]);
