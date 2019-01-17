@@ -230,6 +230,7 @@ class CBController extends Controller {
 		$join_table_temp  = array();
 		$table            = $this->table;
 		$columns_table    = $this->columns_table;
+		// dd($columns_table);
 		foreach($columns_table as $index => $coltab) {
 			// dump($coltab);
 			$join = @$coltab['join'];
@@ -1393,7 +1394,7 @@ class CBController extends Controller {
 	public function getEdit($id){
 		$this->cbLoader();
 		$row             = DB::table($this->table)->where($this->primary_key,$id)->first();
-
+		
 		if(!CRUDBooster::isRead() && $this->global_privilege==FALSE || $this->button_edit==FALSE) {
 			CRUDBooster::insertLog(trans("crudbooster.log_try_edit",['name'=>$row->{$this->title_field},'module'=>CRUDBooster::getCurrentModule()->name]));
 			CRUDBooster::redirect(CRUDBooster::adminPath(),trans('crudbooster.denied_access'));
@@ -1441,20 +1442,21 @@ class CBController extends Controller {
 		
 
 		$this->hook_before_edit($this->arr,$id);
-
+		// dd($this->arr);
 
 		if(strpos(CRUDBooster::mainpath(), 'admin/customer') !== false){
 			$mainmergeDate = DB::table('mainmerge')->where('customer_id',$id)->max('m_date');
 			$carelineDateCreated = DB::table('careline')->where('customer_id',$id)->max('date_created'); 
-			// dd($carelineDateCreated);
 			$carelineData = DB::table('careline')->select('callstatus','currentstatus','date_created','telecomaction')->where('customer_id',$id)->where('date_created','=',$carelineDateCreated)->first();
 			$this->arr['careline_max_datecreated'] = $carelineData->date_created;
 			$this->arr['careline_callstatus'] = $carelineData->callstatus;
 			$this->arr['careline_currentstatus'] = $carelineData->currentstatus;
-			$this->arr['careline_telecomaction'] = $carelineData->date_created;
+			$this->arr['careline_telecomaction'] = $carelineData->telecomaction;
 			$this->arr['mainmerge_max_mdate'] = $mainmergeDate;
 		}
-		
+
+		// dd($this->arr);
+		// die();
 		DB::table($this->table)->where($this->primary_key,$id)->update($this->arr);		
 
 		//Looping Data Input Again After Insert
@@ -1563,16 +1565,17 @@ class CBController extends Controller {
 					if($child_array[$i]['id'] == NULL){
 						
 						if($childtable == 'mainmerge') {
-
 						$customer_array[] = $matchRow;
 						$test = (array) $customer_array[$i];
 						foreach($child_array as $key => $value)
 						{
 							$newArray = array_merge($child_array[$key],$test);
 						}
-						
+						dd($newArray);
 						unset($newArray['id']);
-
+						$remove_array = ['careline_max_datecreated','careline_callstatus','careline_currentstatus','careline_telecomaction','mainmerge_max_mdate'];
+						$newArray = array_diff_key($newArray, array_flip($remove_array));
+						// dd($newArray);
 						$lastId = CRUDBooster::newId($childtable);
 						$newArray['id'] = $lastId;
 						date_default_timezone_set("Asia/Kuala_Lumpur");
@@ -1598,13 +1601,14 @@ class CBController extends Controller {
 					->where('id', $tempId[$i])
 					->update($child_array[$i]);
 
-				}	
+				}
+				// dump($tempId);	
 
 			}
 
 		}//end foreach
 
-		$this->hook_after_edit($id);
+		$this->hook_after_edit($id,$tempId);
 
 		$this->return_url = ($this->return_url)?$this->return_url:Request::get('return_url');
 
@@ -1766,12 +1770,12 @@ class CBController extends Controller {
 	}
 
 	public function postDoImportChunk() {
-		Log::debug('1st');
+		// Log::debug("MAMPUS");
 		$this->cbLoader();
 		$file_md5 = md5(Request::get('file'));
 		Log::debug($file_md5);
 		Cache::add('success_'.$file_md5, 0, 60);
-		
+
 		if(Request::get('file') && Request::get('resume')==1) {
 			$total = Session::get('total_data_import');
 			$prog = intval(Cache::get('success_'.$file_md5)) / $total * 100;

@@ -37,6 +37,60 @@ class GigyaCBController extends CBController {
 		$this->gigya_user_key = config('crudbooster.GIGYAUSERKEY');
 	}
 
+	public function cbLoader() {
+		$this->cbInit();
+
+		$this->checkHideForm();
+
+		$this->primary_key 					 = CB::pk($this->table);
+		$this->columns_table                 = $this->col;
+		$this->data_inputan                  = $this->form;
+		$this->data['pk']				     = $this->primary_key;
+		$this->data['forms']                 = $this->data_inputan;
+		$this->data['hide_form'] 			 = $this->hide_form;
+		$this->data['addaction']             = ($this->show_addaction)?$this->addaction:NULL;
+		$this->data['table']                 = $this->table;
+		$this->data['title_field']           = $this->title_field;
+		$this->data['appname']               = CRUDBooster::getSetting('appname');
+		$this->data['alerts']                = $this->alert;
+		$this->data['index_button']          = $this->index_button;
+		$this->data['show_numbering']	     = $this->show_numbering;
+		$this->data['button_detail']         = $this->button_detail;
+		$this->data['button_edit']           = $this->button_edit;
+		$this->data['button_show']           = $this->button_show;
+		$this->data['button_add']            = $this->button_add;
+		$this->data['button_delete']         = $this->button_delete;
+		$this->data['button_filter']         = $this->button_filter;
+		$this->data['button_export']         = $this->button_export;
+		$this->data['button_addmore']        = $this->button_addmore;
+		$this->data['button_cancel']         = $this->button_cancel;
+		$this->data['button_save']           = $this->button_save;
+		$this->data['button_table_action']   = $this->button_table_action;
+		$this->data['button_bulk_action']    = $this->button_bulk_action;
+		$this->data['button_import']         = $this->button_import;
+		$this->data['button_action_width']   = $this->button_action_width;
+		$this->data['button_selected']       = $this->button_selected;
+		$this->data['index_statistic']       = $this->index_statistic;
+		$this->data['index_additional_view'] = $this->index_additional_view;
+		$this->data['table_row_color']       = $this->table_row_color;
+		$this->data['pre_index_html']        = $this->pre_index_html;
+		$this->data['post_index_html']       = $this->post_index_html;
+		$this->data['load_js']               = $this->load_js;
+		$this->data['load_css']              = $this->load_css;
+		$this->data['script_js']             = $this->script_js;
+		$this->data['style_css']             = $this->style_css;
+		$this->data['sub_module']            = $this->sub_module;
+		$this->data['parent_field'] 		 = (g('parent_field'))?:$this->parent_field;
+		$this->data['parent_id'] 		 	 = (g('parent_id'))?:$this->parent_id;
+
+		if(CRUDBooster::getCurrentMethod() == 'getProfile') {
+			Session::put('current_row_id',CRUDBooster::myId());
+			$this->data['return_url'] = Request::fullUrl();			
+		}		
+
+        view()->share($this->data);
+	}
+
 	public function createTempTable()
 	{
 		$tableName = 'gigya_customer';
@@ -53,6 +107,7 @@ class GigyaCBController extends CBController {
 		return $table;
 	}
 
+/*
 	public function createChildTable()
 	{
 		$childTableName = 'gigya_child';
@@ -94,8 +149,9 @@ class GigyaCBController extends CBController {
 
 		return $table;
 	}
+	*/
 
-	private function getCustomer($offset=0,$limit=5000)
+	private function getCustomer($offset=0,$limit=10)
     {
     	$method = "accounts.search";
     	// $request = new GSRequest($apiKey,$secretKey,$method);
@@ -121,10 +177,10 @@ class GigyaCBController extends CBController {
 	    }
     }
 
+
 	public function getIndex() 
 	{
 		$this->cbLoader();
-		// dd($this);
 		$module = CRUDBooster::getCurrentModule();
 		// $testPath = CRUDBooster::mainpath();
 
@@ -162,6 +218,7 @@ class GigyaCBController extends CBController {
 		$table_columns = CB::getTableColumns($this->table);
 		// $result = DB::table($this->table)->select(DB::raw($this->primary_key));
 		$result = DB::table($this->table)->select(DB::raw($this->table.".".$this->primary_key));
+		// dd($result);
 		if(Request::get('parent_id')) {
 			$table_parent = $this->table;
 			$table_parent = CRUDBooster::parseSqlTable($table_parent)['table'];
@@ -175,14 +232,14 @@ class GigyaCBController extends CBController {
 
 		//insert table
 		$tableName = 'gigya_customer';
-		$childTableName = 'gigya_child';
+		// $childTableName = 'gigya_child';
 		$areaInterestTable = 'gigya_area_interest';
 
 		$tableExist = Schema::hasTable($tableName);
 		$childTableExist = Schema::hasTable($childTableName);
 		$areaInterestTableExist = Schema::hasTable($areaInterestTable);
 
-		if($tableExist !== true && childTableExist !== true && $areaInterestTableExist !== true){
+		if($tableExist !== true && $childTableExist !== true && $areaInterestTableExist !== true){
 			$tempTable = $this->createTempTable();
 			$createChildTable = $this->createChildTable();
 			$areaInterestTableExist = $this->createAreaInterestTable();
@@ -566,7 +623,7 @@ class GigyaCBController extends CBController {
 		} //end foreach data[result]
 
 
-		//$customerlist = $this->getCustomer();
+
 
 		// echo "<pre>".print_r($data,TRUE)."</pre><br>";
 
@@ -586,20 +643,14 @@ class GigyaCBController extends CBController {
 	public function getEdit($id){
 		$this->cbLoader();
 		$row             = DB::table($this->table)->where($this->primary_key,$id)->first();
-		$response = $this->getCustomerRecord($row->UID,$row->email);
+		$response = $this->searchGigya($row->UID,$row->email);
 		$results = $response['results'];
 		// dd($row->email);
 		$UID = $results[0]['UID'];
 		$email = $row->email;
-		// if($row->UID == NULL){
-		// 	DB::table('gigya_customer')
-  //                   ->where('email', $email)
-  //                   ->update(['UID' => $UID]);
-		// }
 		$profile = $results[0]['profile'];
-		$child = $results[0]['data']['child'];
-		// dd($child);
-		$interest = $results[0]['data']['areaOfInterest'];
+		// $child = $results[0]['data']['child'];
+		// $interest = $results[0]['data']['areaOfInterest'];
 		$mobileNumber = $profile['phones']['number'];
 		foreach ($profile as $key => $value) {
 			if($key == 'phones'){
@@ -608,9 +659,9 @@ class GigyaCBController extends CBController {
 				$row->$key = $profile[$key];
 			}
 		}
-
+/*
 		DB::table('gigya_child')->where('customerid', '=', $id)->delete();
-		//dd($child);
+
 		if(!is_null($child)){
 			try {			
 
@@ -671,7 +722,7 @@ class GigyaCBController extends CBController {
                 ]);
 			}
 		}
-
+*/
 
 		if(!CRUDBooster::isRead() && $this->global_privilege==FALSE || $this->button_edit==FALSE) {
 			CRUDBooster::insertLog(trans("crudbooster.log_try_edit",['name'=>$row->{$this->title_field},'module'=>CRUDBooster::getCurrentModule()->name]));
@@ -713,7 +764,8 @@ class GigyaCBController extends CBController {
 		
 
 		$this->hook_before_edit($this->arr,$id);		
-		DB::table($this->table)->where($this->primary_key,$id)->update($this->arr);		
+
+		
 
 		//Looping Data Input Again After Insert
 		// dd($this->data_inputan);
@@ -784,16 +836,28 @@ class GigyaCBController extends CBController {
 				$tempId = array();
 				$name = str_slug($ro['label'],'');
 				$columns = $ro['columns'];
-				if (!empty(Request::get($name.'-'.$columns[0]['name'])))
-					$count_input_data = count(Request::get($name.'-'.$columns[0]['name']))-1;
-				else
-					$count_input_data = -1;
+				$count_input_data = count(Request::get($name.'-'.$columns[0]['name']))-1;
 				$child_array = [];
 				$childtable = CRUDBooster::parseSqlTable($ro['table'])['table'];				
 				$fk = $ro['foreign_key'];
 				$childtablePK = CB::pk($childtable);
-				// dd($childtablePK);
-				//dd($count_input_data);
+
+				$colMatch = array();
+				$row2 = (array) $row;
+				foreach ($this->col as $key => $value) {
+					$val = $value['name'];
+					$colMatch[] = $val;
+
+				}
+
+				$matchRow = [];
+				foreach ($colMatch as $key => $field) {
+					if(array_key_exists($field, $row2)){
+						$matchRow[$field] = $row2[$field];
+					}
+				}
+
+				// dd($newArray2,$colMatch,$row2);
 
 				for($i=0;$i<=$count_input_data;$i++) {
 					
@@ -806,91 +870,82 @@ class GigyaCBController extends CBController {
 					}
 
 					$child_array[] = $column_data;
-					// dd($child_array);
-					if($child_array[$i]['id'] == NULL) {
+
+					if($child_array[$i]['id'] == NULL){
 						
-						$customer_array[] = $row;
-
+						if($childtable == 'mainmerge') {
+						$customer_array[] = $matchRow;
 						$test = (array) $customer_array[$i];
-
 						foreach($child_array as $key => $value)
 						{
 							$newArray = array_merge($child_array[$key],$test);
 						}
-
-						unset($child_array['id']);
+						// dd($newArray);
+						unset($newArray['id']);
+						$newArray['mobileno'] = $newArray['phones'];
+						$newArray['postcode'] = $newArray['zip'];
+						$remove_array = ['phones','zip','careline_max_datecreated','careline_callstatus','careline_currentstatus','careline_telecomaction','mainmerge_max_mdate'];
+						$newArray = array_diff_key($newArray, array_flip($remove_array));
+						// dd($newArray);
 						$lastId = CRUDBooster::newId($childtable);
-						// dump($lastId);
-						$child_array[$i]['id'] = $lastId;
+						$newArray['id'] = $lastId;
+						date_default_timezone_set("Asia/Kuala_Lumpur");
+						$date = date('Y-m-d H:i:s');
+						$newArray['m_date'] = $date;
 
-						if($childtable == 'gigya_child'){
-							foreach ($child_array as $key) {
-				                if($key['birthDateReliability'] == 'Pregnant'){
-				                	$child_array[$i]['birthDateReliability'] = 4;
-				                } 
-				                if ($key['birthDateReliability'] == 'Child is Born') {
-				                	$child_array[$i]['birthDateReliability'] = 0;
-				                }
-				            }
-				        }
-				        // dump($child_array[$i]);
-				        $childArray[$i] = $child_array[$i];
-						DB::table($childtable)->insert($child_array[$i]);
-					} 
-					else {
-						
-						if($childtable == 'gigya_child'){
-							foreach ($child_array as $key) {
-				                if(strpos($key['birthDateReliability'], 'Pregnant') !== false || $key['birthDateReliability'] == 4){
-				                	$child_array[$i]['birthDateReliability'] = 4;
-				                } elseif ($key['birthDateReliability'] == 'Child is Born') {
-				                	$child_array[$i]['birthDateReliability'] = 0;
-				                } 
-				            }
-				        }
+						DB::table($childtable)->insert($newArray);
+						}
+						else {
+							// dd($child_array);
+							unset($child_array['id']);
+							$lastId = CRUDBooster::newId($childtable);
+							$child_array[$i]['id'] = $lastId;
+							DB::table($childtable)->insert($child_array);
+						}
 
-						$tempId[] = $child_array[$i]['id'];
-						// dump($tempId[$i]);
-
-						// unset($child_array[$i]['id']);
-						DB::table($childtable) 
-						->where('id', $tempId[$i])
-						->update($child_array[$i]);
 					}
-	
+					// dd($child_array);
+					$tempId[] = $child_array[$i]['id'];
+					unset($child_array[$i]['id']);
+
+					DB::table($childtable) 
+					->where('id', $tempId[$i])
+					->update($child_array[$i]);
+
 				}
-
-
-				$currentids = array_pluck($child_array,"id");
-				
-				$newids =  DB::table($childtable)->where($fk,'=',$id)->pluck('id')->toArray();
-				
-				$array3 = array_diff($newids,$currentids);
-
-				if (isset($array3))
-				{
-					DB::table($childtable)
-					->whereIn('id', $array3)
-					->delete();
-				}
+				// dump($tempId);	
 
 			}
 
 		}//end foreach
-		$removeKeys = array("UID","children", "sample_request", "careline_detail","area_of_interest");
+		$removeKeys = array("UID","children", "sample_request", "careline_detail","area_of_interest","pregnant","pregnantstage","pregnancyweek","pregnantremarks","currentlybreastfeeding","maternalmilkbrand","userid","mother");
 		foreach ($removeKeys as $key) {
 			unset($setInputData[$key]);
 		}
 
 		// $childArray = $childData[0];
-		unset($childArray['customerid']);
+		// unset($childArray['customerid']);
 
-		$areaInterestData = $areaInterestData[0];
-		unset($areaInterestData['customerid']);
+		// $areaInterestData = $areaInterestData[0];
+		// unset($areaInterestData['customerid']);
 
 		// dd($childArray);
 		// dd($UID,$setInputData,$childArray,$areaInterestData);
-		$this->updateCustomerRecord($UID,$setInputData,$childArray,$areaInterestData);
+
+		if(strpos(CRUDBooster::mainpath(), 'admin/gigyacustomer') !== false){
+			$mainmergeDate = DB::table('mainmerge')->where('customer_id',$id)->max('m_date');
+			$carelineDateCreated = DB::table('careline')->where('customer_id',$id)->max('date_created'); 
+			$carelineData = DB::table('careline')->select('callstatus','currentstatus','date_created','telecomaction')->where('customer_id',$id)->where('date_created','=',$carelineDateCreated)->first();
+			$this->arr['careline_max_datecreated'] = $carelineData->date_created;
+			$this->arr['careline_callstatus'] = $carelineData->callstatus;
+			$this->arr['careline_currentstatus'] = $carelineData->currentstatus;
+			$this->arr['careline_telecomaction'] = $carelineData->telecomaction;
+			$this->arr['mainmerge_max_mdate'] = $mainmergeDate;
+		}
+
+		DB::table($this->table)->where($this->primary_key,$id)->update($this->arr);		
+		
+		$this->updateCustomerRecord($UID,$setInputData);
 
 		$this->hook_after_edit($id);
 
@@ -910,7 +965,7 @@ class GigyaCBController extends CBController {
 		}
 	}
 
-    public function getCustomerRecord($UID,$email)
+    public function searchGigya($UID,$email)
     {
     	$method = "accounts.search";
     	$request = new GSRequest($this->gigya_api_key,$this->gigya_secret_key,$method,null,true,$this->gigya_user_key);
@@ -938,11 +993,8 @@ class GigyaCBController extends CBController {
     	}
     }
 
-	public function updateCustomerRecord($UID, $setInputData, $childArray, $areaInterestData)
+	public function updateCustomerRecord($UID, $setInputData)
     {
-
-    	//$method = "accounts.search";
-    	// $newids =  DB::table($childtable)->where($fk,'=',$id)->pluck('id')->toArray();
     	$state = DB::table('state')->select('name')->where('id','=',$setInputData['state'])->first();
     	$state = (array) $state;
     	$setInputData['state'] = $state['name'];
@@ -958,6 +1010,7 @@ class GigyaCBController extends CBController {
     	// $request->setParam("openCursor",true);
 
     	$response = $request->send();
+    	// dump($response);
     	$regtoken="";
     	
     	if($response->getErrorCode()==0)
@@ -992,10 +1045,10 @@ class GigyaCBController extends CBController {
 			if (isset($itemParent))
 				$parentid = $itemParent->id;
 
-			//dd($parentid);
+			/*
 
 			$childItems = DB::table('gigya_child')->where('customerid',$parentid)->get();
-			// dd($childItems);
+
 	    	
 	    	$childData = [];
 	    	$ci = 0;
@@ -1017,7 +1070,7 @@ class GigyaCBController extends CBController {
 
 
 	    	$child["child"] = $childData;
-	    	//dd(json_encode($child));
+
 
 
 	    	$interestData=[];
@@ -1029,13 +1082,8 @@ class GigyaCBController extends CBController {
 		    	$ci++;
 			}
 
+			$child["areaOfInterest"] = $interestData;*/
 
-			//dd($interestData);
-			$child["areaOfInterest"] = $interestData;
-	    	/*foreach ($areaInterestData as $key => $value) {
-	    		$interestItem['areaOfInterest.'.$key] = $value;
- 	    	}*/
- 	    	// dd($child);
 
 	    	$method = "accounts.search";
 	    	// $method = "accounts.getAccountInfo";
@@ -1043,6 +1091,7 @@ class GigyaCBController extends CBController {
 	    	$request->setParam("query","SELECT * FROM emailAccounts WHERE UID='$UID'");
 	    	// $request->setParam("UID",$UID);
 	    	$response = $request->send();
+	    	// dump($response);
 	    	if($response->getErrorCode()==0)
 		   	{
 	            $response = $response->getResponseText();
@@ -1051,13 +1100,13 @@ class GigyaCBController extends CBController {
 	            	$method2 = "accounts.setAccountInfo";
 	            	$request = new GSRequest($this->gigya_api_key,$this->gigya_secret_key,$method2,null,true,$this->gigya_user_key);
 	            	$request->setParam("regToken",$regtoken);
-					$request->setparam("data", json_encode($child));
+					// $request->setparam("data", json_encode($child));
 					//dd(json_encode($child));
 					//$request->setparam("data", json_encode($interestItem));
 	            	$request->setParam("profile",json_encode($setInputData));
 
 	            	$response = $request->send();
-	            	// dd($response);
+	            	// dump($response);	
 	            	if($response->getErrorCode()==0)
 	            	{
 	            	    $response = $response->getResponseText();
@@ -1106,9 +1155,10 @@ class GigyaCBController extends CBController {
 		if($searchEmail == true) {
 
 			// dd('email no exist');
+			// dd($this->table);
 			$this->arr[$this->primary_key] = $id = CRUDBooster::newId($this->table);
+			// dd($this->arr);
 			DB::table($this->table)->insert($this->arr);
-
 
 			//Looping Data Input Again After Insert
 			foreach($this->data_inputan as $ro) {
