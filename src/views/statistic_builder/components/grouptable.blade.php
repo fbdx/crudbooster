@@ -51,7 +51,7 @@
     ?>
 
     @if($sql)
-        <table id="table-{{$componentID}}" class='table table-striped'>
+        <table id="table-{{$componentID}}" class='grouptable table-striped'>
             <thead>
             <tr>
                 @foreach($sql[0] as $key=>$val)

@@ -110,6 +110,14 @@
                 </div>
             </li>
             <li class='connectedSortable' title='Drag To Main Area'>
+                <div id='btn-table' class='button-widget-area'>
+                    <a href="#" data-component='grouptable' class='btn-add-widget add-table'>
+                        <img src='{{asset("vendor/crudbooster/assets/statistic_builder/table.png")}}'/>
+                        <div class='title'>Group Table</div>
+                    </a>
+                </div>
+            </li>
+            <li class='connectedSortable' title='Drag To Main Area'>
                 <div id='btn-chartarea' class='button-widget-area'>
                     <a href="#" data-component='chartarea' class='btn-add-widget add-chart-area'>
                         <img src='{{asset("vendor/crudbooster/assets/statistic_builder/chart_area.png")}}'/>
