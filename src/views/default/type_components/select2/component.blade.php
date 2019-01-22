@@ -231,15 +231,35 @@
                         $data1 = $form['data1'];
                         $select_where = $form['datatable_where'];
                         $datatable_format = $form['datatable_format'];
-                        $select_table_pk = CRUDBooster::findPrimaryKey($select_table);
-                        if ($data1!=null)
-                            $result = DB::table($select_table)->select($select_table_pk, $select_title,$data1);
+                        $select_table_pk = CRUDBooster::findPrimaryKey($select_table);                        
+                        if($form['join_table']) {
+                            $jn_table = explode(',', $form['join_table'])[0];
+                            $jn_field = explode(',', $form['join_table'])[1];
+                            $id_field = explode(',', $form['join_table'])[2];
+                            
+                            //$result = $result->join($jn_table,$jn_table.".".$jn_field,'=',$select_table.".".$id_field);
+                            $select_table_pk2 = $select_table.".".$select_table_pk;
+
+                            if ($data1!=null)
+                                $result = DB::table($select_table)->select($select_table_pk2, $select_title,$data1)->join($jn_table,$jn_table.".".$jn_field,'=',$select_table.".".$select_table_pk);
+                            else
+                                $result = DB::table($select_table)->select($select_table_pk2, $select_title)->join($jn_table,$jn_table.".".$jn_field,'=',$select_table.".".$select_table_pk);
+                        }
                         else
-                            $result = DB::table($select_table)->select($select_table_pk, $select_title);
+                        {
+                            if ($data1!=null)
+                                $result = DB::table($select_table)->select($select_table_pk, $select_title,$data1);
+                            else
+                                $result = DB::table($select_table)->select($select_table_pk, $select_title);
+                        }
+                        
 
                         if ($datatable_format) {
                             $result->addSelect(DB::raw("CONCAT(".$datatable_format.") as $select_title"));
                         }
+
+                        
+
                         if ($select_where) {
                             $result->whereraw($select_where);
                         }
@@ -247,6 +267,7 @@
                             $result->whereNull('deleted_at');
                         }
                         $result = $result->orderby($select_title, 'asc')->get();
+                        
 
                         foreach ($result as $r) {
                             $option_label = $r->{$select_title};
@@ -261,6 +282,8 @@
                             else
                                 echo "<option $selected value='$option_value'>$option_label</option>";
                         }
+
+                        
                         ?>
                     <!--end-datatable-ajax-->
                     @endif

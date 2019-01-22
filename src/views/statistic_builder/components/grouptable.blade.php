@@ -1,4 +1,11 @@
 @if($command=='layout')
+    <style>
+        tr.dtrg-group,
+        tr.dtrg-group:hover {
+            font-weight: bold;
+            background-color: #ddd !important;
+        }
+    </style>
     <div id='{{$componentID}}' class='border-box'>
 
         <div class="panel panel-default">
@@ -32,6 +39,14 @@
             <div class='help-block'>
                 Make sure the sql query are correct unless the widget will be broken. Mak sure give the alias name each column. You may use alias [SESSION_NAME]
                 to get the session. We strongly recommend that you use a <a href='http://www.w3schools.com/sql/sql_view.asp' target='_blank'>view table</a>
+            </div>
+        </div>
+
+         <div class="form-group">
+            <label>Group Column No</label>
+            <input class="form-control" name='config[groupcolno]' type='number' value='{{@$config->groupcolno}}'/>
+            <div class='help-block'>
+                Column number that it's made for grouping the table
             </div>
         </div>
 
@@ -70,9 +85,63 @@
             </tbody>
         </table>
         <script type="text/javascript">
+            var collapsedGroups = {};
+
             $('#table-{{$componentID}}').DataTable({
                 dom: "<'row'<'col-sm-6'l><'col-sm-6'f>><'row'<'col-sm-12'tr>><'row'<'col-sm-5'i><'col-sm-7'p>>",
-                lengthMenu: [[10, 25, 50, -1], [10, 25, 50, "All"]]
+                rowGroup: {                    
+                    startRender: function (rows, group) {
+                        var collapsed = !!collapsedGroups[group];
+
+                        rows.nodes().each(function (r) {
+                            r.style.display = collapsed ? 'none' : '';
+                        });
+
+                        var dealsCreated = rows
+                            .data()
+                            .pluck(2)
+                            .reduce( function (a, b) {
+                                return a + b.replace(/[^\d]/g, '')*1;
+                            }, 0);
+
+                        var dealsPending = rows
+                            .data()
+                            .pluck(3)
+                            .reduce( function (a, b) {
+                                return a + b.replace(/[^\d]/g, '')*1;
+                            }, 0);
+
+                        var dealsCompleted = rows
+                            .data()
+                            .pluck(4)
+                            .reduce( function (a, b) {
+                                return a + b.replace(/[^\d]/g, '')*1;
+                            }, 0);
+                        //dealsCreated = $.fn.dataTable.render.number(',', '.', 0, '$').display( dealsCreated );
+
+                        // Add category name to the <tr>. NOTE: Hardcoded colspan
+                        return $('<tr/>')
+                            .append('<td colspan=2">' + group + ' (' + rows.count() + ')</td>')
+                            .append( '<td>'+dealsCreated+'</td>' )
+                            .append( '<td>'+dealsPending+'</td>' )
+                            .append( '<td>'+dealsCompleted+'</td>' )
+                            .attr('data-name', group)
+                            .toggleClass('collapsed', collapsed);
+                    },
+                    dataSrc: 0
+                },         
+                @if($config->groupcolno)
+                    rowGroup: {
+                        dataSrc: {{$config->groupcolno}}
+                    },                    
+                @endif
+                lengthMenu: [[-1], ["All"]]                
+            });
+
+            $('#table-{{$componentID}} > tbody').on('click', 'tr.dtrg-start', function () {
+                var name = $(this).data('name');
+                collapsedGroups[name] = !collapsedGroups[name];
+                $('#table-{{$componentID}}').DataTable().draw();
             });
         </script>
     @endif
