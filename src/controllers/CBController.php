@@ -1770,198 +1770,217 @@ class CBController extends Controller {
 	}
 
 	public function postDoImportChunk() {
-		// Log::debug("MAMPUS");
 		$this->cbLoader();
-		$file_md5 = md5(Request::get('file'));
-		Log::debug($file_md5);
-		Cache::add('success_'.$file_md5, 0, 60);
-
-		if(Request::get('file') && Request::get('resume')==1) {
-			$total = Session::get('total_data_import');
-			$prog = intval(Cache::get('success_'.$file_md5)) / $total * 100;
-			$prog = round($prog,2);
-			if($prog >= 100) {
-				Cache::forget('success_'.$file_md5);
-			}
-			return response()->json(['progress'=> $prog, 'last_error'=>Cache::get('error_'.$file_md5) ]);
-		}
-
-		$select_column = Session::get('select_column');
-		$select_column = array_filter($select_column);
-		$table_columns = DB::getSchemaBuilder()->getColumnListing($this->table);
-
-
-		$file = base64_decode(Request::get('file'));
-		$file = trim(str_replace('uploads','app',$file),'/');
-		$file = storage_path($file);
-
-		$rows = $this->csvToArray($file);
-		// Log::error($rows);
-		$f = $this->import_consignment;
-		//set_time_limit ( 600 );
-		
-		//$rows = Excel::load($file,function($reader) {})->get();
-
-		$has_created_at = false;
-		if(CRUDBooster::isColumnExists($this->table,'created_at')) {
-			$has_created_at = true;
-		}
-
-		$data_import_column = array();
-		$uploadNotUpdated = [];
-		foreach($rows as $value) {
-			
-			$a = array();
-			foreach($select_column as $sk => $s) {
-				$colname = $table_columns[$sk];
-				//Log::error($colname);
-
-				/*if(CRUDBooster::isForeignKey($colname)) {
-
-					//Skip if value is empty
-					if($value->$s == '') continue;
-
-					if(intval($value->$s)) {
-						$a[$colname] = $value->$s;
-					}else{
-						$relation_table = CRUDBooster::getTableForeignKey($colname);
-						$relation_moduls = DB::table('cms_moduls')->where('table_name',$relation_table)->first();
-
-						$relation_class = __NAMESPACE__ . '\\' . $relation_moduls->controller;
-						if(!class_exists($relation_class)) {
-							$relation_class = '\App\Http\Controllers\\'.$relation_moduls->controller;
-						}
-						$relation_class = new $relation_class;
-						$relation_class->cbLoader();
-
-						$title_field = $relation_class->title_field;
-
-						$relation_insert_data = array();
-						$relation_insert_data[$title_field] = $value->$s;
-
-						if(CRUDBooster::isColumnExists($relation_table,'created_at')) {
-							$relation_insert_data['created_at'] = date('Y-m-d H:i:s');
-						}
-
-						try{
-							$relation_exists = DB::table($relation_table)->where($title_field,$value->$s)->first();
-							if($relation_exists) {
-								$relation_primary_key = $relation_class->primary_key;
-								$relation_id = $relation_exists->$relation_primary_key;
-							}else{
-								$relation_id = DB::table($relation_table)->insertGetId($relation_insert_data);
-							}
-
-							$a[$colname] = $relation_id;
-						}catch(\Exception $e) {
-							exit($e);
-						}
-					} //END IS INT
-
-				}else{*/
-					$a[$colname] = $value[$s];
-				//}
-			}
-			/*if ($f != FALSE)
-				array_filter($linksArray, function($value) { return $value[''] !== ''; });*/
-			//Log::error($a);
-
-			$has_title_field = true;
-			foreach($a as $k=>$v) {
-				if($k == $this->title_field && $v == '') {
-					$has_title_field = false;
-					break;
+		if(CRUDBooster::myPrivilegeId() == 1){
+			$file_md5 = md5(Request::get('file'));
+			if(Request::get('file') && Request::get('resume')==1) {
+				$total = Session::get('total_data_import');
+				$prog = intval(Cache::get('success_'.$file_md5)) / $total * 100;
+				$prog = round($prog,2);
+				if($prog >= 100) {
+					Cache::forget('success_'.$file_md5);
 				}
+				return response()->json(['progress'=> $prog, 'last_error'=>Cache::get('error_'.$file_md5) ]);
 			}
-
-			if($has_title_field==false) continue;
-
-
-
-			try{
-				$f = $this->import_consignment;
-				if ($f == FALSE)
-				{
+			$select_column = Session::get('select_column');
+			$select_column = array_filter($select_column);
+			$table_columns = DB::getSchemaBuilder()->getColumnListing($this->table);
+			$file = base64_decode(Request::get('file'));
+			$file = trim(str_replace('uploads','app',$file),'/');
+			$file = storage_path($file);
+			$rows = Excel::load($file,function($reader) {
+			})->get();
+			$has_created_at = false;
+			if(Schema::hasColumn($this->table,'created_at')) {
+				$has_created_at = true;
+			}
+			$data_import_column = array();
+			foreach($rows as $value) {
+				$a = array();
+				foreach($select_column as $sk => $s) {
+					$colname = $table_columns[$sk];
+					if(CRUDBooster::isForeignKey($colname)) {
+						//Skip if value is empty
+						if($value->$s == '') continue;
+						if(intval($value->$s)) {
+							$a[$colname] = $value->$s;
+						}else{
+							$relation_table = CRUDBooster::getTableForeignKey($colname);
+							$relation_moduls = DB::table('cms_moduls')->where('table_name',$relation_table)->first();
+							$relation_class = __NAMESPACE__ . '\\' . $relation_moduls->controller;
+							if(!class_exists($relation_class)) {
+								$relation_class = '\App\Http\Controllers\\'.$relation_moduls->controller;
+							}
+							$relation_class = new $relation_class;
+							$relation_class->cbLoader();
+							$title_field = $relation_class->title_field;
+							$relation_insert_data = array();
+							$relation_insert_data[$title_field] = $value->$s;
+							if(CRUDBooster::isColumnExists($relation_table,'created_at')) {
+								$relation_insert_data['created_at'] = date('Y-m-d H:i:s');
+							}
+							try{
+								$relation_exists = DB::table($relation_table)->where($title_field,$value->$s)->first();
+								if($relation_exists) {
+									$relation_primary_key = $relation_class->primary_key;
+									$relation_id = $relation_exists->$relation_primary_key;
+								}else{
+									$relation_id = DB::table($relation_table)->insertGetId($relation_insert_data);
+								}
+								$a[$colname] = $relation_id;
+							}catch(\Exception $e) {
+								exit($e);
+							}
+						} //END IS INT
+					}else{
+						$a[$colname] = $value->$s;
+					}
+				}
+				$has_title_field = true;
+				foreach($a as $k=>$v) {
+					if($k == $this->title_field && $v == '') {
+						$has_title_field = false;
+						break;
+					}
+				}
+				if($has_title_field==false) continue;
+				try{
 					if($has_created_at) {
 						$a['created_at'] = date('Y-m-d H:i:s');
 					}
-					$v = $this->validationArray($a);
-					if (!$v->fails())
-						DB::table($this->table)->insert($a);
+					DB::table($this->table)->insert($a);
+					Cache::increment('success_'.$file_md5);
+				}catch(\Exception $e) {
+					$e = (string) $e;
+					Cache::put('error_'.$file_md5,$e,500);
+				}
+			}
+		} else {
+			$file_md5 = md5(Request::get('file'));
+			Log::debug($file_md5);
+			Cache::add('success_'.$file_md5, 0, 60);
+
+			if(Request::get('file') && Request::get('resume')==1) {
+				$total = Session::get('total_data_import');
+				$prog = intval(Cache::get('success_'.$file_md5)) / $total * 100;
+				$prog = round($prog,2);
+				if($prog >= 100) {
+					Cache::forget('success_'.$file_md5);
+				}
+				return response()->json(['progress'=> $prog, 'last_error'=>Cache::get('error_'.$file_md5) ]);
+			}
+
+			$select_column = Session::get('select_column');
+			$select_column = array_filter($select_column);
+			$table_columns = DB::getSchemaBuilder()->getColumnListing($this->table);
+
+
+			$file = base64_decode(Request::get('file'));
+			$file = trim(str_replace('uploads','app',$file),'/');
+			$file = storage_path($file);
+
+			$rows = $this->csvToArray($file);
+			// Log::error($rows);
+			$f = $this->import_consignment;
+			//set_time_limit ( 600 );
+			
+			//$rows = Excel::load($file,function($reader) {})->get();
+
+			$has_created_at = false;
+			if(CRUDBooster::isColumnExists($this->table,'created_at')) {
+				$has_created_at = true;
+			}
+
+			$data_import_column = array();
+			$uploadNotUpdated = [];
+			foreach($rows as $value) {
+				
+				$a = array();
+				foreach($select_column as $sk => $s) {
+					$colname = $table_columns[$sk];
+	
+						$a[$colname] = $value[$s];
+				}
+
+				$has_title_field = true;
+				foreach($a as $k=>$v) {
+					if($k == $this->title_field && $v == '') {
+						$has_title_field = false;
+						break;
+					}
+				}
+
+				if($has_title_field==false) continue;
+
+
+
+				try{
+					$f = $this->import_consignment;
+					if ($f == FALSE)
+					{
+						if($has_created_at) {
+							$a['created_at'] = date('Y-m-d H:i:s');
+						}
+						$v = $this->validationArray($a);
+						if (!$v->fails())
+							DB::table($this->table)->insert($a);
+						else
+						{
+							Log::error('Validation issue');
+							$errors = $v->errors();
+							foreach ($errors->all() as $message) {
+		    					Log::error($message);	
+							}
+						}
+					}
 					else
 					{
-						Log::error('Validation issue');
-						$errors = $v->errors();
-						foreach ($errors->all() as $message) {
-	    					Log::error($message);	
+						//Log::error("notinloop");
+						// Log::error($a);
+						if ( (isset($a['m_product'])) && (isset($a['m_date'])) && (isset($a['email'])) && (isset($a['mobileno'])) && (isset($a['childname'])) && (isset($a['childdob'])) ) {
+							if (($a['consigmentno'] != '')||($a['returnreason'] != '')||($a['batchno'] != ''))
+							{
+								$arr = array();
+								foreach ($a as $key => $value){
+									if (($key!=='consigmentno')&&($key!='batchno')&&($key!='created_at')&&($key!='returnreason')&&($key!='m_date'))
+										$arr[] = array($key,'=',$value);
+								}
+
+								$checkDB = DB::table($this->table)->where($arr);
+
+								$countCheckDB = $checkDB->update(
+									['consigmentno' => $a['consigmentno'],'batchno' => $a['batchno'],'returnreason'=>$a['returnreason']]
+								);
+								// Log::debug($testCheck);
+								if($countCheckDB == 0){
+									$uploadNotUpdated[] = $a;
+								}
+								$uploadStatus = 'Successful';
+								//Log::error(DB::getQueryLog());
+							}
+						} else {
+							$uploadStatus = "Fail to match record";
 						}
 					}
+					Cache::increment('success_'.$file_md5);
+				}catch(\Exception $e) {
+					$e = (string) $e;
+					$uploadStatus = 'Failed';
+					Log::error('Error'.$e);
+					Cache::put('error_'.$file_md5,$e,500);
 				}
-				else
-				{
-					//Log::error("notinloop");
-					// Log::error($a);
-					if ( (isset($a['m_product'])) && (isset($a['m_date'])) && (isset($a['email'])) && (isset($a['mobileno'])) && (isset($a['childname'])) && (isset($a['childdob'])) ) {
-						if (($a['consigmentno'] != '')||($a['returnreason'] != '')||($a['batchno'] != ''))
-						{
-							$arr = array();
-							foreach ($a as $key => $value){
-								if (($key!=='consigmentno')&&($key!='batchno')&&($key!='created_at')&&($key!='returnreason')&&($key!='m_date'))
-									$arr[] = array($key,'=',$value);
-							}
-
-							$checkDB = DB::table($this->table)->where($arr);
-							// Log::debug($checkDB->toSql());
-
-							// if (isset($a["m_date"]) || array_key_exists("m_date",$a))
-							// {
-							// 	//Log::error("in m_date");
-							// 	$checkDB = $checkDB->whereRaw("m_date <= DATE_ADD(?, INTERVAL 2 MONTH)",$a["m_date"])->whereRaw("m_date >= DATE_SUB(?, INTERVAL 2 MONTH)",$a["m_date"]);
-							// 	//Log::error($checkDB->toSql());
-							// }
-
-							$countCheckDB = $checkDB->update(
-								['consigmentno' => $a['consigmentno'],'batchno' => $a['batchno'],'returnreason'=>$a['returnreason']]
-							);
-							// Log::debug($testCheck);
-							if($countCheckDB == 0){
-								$uploadNotUpdated[] = $a;
-							}
-							$uploadStatus = 'Successful';
-							//Log::error(DB::getQueryLog());
-						}
-					} else {
-						$uploadStatus = "Fail to match record";
-					}
-				}
-				Cache::increment('success_'.$file_md5);
-			}catch(\Exception $e) {
-				$e = (string) $e;
-				$uploadStatus = 'Failed';
-				Log::error('Error'.$e);
-				Cache::put('error_'.$file_md5,$e,500);
 			}
+
+			Log::debug($uploadNotUpdated);
+
+			DB::table('upload_logs')->insert([
+				[
+					'userid' => CRUDBooster::myId(),
+					'status' => $uploadStatus,
+					'created' => Carbon\Carbon::now()
+				]
+			]);
 		}
-
-		Log::debug($uploadNotUpdated);
-
-		DB::table('upload_logs')->insert([
-			[
-				'userid' => CRUDBooster::myId(),
-				'status' => $uploadStatus,
-				'created' => Carbon\Carbon::now()
-			]
-		]);
-
-		// $output = fopen("php://output",'w') or die("Can't open php://output");
-		// header("Content-Type:application/csv"); 
-		// header("Content-Disposition:attachment;filename=pressurecsv.csv"); 
-		// fputcsv($output, array('m_product','m_date','email','mobileno','childname','childdob','consignmentno'));
-		// foreach($uploadNotUpdated as $upnot) {
-		//     fputcsv($output, $upnot);
-		// }
-		// fclose($output);
-
 		return response()->json(['status'=>true]);
 	}
 

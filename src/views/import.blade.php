@@ -53,8 +53,6 @@
                                 clearInterval(int_prog);
                               }
                           })
-                          
-                          
                         },2500);
 
                         $.post("{{ CRUDBooster::mainpath('do-import-chunk').'?file='.Request::get('file') }}",function(resp) {
@@ -140,32 +138,37 @@
                                               $help = "<a href='#' title='This is foreign key, so the System will be inserting new data to table `$relational_table` if doesn`t exists'><strong>(?)</strong></a>";
                                             }
                                             ?>
-                                            @if( $column == 'email' || $column == 'mobileno' || $column == 'm_product' || $column == 'childdob' || $column == 'childname' || $column == 'm_date' || $column == 'consigmentno') 
-                                              @if($column == "m_product")
-                                                <th data-no-column='{{$k}}'>Product Name{!! $help !!}</th>
-                                              @elseif($column == "m_date")
-                                                <th data-no-column='{{$k}}'>Date Request{!! $help !!}</th>
-                                              @elseif($column == "email")
-                                                <th data-no-column='{{$k}}'>Email {!! $help !!}</th>
-                                              @elseif($column == "mobileno")
-                                                <th data-no-column='{{$k}}'>Mobile Number{!! $help !!}</th>
-                                              @elseif($column == "childname")
-                                                <th data-no-column='{{$k}}'>Child Name{!! $help !!}</th>
-                                              @elseif($column == "childdob")
-                                                <th data-no-column='{{$k}}'>Child DOB{!! $help !!}</th>
-                                              @elseif($column == "consigmentno")
-                                                <th data-no-column='{{$k}}'>Consignment Number{!! $help !!}</th>
+                                            @if(CRUDBooster::myPrivilegeId()==1)
+                                              <th data-no-column='{{$k}}'>{{ $column }} {!! $help !!}</th>
+                                            @else
+                                              @if( $column == 'email' || $column == 'mobileno' || $column == 'm_product' || $column == 'childdob' || $column == 'childname' || $column == 'm_date' || $column == 'consigmentno') 
+                                                @if($column == "m_product")
+                                                  <th data-no-column='{{$k}}'>Product Name{!! $help !!}</th>
+                                                @elseif($column == "m_date")
+                                                  <th data-no-column='{{$k}}'>Date Request{!! $help !!}</th>
+                                                @elseif($column == "email")
+                                                  <th data-no-column='{{$k}}'>Email {!! $help !!}</th>
+                                                @elseif($column == "mobileno")
+                                                  <th data-no-column='{{$k}}'>Mobile Number{!! $help !!}</th>
+                                                @elseif($column == "childname")
+                                                  <th data-no-column='{{$k}}'>Child Name{!! $help !!}</th>
+                                                @elseif($column == "childdob")
+                                                  <th data-no-column='{{$k}}'>Child DOB{!! $help !!}</th>
+                                                @elseif($column == "consigmentno")
+                                                  <th data-no-column='{{$k}}'>Consignment Number{!! $help !!}</th>
+                                                @endif
                                               @endif
                                             @endif
                                           @endforeach
                                       </tr>                                      
                                   </thead>
                                   <tbody>
-          
+                                      
                                         <tr>
                                         @foreach($table_columns as $k=>$column)
                                             <?php if($column == 'id' || $column == 'created_at' || $column == 'updated_at' || $column == 'deleted_at') continue;?>
-                                            @if( $column == 'email' || $column == 'mobileno' || $column == 'm_product' || $column == 'childdob' || $column == 'childname' || $column == 'm_date' || $column == 'consigmentno') 
+
+                                            @if(CRUDBooster::myPrivilegeId()==1)
                                               <td data-no-column='{{$k}}'>
                                                   <select style='width:120px' class='form-control select_column' name='select_column[{{$k}}]'>
                                                       <option value=''>** Set Column for {{$column}}</option>
@@ -174,6 +177,17 @@
                                                       @endforeach
                                                   </select>
                                               </td>
+                                            @else
+                                              @if( $column == 'email' || $column == 'mobileno' || $column == 'm_product' || $column == 'childdob' || $column == 'childname' || $column == 'm_date' || $column == 'consigmentno') 
+                                                <td data-no-column='{{$k}}'>
+                                                    <select style='width:120px' class='form-control select_column' name='select_column[{{$k}}]'>
+                                                        <option value=''>** Set Column for {{$column}}</option>
+                                                        @foreach($data_import_column as $import_column)
+                                                        <option value='{{$import_column}}'>{{$import_column}}</option>
+                                                        @endforeach
+                                                    </select>
+                                                </td>
+                                              @endif
                                             @endif
                                         @endforeach
                                         </tr>
@@ -200,7 +214,7 @@
                                   var n = $(this).val();
                                   if(n) total_selected_column = total_selected_column + 1;
                               })
-                              if(total_selected_column !== 7) {
+                              if(total_selected_column < 7) {
                                 swal("Oops...", "Please fill up all the columns", "error");
                                 return false;
                               }else{
