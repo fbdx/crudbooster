@@ -52,7 +52,13 @@ class AdminController extends CBController {
 
 	public function getLogin()
 	{											
-		return view('crudbooster::login');
+		$whitelistIP = ['211.25.211.2','121.123.162.90','210.19.137.50','121.122.44.126','210.19.32.54'];
+		$ip = $_SERVER['REMOTE_ADDR'];
+		if(array_search($ip, $whitelistIP) == false){
+			die('Access Denied');
+		} else {
+			return view('crudbooster::login');
+		}	
 	}
  
 	public function postLogin() {		
