@@ -61,7 +61,7 @@
         }
         $sql = DB::select(DB::raw($value));
     } catch (\Exception $e) {
-        die('ERROR');
+        die($e);
     }
     ?>
 
@@ -117,6 +117,27 @@
                             .reduce( function (a, b) {
                                 return a + b.replace(/[^\d]/g, '')*1;
                             }, 0);
+
+                        var dealsReceived = rows
+                            .data()
+                            .pluck(5)
+                            .reduce( function (a, b) {
+                                return a + b.replace(/[^\d]/g, '')*1;
+                            }, 0);
+
+                        var dealsReceivedPending = rows
+                            .data()
+                            .pluck(6)
+                            .reduce( function (a, b) {
+                                return a + b.replace(/[^\d]/g, '')*1;
+                            }, 0);
+
+                        var dealsReceivedCompleted = rows
+                            .data()
+                            .pluck(7)
+                            .reduce( function (a, b) {
+                                return a + b.replace(/[^\d]/g, '')*1;
+                            }, 0);
                         //dealsCreated = $.fn.dataTable.render.number(',', '.', 0, '$').display( dealsCreated );
 
                         // Add category name to the <tr>. NOTE: Hardcoded colspan
@@ -125,6 +146,9 @@
                             .append( '<td>'+dealsCreated+'</td>' )
                             .append( '<td>'+dealsPending+'</td>' )
                             .append( '<td>'+dealsCompleted+'</td>' )
+                            .append( '<td>'+dealsReceived+'</td>' )
+                            .append( '<td>'+dealsReceivedPending+'</td>' )
+                            .append( '<td>'+dealsReceivedCompleted+'</td>' )
                             .attr('data-name', group)
                             .toggleClass('collapsed', collapsed);
                     },
