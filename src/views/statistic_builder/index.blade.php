@@ -245,11 +245,11 @@
                     if (response.components) {
 
                         $.each(response.components, function (i, obj) {
-                            $('#' + areaname).append("<div id='area-loading-" + obj.componentID + "' class='area-loading'><i class='fa fa-spin fa-spinner'></i></div>");
+                            $('#' + areaname).append("<div id='"+ obj.componentID +"'><div id='area-loading-" + obj.componentID + "' class='area-loading'><i class='fa fa-spin fa-spinner'></i></div></div>");
                             $.get("{{CRUDBooster::mainpath('view-component')}}/" + obj.componentID, function (view) {
                                 console.log('View For CID ' + view.componentID);
                                 $('#area-loading-' + obj.componentID).remove();
-                                $('#' + areaname).append(view.layout);
+                                $('#' + obj.componentID).append(view.layout);
 
                             })
                         })
