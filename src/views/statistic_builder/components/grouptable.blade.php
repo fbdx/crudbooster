@@ -50,6 +50,30 @@
             </div>
         </div>
 
+        <div class="form-group">
+            <label>Color Column</label>
+            <input class="form-control" name='config[colorcol]' type='text' value='{{@$config->colorcol}}'/>
+            <div class='help-block'>
+                Column name that it's made for identifying column to colour
+            </div>
+        </div>
+
+         <div class="form-group">
+            <label>Color Column Find String</label>
+            <input class="form-control" name='config[colortextrow]' type='text' value='{{@$config->colortextrow}}'/>
+            <div class='help-block'>
+                The text string to check if to color the row
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label>Row Color</label>
+            <input class="form-control" name='config[colorrow]' type='text' value='{{@$config->colorrow}}'/>
+            <div class='help-block'>
+                CSS color text for coloring row (must be either hexadecimal with hash, i.e. #fff or color name, i.e. white)
+            </div>
+        </div>
+
     </form>
 @elseif($command=='showFunction')
     <?php
@@ -76,7 +100,15 @@
             </thead>
             <tbody>
             @foreach($sql as $row)
-                <tr>
+                @if (($config->colorcol)&&($config->colortextrow))
+                    @if (strpos($row->Name,$config->colortextrow)!==FALSE)
+                        <tr style="color:{{$config->colorrow}}">
+                    @else
+                        <tr>
+                    @endif
+                @else
+                    <tr>
+                @endif                
                     @foreach($row as $key=>$val)
                         <td>{{$val}}</td>
                     @endforeach
@@ -125,30 +157,13 @@
                                 return a + b.replace(/[^\d]/g, '')*1;
                             }, 0);
 
-                        var dealsReceivedPending = rows
-                            .data()
-                            .pluck(6)
-                            .reduce( function (a, b) {
-                                return a + b.replace(/[^\d]/g, '')*1;
-                            }, 0);
-
-                        var dealsReceivedCompleted = rows
-                            .data()
-                            .pluck(7)
-                            .reduce( function (a, b) {
-                                return a + b.replace(/[^\d]/g, '')*1;
-                            }, 0);
-                        //dealsCreated = $.fn.dataTable.render.number(',', '.', 0, '$').display( dealsCreated );
-
                         // Add category name to the <tr>. NOTE: Hardcoded colspan
                         return $('<tr/>')
                             .append('<td colspan=2">' + group + ' (' + rows.count() + ')</td>')
                             .append( '<td>'+dealsCreated+'</td>' )
                             .append( '<td>'+dealsPending+'</td>' )
-                            .append( '<td>'+dealsCompleted+'</td>' )
-                            .append( '<td>'+dealsReceived+'</td>' )
-                            .append( '<td>'+dealsReceivedPending+'</td>' )
-                            .append( '<td>'+dealsReceivedCompleted+'</td>' )
+                            .append( '<td style="color:{{$config->colorrow}}">'+dealsCompleted+'</td>' )
+                            .append( '<td style="color:{{$config->colorrow}}">'+dealsReceived+'</td>' )
                             .attr('data-name', group)
                             .toggleClass('collapsed', collapsed);
                     },
