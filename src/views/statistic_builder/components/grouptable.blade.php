@@ -5,6 +5,14 @@
             font-weight: bold;
             background-color: #ddd !important;
         }
+        .grouptable td
+        {
+            border-right:1px solid #ddd;
+        }
+        .grouptable td:first-child
+        {
+            border-left:1px solid #ddd;
+        }
     </style>
     <div id='{{$componentID}}' class='border-box'>
 
@@ -110,7 +118,11 @@
                     <tr>
                 @endif                
                     @foreach($row as $key=>$val)
-                        <td>{{$val}}</td>
+                        @if (strpos("Deals Completed,Dealing Assistant Deals Pending, Dealing Assistant Deals Completed",$key)!==FALSE)
+                            <td style="text-align:right">{{$val}}</td>
+                        @else
+                            <td>{{$val}}</td>
+                        @endif
                     @endforeach
                 </tr>
             @endforeach
@@ -160,10 +172,10 @@
                         // Add category name to the <tr>. NOTE: Hardcoded colspan
                         return $('<tr/>')
                             .append('<td colspan=2">' + group + ' (' + rows.count() + ')</td>')
-                            .append( '<td>'+dealsCreated+'</td>' )
-                            .append( '<td>'+dealsPending+'</td>' )
-                            .append( '<td style="color:{{$config->colorrow}}">'+dealsCompleted+'</td>' )
-                            .append( '<td style="color:{{$config->colorrow}}">'+dealsReceived+'</td>' )
+                            .append( '<td style="text-align:right">'+dealsCreated+'</td>' )
+                            .append( '<td style="text-align:right">'+dealsPending+'</td>' )
+                            .append( '<td style="color:{{$config->colorrow}};text-align:right">'+dealsCompleted+'</td>' )
+                            .append( '<td style="color:{{$config->colorrow}};text-align:right">'+dealsReceived+'</td>' )
                             .attr('data-name', group)
                             .toggleClass('collapsed', collapsed);
                     },
