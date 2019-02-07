@@ -8,6 +8,7 @@
         .grouptable td
         {
             border-right:1px solid #ddd;
+            border-bottom:1px solid #ddd;
         }
         .grouptable td:first-child
         {
@@ -118,7 +119,7 @@
                     <tr>
                 @endif                
                     @foreach($row as $key=>$val)
-                        @if (strpos("Deals Completed,Dealing Assistant Deals Pending, Dealing Assistant Deals Completed",$key)!==FALSE)
+                        @if (strpos("Deals Confirmed,Dealing Assistant Deals Pending, Dealing Assistant Deals Confirmed",$key)!==FALSE)
                             <td style="text-align:right">{{$val}}</td>
                         @else
                             <td>{{$val}}</td>
@@ -186,7 +187,9 @@
                         dataSrc: {{$config->groupcolno}}
                     },                    
                 @endif
-                lengthMenu: [[-1], ["All"]]                
+                lengthMenu: [[-1], ["All"]],
+                "bLengthChange" : false, //thought this line could hide the LengthMenu
+                "bInfo":false,   
             });
 
             $('#table-{{$componentID}} > tbody').on('click', 'tr.dtrg-start', function () {
