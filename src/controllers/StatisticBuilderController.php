@@ -163,10 +163,17 @@ class StatisticBuilderController extends CBController
 
     public function postUpdateAreaComponent()
     {
-        DB::table('cms_statistic_components')->where('componentID', Request::get('componentid'))->update([
-            'sorting' => Request::get('sorting'),
-            'area_name' => Request::get('areaname'),
-        ]);
+        $children = Request::get('children');
+
+        for ($i=0;$i<count($children);$i++)
+        {            
+            DB::table('cms_statistic_components')->where('componentID', $children[$i])->update([
+                'sorting' => $i,
+                'area_name' => Request::get('areaname'),
+            ]);
+        }
+        //dd($children);
+        
 
         return response()->json(['status' => true]);
     }

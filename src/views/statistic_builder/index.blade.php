@@ -213,20 +213,26 @@
                         }
                     },
                     update: function (event, ui) {
-                        if (ui.sender) {
+                        //if (ui.sender) {                            
                             var componentID = ui.item.attr('id');
                             var areaname = $('#' + componentID).parent('.connectedSortable').attr("id");
-                            var index = $('#' + componentID).index();
-
+                            var index = $('#' + componentID).index();                            
+                            var chldren = $('#'+areaname).children("div");                            
+                            var chlds = [];                            
+                            for (var i = 0; i < chldren.length; i++)
+                            {
+                                chlds.push(chldren[i].id);
+                            }
 
                             $.post("{{CRUDBooster::mainpath('update-area-component')}}", {
                                 componentid: componentID,
                                 sorting: index,
-                                areaname: areaname
+                                areaname: areaname,
+                                children: chlds
                             }, function (response) {
-
+                                
                             })
-                        }
+                        //}
                     }
                 });
             }
