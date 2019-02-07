@@ -741,6 +741,38 @@ class GigyaCBController extends CBController {
 		
 	}
 
+	public function getDetail($id)	{
+		$this->cbLoader();
+		$row        = DB::table($this->table)->where($this->primary_key,$id)->first();
+		$response = $this->search($row->UID,$row->email);
+		$results = $response['results'];
+		$UID = $results[0]['UID'];
+		$email = $row->email;
+		$profile = $results[0]['profile'];
+		$mobileNumber = $profile['phones']['number'];
+		foreach ($profile as $key => $value) {
+			if($key == 'phones'){
+				$row->phones = $mobileNumber;
+			} else{
+				$row->$key = $profile[$key];
+			}
+		}
+		if(!CRUDBooster::isRead() && $this->global_privilege==FALSE || $this->button_detail==FALSE) {
+			CRUDBooster::insertLog(trans("crudbooster.log_try_view",['name'=>$row->{$this->title_field},'module'=>CRUDBooster::getCurrentModule()->name]));
+			CRUDBooster::redirect(CRUDBooster::adminPath(),trans('crudbooster.denied_access'));
+		}
+
+		$module     = CRUDBooster::getCurrentModule();
+
+		$page_menu  = Route::getCurrentRoute()->getActionName();
+		$page_title = trans("crudbooster.detail_data_page_title",['module'=>$module->name,'name'=>$row->{$this->title_field}]);
+		$command    = 'detail';
+
+		Session::put('current_row_id',$id);
+
+		return view('crudbooster::default.form',compact('row','page_menu','page_title','command','id'));
+	}
+
 
 	public function postEditSave($id) {
 
