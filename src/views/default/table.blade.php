@@ -138,11 +138,12 @@
                           @endif
                           
                               @foreach($hc as $h)
-                                @if($loop->index==1) 
+                              {{-- To enable the text as edit button on the first col --}}
+                                {{-- @if($loop->index==1) 
                                   <td><a href="{{CRUDBooster::mainpath("edit/").$h}}">{!! $h !!}</a></td>
-                                @else
+                                @else --}}
                                   <td>{!! $h !!}</td>
-                                @endif
+                                {{-- @endif --}}
                               @endforeach
                           </tr>
                       @endforeach
