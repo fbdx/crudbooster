@@ -83,6 +83,30 @@
             </div>
         </div>
 
+        <div class="form-group">
+            <label>Column Color Highlight</label>
+            <input class="form-control" name='config[colorcolhighlight]' type='text' value='{{@$config->colorcolhighlight}}'/>
+            <div class='help-block'>
+                CSS color text for coloring row (must be either hexadecimal with hash, i.e. #fff or color name, i.e. white)
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label>Column Color Highlight Find Header </label>
+            <input class="form-control" name='config[colorcolhighlightheader]' type='text' value='{{@$config->colorcolhighlightheader}}'/>
+            <div class='help-block'>
+                The text string on the header to check if need to color the column
+            </div>
+        </div>
+
+         <div class="form-group">
+            <label>Merged Color Highlight</label>
+            <input class="form-control" name='config[colormerged]' type='text' value='{{@$config->colormerged}}'/>
+            <div class='help-block'>
+                CSS color text for coloring merged cell that has the highlight header and the row
+            </div>
+        </div>
+
     </form>
 @elseif($command=='showFunction')
     <?php
@@ -109,8 +133,10 @@
             </thead>
             <tbody>
             @foreach($sql as $row)
+            <?php $colorcol=false;?>
                 @if (($config->colorcol)&&($config->colortextrow))
                     @if (strpos($row->Name,$config->colortextrow)!==FALSE)
+                        <?php $colorcol=true;?>
                         <tr style="color:{{$config->colorrow}}">
                     @else
                         <tr>
@@ -119,8 +145,16 @@
                     <tr>
                 @endif                
                     @foreach($row as $key=>$val)
-                        @if (strpos("Deals Confirmed,Dealing Assistant Deals Pending, Dealing Assistant Deals Confirmed",$key)!==FALSE)
-                            <td style="text-align:right">{{$val}}</td>
+                        @if (strpos("Deals Confirmed,Dealing Assistant Deals Pending, Dealing Assistant Deals Confirmed",$key)!==FALSE)                            
+                            @if (strpos($key,$config->colorcolhighlightheader)!==FALSE)
+                                @if($colorcol)
+                                    <td style="text-align:right;color:{{$config->colormerged}}">{{$val}}</td>
+                                @else
+                                    <td style="text-align:right;color:{{$config->colorcolhighlight}}">{{$val}}</td> 
+                                @endif
+                            @else
+                                <td style="text-align:right;">{{$val}}</td>
+                            @endif                            
                         @else
                             <td>{{$val}}</td>
                         @endif
@@ -173,9 +207,9 @@
                         // Add category name to the <tr>. NOTE: Hardcoded colspan
                         return $('<tr/>')
                             .append('<td colspan=2">' + group + ' (' + rows.count() + ')</td>')
-                            .append( '<td style="text-align:right">'+dealsCreated+'</td>' )
+                            .append( '<td style="text-align:right;color:{{$config->colorcolhighlight}};">'+dealsCreated+'</td>' )
                             .append( '<td style="text-align:right">'+dealsPending+'</td>' )
-                            .append( '<td style="color:{{$config->colorrow}};text-align:right">'+dealsCompleted+'</td>' )
+                            .append( '<td style="color:{{$config->colormerged}};text-align:right">'+dealsCompleted+'</td>' )
                             .append( '<td style="color:{{$config->colorrow}};text-align:right">'+dealsReceived+'</td>' )
                             .attr('data-name', group)
                             .toggleClass('collapsed', collapsed);
