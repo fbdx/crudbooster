@@ -121,7 +121,7 @@
 
 @if ($form['lockchange']==true)    
   <?php
-    $disabled = "disabled='disabled'";
+    //$disabled = "readonly='readonly'";
     if ($col_width)
     {
       $array_of_piece = explode('-', $col_width);
@@ -135,10 +135,12 @@
   @push('bottom')
       <script type="text/javascript">
           $(function () {
+          $("#{{$name}}").prop("disabled", "true");            
             $('#lockchange-{{$name}}').click(function() {
                 var r = confirm("You are changing your dealing assistant from the dealing assistant assigned to you, please confirm");
-                if (r == true) {
-                    $("#{{$name}}").prop("disabled", false);
+                if (r == true) {                    
+                    $('#{{$name}}').prop('disabled', false);
+                    $("#{{$name}}").removeAttr("disabled");                    
                     @if (isset($form['lockchangeconfirmapi']))
                         var link = "{{$form['lockchangeconfirmapi']}}"+"/"+$("#{{$name}}").val();
                         $.get(link, function(data, status){
@@ -148,6 +150,10 @@
                     $("#lockchange-{{$name}}").off('click');
                 }
             
+            });
+            $('#form').on('submit', function() {
+                $('#{{$name}}').prop('disabled', false);
+                $("#{{$name}}").removeAttr("disabled");                    
             });
           })
       </script>
@@ -163,7 +169,7 @@
 
     <div class="{{$col_width?:'col-sm-10'}}">
         <select style='width:100%' class='form-control {{@$form["formclass"]}}' id="{{$name}}"
-                {{$required}} {{$readonly}} {!!$placeholder!!} {{$disabled}} name="{{$name}}{{($form['relationship_table'])?'[]':''}}" {{ ($form['relationship_table'])?'multiple="multiple"':'' }} >
+                {{$required}} {!!$placeholder!!} name="{{$name}}{{($form['relationship_table'])?'[]':''}}" {{ ($form['relationship_table'])?'multiple="multiple"':'' }} >
             @if($form['dataenum'])
                 <option value=''>{{trans('crudbooster.text_prefix_option')}} {{$form['label']}}</option>
                 <?php

@@ -1049,8 +1049,8 @@ class CRUDBooster
         $a['id_cms_users'] = self::myId();
         DB::table('cms_logs')->insert($a);
     }
-	
-	public static function insertLogOut($description, $userid, $details = '')
+
+        public static function insertLogOut($description, $userid, $details = '')
     {
         $a = [];
         $a['created_at'] = date('Y-m-d H:i:s');

@@ -48,13 +48,12 @@
 @elseif($command=='showFunction')
 
     @if($key == 'sql')
-        <?php
+        <?php        
         $sqls = explode(';', $value);
         $dataPoints = array();
         $datax = array();
 
-        foreach ($sqls as $i => $sql) {
-
+        foreach ($sqls as $i => $sql) {            
             $datamerger = array();
 
             $sessions = Session::all();

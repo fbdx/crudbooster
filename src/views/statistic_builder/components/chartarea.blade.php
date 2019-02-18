@@ -53,8 +53,7 @@
         $dataPoints = array();
         $datax = array();
 
-        foreach ($sqls as $i => $sql) {
-
+        foreach ($sqls as $i => $sql) {            
             $datamerger = array();
 
             $sessions = Session::all();
@@ -62,8 +61,9 @@
                 $sql = str_replace("[".$key."]", $val, $sql);
             }
 
-            try {
+            try {                
                 $query = DB::select(DB::raw($sql));
+                //dd($query);
                 foreach ($query as $r) {
                     $datax[] = $r->label;
                     $datamerger[] = $r->value;
@@ -71,7 +71,7 @@
             } catch (\Exception $e) {
                 echo $e;
                 // echo $e->getMessage();
-            }
+            }            
 
             $dataPoints[$i] = $datamerger;
         }
@@ -94,7 +94,7 @@
             }
             $data_result[] = $dr;
         }
-
+        
         $data_result = json_encode($data_result);
         // $data_result = preg_replace('/"([a-zA-Z_]+[a-zA-Z0-9_]*)":/','$1:',$data_result);
 
