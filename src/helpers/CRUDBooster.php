@@ -1049,6 +1049,45 @@ class CRUDBooster
         $a['id_cms_users'] = self::myId();
         DB::table('cms_logs')->insert($a);
     }
+	
+	public static function insertLogOut($description, $userid, $details = '')
+    {
+        $a = [];
+        $a['created_at'] = date('Y-m-d H:i:s');
+        $a['ipaddress'] = $_SERVER['REMOTE_ADDR'];
+        $a['useragent'] = $_SERVER['HTTP_USER_AGENT'];
+        $a['url'] = Request::url();
+        $a['description'] = $description;
+        $a['details'] = $details;
+        $a['id_cms_users'] = $userid;
+        DB::table('cms_logs')->insert($a);
+    }
+
+    public static function insertLogOutDouble($description, $userid, $details = '')
+    {
+        if (!is_array($description))
+            return;
+
+        $a = [];
+        $a['created_at'] = date('Y-m-d H:i:s');
+        $a['ipaddress'] = $_SERVER['REMOTE_ADDR'];
+        $a['useragent'] = $_SERVER['HTTP_USER_AGENT'];
+        $a['url'] = Request::url();
+        $a['description'] = $description[0];
+        $a['details'] = $details;
+        $a['id_cms_users'] = $userid;        
+
+        $b = [];
+        $b['created_at'] = date('Y-m-d H:i:s');
+        $b['ipaddress'] = $_SERVER['REMOTE_ADDR'];
+        $b['useragent'] = $_SERVER['HTTP_USER_AGENT'];
+        $b['url'] = Request::url();
+        $b['description'] = $description[1];
+        $b['details'] = $details;
+        $b['id_cms_users'] = $userid;
+
+        DB::table('cms_logs')->insert([$a,$b]);        
+    }
 
     public static function referer()
     {
