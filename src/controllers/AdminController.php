@@ -67,7 +67,7 @@ class AdminController extends CBController {
 	      $ip=$_SERVER['REMOTE_ADDR'];
 	    }
 	    
-	    dump($ip);
+	    // dump($ip);
 
 		if(array_search($ip, $whitelistIP) === false){
 			die('Access Denied');
