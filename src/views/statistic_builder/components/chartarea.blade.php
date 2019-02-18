@@ -99,13 +99,27 @@
         // $data_result = preg_replace('/"([a-zA-Z_]+[a-zA-Z0-9_]*)":/','$1:',$data_result);
 
         ?>
-        <div id="chartContainer-{{$componentID}}" style="height: 250px;"></div>
+        <style>
+        .mbox {   
+            display: inline-block;
+            width: 5px;
+            height: 50px;
+            margin: 10px 75px 10px 25px;
+            padding-left: 4px;
+            vertical-align:top;
+        }
+        </style>
+        <div id="chartLegend-{{$componentID}}"></div>
+        <div id="chartContainer-{{$componentID}}" style="height: 250px;">
+            
+
+        </div>
 
 
         <script type="text/javascript">
 
             $(function () {
-                new Morris.Area({
+                var chart= new Morris.Area({
                     element: 'chartContainer-{{$componentID}}',
                     data: $.parseJSON("{!! addslashes($data_result) !!}"),
                     xkey: 'y',
@@ -118,6 +132,12 @@
                     @endif
                     behaveLikeLine: true,
                     hideHover: 'auto'
+                });
+
+                chart.options.labels.forEach(function(label, i){
+                    var legendlabel=$('<span style="display: inline-block;padding-left:10px;margin-top:-5px;">'+label+'</span>');
+                    var legendItem = $('<div class="mbox"></div>').css('background-color', chart.options.lineColors[i]).append(legendlabel);
+                    $('#chartLegend-{{$componentID}}').append(legendItem);
                 });
             })
         </script>
