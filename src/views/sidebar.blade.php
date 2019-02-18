@@ -66,8 +66,8 @@
                     <li class='treeview'>
                         <a href='#'><i class='fa fa-users'></i> <span>{{ trans('crudbooster.Users_Management') }}</span>  <i class="fa fa-angle-{{ trans("crudbooster.right") }} pull-{{ trans("crudbooster.right") }}"></i></a>
                         <ul class='treeview-menu'>
-                            <li class="{{ (Request::is(config('crudbooster.ADMIN_PATH').'/users/add*')) ? 'active' : '' }}"><a href='{{Route("AdminCmsUsersControllerGetAdd")}}?m=0'><i class='fa fa-plus'></i> {{ trans('crudbooster.add_user') }}</a></li>
-                            <li class="{{ (Request::is(config('crudbooster.ADMIN_PATH').'/users')) ? 'active' : '' }}"><a href='{{Route("AdminCmsUsersControllerGetIndex")}}?m=0'><i class='fa fa-bars'></i> {{ trans('crudbooster.List_users') }}</a></li>
+                            {{-- <li class="{{ (Request::is(config('crudbooster.ADMIN_PATH').'/users/add*')) ? 'active' : '' }}"><a href='{{Route("AdminCmsUsersControllerGetAdd")}}?m=0'><i class='fa fa-plus'></i> {{ trans('crudbooster.add_user') }}</a></li>
+                            <li class="{{ (Request::is(config('crudbooster.ADMIN_PATH').'/users')) ? 'active' : '' }}"><a href='{{Route("AdminCmsUsersControllerGetIndex")}}?m=0'><i class='fa fa-bars'></i> {{ trans('crudbooster.List_users') }}</a></li> --}}
                         </ul>
                     </li>
 
