@@ -1789,7 +1789,7 @@ class CBController extends Controller {
 			$userRegisterGigya = $this->setAccountInfo($regToken,$setInputData);
 		} else {
 			$profile = $this->arrayMappingtoSD($profile);
-			dump($profile);
+			// dump($profile);
 			foreach ($row as $key1 => $value1) {
 				foreach ($profile as $key2 => $value2) {
 					if($key2 == $key1){
@@ -1798,7 +1798,7 @@ class CBController extends Controller {
 				}
 			}
 		}
-		$row        = DB::table($this->table)->where($this->primary_key,$id)->first();
+		// $row        = DB::table($this->table)->where($this->primary_key,$id)->first();
 
 		if(!CRUDBooster::isRead() && $this->global_privilege==FALSE || $this->button_detail==FALSE) {
 			CRUDBooster::insertLog(trans("crudbooster.log_try_view",['name'=>$row->{$this->title_field},'module'=>CRUDBooster::getCurrentModule()->name]));
