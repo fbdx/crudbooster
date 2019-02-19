@@ -95,9 +95,9 @@ class CBController extends Controller {
 
 	public function __construct()
 	{
-		$this->gigya_api_key  = config('gigyaaccess.GIGYAAPIKEY');
+		/*$this->gigya_api_key  = config('gigyaaccess.GIGYAAPIKEY');
 		$this->gigya_secret_key = config('gigyaaccess.GIGYASECRETKEY');
-		$this->gigya_user_key = config('gigyaaccess.GIGYAUSERKEY');
+		$this->gigya_user_key = config('gigyaaccess.GIGYAUSERKEY');*/
 	}
 
 	public function cbLoader() {
@@ -1664,36 +1664,36 @@ class CBController extends Controller {
 	public function getDetail($id)	{
 		$this->cbLoader();
 		// $keyy =  config('gigyaaccess.GIGYAAPIKEY');
-		dump($gigya_api_key);
+		// dump($gigya_api_key);
 		dump(CRUDBooster::getCurrentMethod());
 		$row             = DB::table($this->table)->where($this->primary_key,$id)->first();
-		dump($row);
-		$response = $this->searchViaEmail($row->email);
-		dump($response);
-		$results = $response['results'];
-		$email = $row->email;
-		$profile = $results[0]['profile'];
-		dump($profile);
-		if($profile == null){
-			$initRegisterGigya = $this->initRegistration();
-			dump($initRegisterGigya);
-			$regToken = $initRegisterGigya['regToken'];
-			$rowArray = (array) $row;
-			$setInputData = $this->arrayMappingtoGigya($rowArray);
-			$userRegisterGigya = $this->setAccountInfo($regToken,$setInputData);
-			dump($userRegisterGigya);
-		} else {
-			$profile = $this->arrayMappingtoSD($profile);
-			dump($profile);
-			foreach ($row as $key1 => $value1) {
-				foreach ($profile as $key2 => $value2) {
-					if($key2 == $key1){
-						$row->$key1 = $profile->$key2;
-					}
-				}
-			}
-		}
-		$row        = DB::table($this->table)->where($this->primary_key,$id)->first();
+		// dump($row);
+		// $response = $this->searchViaEmail($row->email);
+		// dump($response);
+		// $results = $response['results'];
+		// $email = $row->email;
+		// $profile = $results[0]['profile'];
+		// dump($profile);
+		// if($profile == null){
+		// 	$initRegisterGigya = $this->initRegistration();
+		// 	dump($initRegisterGigya);
+		// 	$regToken = $initRegisterGigya['regToken'];
+		// 	$rowArray = (array) $row;
+		// 	$setInputData = $this->arrayMappingtoGigya($rowArray);
+		// 	$userRegisterGigya = $this->setAccountInfo($regToken,$setInputData);
+		// 	dump($userRegisterGigya);
+		// } else {
+		// 	$profile = $this->arrayMappingtoSD($profile);
+		// 	dump($profile);
+		// 	foreach ($row as $key1 => $value1) {
+		// 		foreach ($profile as $key2 => $value2) {
+		// 			if($key2 == $key1){
+		// 				$row->$key1 = $profile->$key2;
+		// 			}
+		// 		}
+		// 	}
+		// }
+		// $row        = DB::table($this->table)->where($this->primary_key,$id)->first();
 
 		if(!CRUDBooster::isRead() && $this->global_privilege==FALSE || $this->button_detail==FALSE) {
 			CRUDBooster::insertLog(trans("crudbooster.log_try_view",['name'=>$row->{$this->title_field},'module'=>CRUDBooster::getCurrentModule()->name]));
