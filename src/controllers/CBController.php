@@ -27,6 +27,7 @@ use Carbon;
 use App\Traits\GigyaApi;
 use Config;
 
+
 class CBController extends Controller {
 
 	use GigyaApi;
@@ -413,7 +414,6 @@ class CBController extends Controller {
 						break;
 					}
 
-
 				}
 			});
 
@@ -633,7 +633,6 @@ class CBController extends Controller {
 		$papersize			= Request::input('page_size');
 		$paperorientation	= Request::input('page_orientation');
 		$response           = $this->getIndex();
-
 
 		if(Request::input('default_paper_size')) {
 			DB::table('cms_settings')->where('name','default_paper_size')->update(['content'=>$papersize]);
@@ -1312,8 +1311,6 @@ class CBController extends Controller {
 					}
 				}
 
-				// dd($newArray2,$colMatch,$row2);
-
 				for($i=0;$i<=$count_input_data;$i++) {
 					
 					$column_data = [];
@@ -1398,15 +1395,88 @@ class CBController extends Controller {
 		}
 	}
 
+	public function arrayMappingtoSD($profile){
+		$row = new \stdClass();
+		// dd($profile);
+		foreach ($profile as $key => $value) {
+			// dump($key);
+			// dd($profile['zip']);
+			if($key == 'zip'){
+				$row->postcode = $profile['zip'];
+			} elseif($key == 'firstName') {
+				$row->firstname = $profile['firstName'];
+			} elseif($key == 'lastName'){
+				$row->lastname = $profile['lastName'];
+			} elseif($key == 'phones') {
+				$row->mobileno = $profile['phones'][0]['number'];
+			} else {
+				$row->$key = $profile[$key];
+			}
+		}
+		return $row;
+	}
+
+	public function arrayMappingtoGigya($profile){
+		// $row = new \stdClass();
+		// dump($profile['phones'][0]['number']);
+		// dd("anjay",$profile);
+
+		foreach ($profile as $key => $value) {
+			if($key == 'postcode'){
+				$row['zip'] = $profile['postcode'];
+			} elseif($key == 'firstname') {
+				$row['firstName'] = $profile['firstname'];
+			} elseif($key == 'lastname'){
+				$row['lastName'] = $profile['lastname'];
+			} elseif($key == 'city') {
+				$row['city'] = $profile['city'];
+			} elseif($key == 'mobileno') {
+				$row['phones'][0] = array("number"=>$profile['mobileno']);
+			} elseif($key == 'address1') {
+				$row['address'] = $profile['address1'].",".$profile['address2'];
+			} elseif($key == 'state') {
+				$row['state'] = $profile['state']; 
+			} elseif($key == 'email'){
+				$row['email'] = $profile['email'];
+			}/*else {
+				$row[$key] = $profile[$key];
+			}*/
+		}
+		return $row;
+		// dump($row);
+		// die();
+	}
+
 	public function getEdit($id){
 		$this->cbLoader();
 		$row             = DB::table($this->table)->where($this->primary_key,$id)->first();
-		
+		$response = $this->searchViaEmail($row->email);
+		$results = $response['results'];
+		$email = $row->email;
+		$profile = $results[0]['profile'];
+
+		if($profile == null){
+			$initRegisterGigya = $this->initRegistration();
+			$regToken = $initRegisterGigya['regToken'];
+			$rowArray = (array) $row;
+			// dd($rowArray);
+			$setInputData = $this->arrayMappingtoGigya($rowArray);
+			$userRegisterGigya = $this->setAccountInfo($regToken,$setInputData);
+			// dd($userRegisterGigya);
+		} else {	
+			$profile = $this->arrayMappingtoSD($profile);
+			foreach ($row as $key1 => $value1) {
+				foreach ($profile as $key2 => $value2) {
+					if($key2 == $key1){
+						$row->$key1 = $profile->$key2;
+					}
+				}
+			}
+		}
 		if(!CRUDBooster::isRead() && $this->global_privilege==FALSE || $this->button_edit==FALSE) {
 			CRUDBooster::insertLog(trans("crudbooster.log_try_edit",['name'=>$row->{$this->title_field},'module'=>CRUDBooster::getCurrentModule()->name]));
 			CRUDBooster::redirect(CRUDBooster::adminPath(),trans('crudbooster.denied_access'));
 		}
-
 
 		$page_menu       = Route::getCurrentRoute()->getActionName();
 		$page_title 	 = trans("crudbooster.edit_data_page_title",['module'=>CRUDBooster::getCurrentModule()->name,'name'=>$row->{$this->title_field}]);
@@ -1416,14 +1486,7 @@ class CBController extends Controller {
 		$option_fields	 = $this->option_fields;
 		$table = $this->table;
 
-		// $mainmerge_id = DB::table('mainmerge')->where('customer_id', $id)->value('id');
-		
-		// if(DB::table('customer')){
-		// 	return view('crudbooster::default.form',compact('id','mainmerge_id','row','page_menu','page_title','command','option_id','option_fields'));	
-		// } else {
-		// dd($id,$row,$page_menu,$page_title,$command,$option_id,$option_fields,$table);
 		return view('crudbooster::default.form',compact('id','row','page_menu','page_title','command','option_id','option_fields','table'));
-		// }
 		
 	}
 
@@ -1432,8 +1495,8 @@ class CBController extends Controller {
 
 		$this->cbLoader();
 		$row = DB::table($this->table)->where($this->primary_key,$id)->first();
-
-
+		$email = $row->email;
+		// dd($email);
 		if(!CRUDBooster::isUpdate() && $this->global_privilege==FALSE) {
 			CRUDBooster::insertLog(trans("crudbooster.log_try_add",['name'=>$row->{$this->title_field},'module'=>CRUDBooster::getCurrentModule()->name]));
 			CRUDBooster::redirect(CRUDBooster::adminPath(),trans('crudbooster.denied_access'));
@@ -1448,23 +1511,9 @@ class CBController extends Controller {
 		}
 		
 
-		$this->hook_before_edit($this->arr,$id);
-		// dd($this->arr);
+		$this->hook_before_edit($this->arr,$id);		
 
-		if(strpos(CRUDBooster::mainpath(), 'admin/customer') !== false){
-			$mainmergeDate = DB::table('mainmerge')->where('customer_id',$id)->max('m_date');
-			$carelineDateCreated = DB::table('careline')->where('customer_id',$id)->max('date_created'); 
-			$carelineData = DB::table('careline')->select('callstatus','currentstatus','date_created','telecomaction')->where('customer_id',$id)->where('date_created','=',$carelineDateCreated)->first();
-			$this->arr['careline_max_datecreated'] = $carelineData->date_created;
-			$this->arr['careline_callstatus'] = $carelineData->callstatus;
-			$this->arr['careline_currentstatus'] = $carelineData->currentstatus;
-			$this->arr['careline_telecomaction'] = $carelineData->telecomaction;
-			$this->arr['mainmerge_max_mdate'] = $mainmergeDate;
-		}
-
-		// dd($this->arr);
-		// die();
-		DB::table($this->table)->where($this->primary_key,$id)->update($this->arr);		
+		
 
 		//Looping Data Input Again After Insert
 		// dd($this->data_inputan);
@@ -1479,6 +1528,7 @@ class CBController extends Controller {
 			if(!$name) continue;
 
 			$inputdata = Request::get($name);
+			$setInputData[$name] = $inputdata;
 
 			//Insert Data Checkbox if Type Datatable
 			if($ro['type'] == 'checkbox') {
@@ -1503,7 +1553,6 @@ class CBController extends Controller {
 
 				}
 			}			
-
 
 			if($ro['type'] == 'select2') {
 				if($ro['relationship_table']) {
@@ -1578,9 +1627,11 @@ class CBController extends Controller {
 						{
 							$newArray = array_merge($child_array[$key],$test);
 						}
-						dd($newArray);
+						// dd($newArray);
 						unset($newArray['id']);
-						$remove_array = ['careline_max_datecreated','careline_callstatus','careline_currentstatus','careline_telecomaction','mainmerge_max_mdate'];
+						$newArray['mobileno'] = $newArray['phones'];
+						$newArray['postcode'] = $newArray['zip'];
+						$remove_array = ['phones','zip','careline_max_datecreated','careline_callstatus','careline_currentstatus','careline_telecomaction','mainmerge_max_mdate'];
 						$newArray = array_diff_key($newArray, array_flip($remove_array));
 						// dd($newArray);
 						$lastId = CRUDBooster::newId($childtable);
@@ -1615,7 +1666,41 @@ class CBController extends Controller {
 
 		}//end foreach
 
-		$this->hook_after_edit($id,$tempId);
+		if ($setInputData['address2'] == 'NA' || $setInputData['address2'] == 'na') {
+			$setInputData['address2'] = '';
+		}
+		
+		// $setInputData['address'] = $setInputData['address1'].",".$setInputData['address2'].",".$setInputData['city']; 
+		// $removeKeys = array("optin","address1","address2","city","m_source","m_subsource","m_lang","m_date","childname","childdob","m_product","switched","reasonnotsuitable","remarks","currentgumbrand","currentbabyfoodbrand","previousbrand","previousbabyfood","consigmentno","calls_detail","children", "sample_request", "careline_detail","area_of_interest","pregnant","pregnantstage","pregnancyweek","pregnantremarks","currentlybreastfeeding","maternalmilkbrand","userid","mother");
+		// foreach ($removeKeys as $key) {
+		// 	unset($setInputData[$key]);
+		// }
+
+		// $childArray = $childData[0];
+		// unset($childArray['customerid']);
+
+		// $areaInterestData = $areaInterestData[0];
+		// unset($areaInterestData['customerid']);
+
+		// dd($childArray);
+		// dd($UID,$setInputData,$childArray,$areaInterestData);
+
+		if(strpos(CRUDBooster::mainpath(), 'admin/gigyacustomer') !== false){
+			$mainmergeDate = DB::table('mainmerge')->where('customer_id',$id)->max('m_date');
+			$carelineDateCreated = DB::table('careline')->where('customer_id',$id)->max('date_created'); 
+			$carelineData = DB::table('careline')->select('callstatus','currentstatus','date_created','telecomaction')->where('customer_id',$id)->where('date_created','=',$carelineDateCreated)->first();
+			$this->arr['careline_max_datecreated'] = $carelineData->date_created;
+			$this->arr['careline_callstatus'] = $carelineData->callstatus;
+			$this->arr['careline_currentstatus'] = $carelineData->currentstatus;
+			$this->arr['careline_telecomaction'] = $carelineData->telecomaction;
+			$this->arr['mainmerge_max_mdate'] = $mainmergeDate;
+		}
+
+		DB::table($this->table)->where($this->primary_key,$id)->update($this->arr);
+
+		$this->updateCustomerRecord($email,$setInputData);
+
+		$this->hook_after_edit($id);
 
 		$this->return_url = ($this->return_url)?$this->return_url:Request::get('return_url');
 
@@ -1631,6 +1716,30 @@ class CBController extends Controller {
 				CRUDBooster::redirect(CRUDBooster::mainpath(),trans("crudbooster.alert_update_data_success"),'success');
 			}
 		}
+	}
+
+	public function updateCustomerRecord($email, $setInputData)
+    {
+    	$response = $this->initRegistration();
+    	$regtoken = $response["regToken"];
+
+	    if ($regtoken!="")
+        {
+	    	// $setInputData['phones'][0] = array("number"=>$setInputData['mobileno']);
+	    	$setInputData = $this->arrayMappingtoGigya($setInputData);
+	    	$response = $this->searchViaEmail($email);
+	    	if($response['errorCode']==0)
+		   	{
+	            $response = $this->setAccountInfo($regtoken,$setInputData);
+	            // dump($response);
+	        }
+		}
+    	else
+	    {
+
+	        echo ("Uh-oh, we got the following error: " . $response->getErrorMessage());
+	        error_log($response->getLog());
+	    }
 	}
 
 	public function getDelete($id) {
@@ -1663,25 +1772,21 @@ class CBController extends Controller {
 
 	public function getDetail($id)	{
 		$this->cbLoader();
-		// $keyy =  config('gigyaaccess.GIGYAAPIKEY');
-		// dump($keyy);
-		dump(CRUDBooster::getCurrentMethod());
+		$keyy =  config('gigyaaccess.GIGYAAPIKEY');
 		$row             = DB::table($this->table)->where($this->primary_key,$id)->first();
-		dump($row);
+
 		$response = $this->searchViaEmail($row->email);
-		dump($response);
+
 		$results = $response['results'];
 		$email = $row->email;
 		$profile = $results[0]['profile'];
-		dump($profile);
+
 		if($profile == null){
 			$initRegisterGigya = $this->initRegistration();
-			dump($initRegisterGigya);
 			$regToken = $initRegisterGigya['regToken'];
 			$rowArray = (array) $row;
 			$setInputData = $this->arrayMappingtoGigya($rowArray);
 			$userRegisterGigya = $this->setAccountInfo($regToken,$setInputData);
-			dump($userRegisterGigya);
 		} else {
 			$profile = $this->arrayMappingtoSD($profile);
 			dump($profile);
