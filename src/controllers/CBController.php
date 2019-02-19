@@ -30,9 +30,9 @@ use Config;
 class CBController extends Controller {
 
 	use GigyaApi;
-	private $gigya_api_key;
-	private $gigya_secret_key;
-	private $gigya_user_key;
+	// private $gigya_api_key;
+	// private $gigya_secret_key;
+	// private $gigya_user_key;
 
 	public $data_inputan;
 	public $columns_table;
