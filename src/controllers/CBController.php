@@ -1656,6 +1656,9 @@ class CBController extends Controller {
 
 	public function getDetail($id)	{
 		$this->cbLoader();
+		dump(CRUDBooster::getCurrentMethod());
+		$keyy =  config('gigyaaccess.GIGYAAPIKEY');
+		dd($keyy);
 		$row        = DB::table($this->table)->where($this->primary_key,$id)->first();
 
 		if(!CRUDBooster::isRead() && $this->global_privilege==FALSE || $this->button_detail==FALSE) {
