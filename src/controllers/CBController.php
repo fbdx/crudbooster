@@ -276,9 +276,9 @@ class CBController extends Controller
         $join_alias_count = 0;
         $join_table_temp = [];
         $table = $this->table;
-        $columns_table = $this->columns_table;		
+        $columns_table = $this->columns_table;       
         foreach ($columns_table as $index => $coltab) {
-
+            $additem = false;
             $join = @$coltab['join'];
             $join_where = @$coltab['join_where'];
             $join_id = @$coltab['join_id'];
@@ -289,7 +289,7 @@ class CBController extends Controller
                 continue;
             }
 
-            if (strpos($field, ' as ') !== false) {
+            if (strpos($field, ' as ') !== false) {                
                 $field = substr($field, strpos($field, ' as ') + 4);
                 $field_with = (array_key_exists('join', $coltab)) ? str_replace(",", ".", $coltab['join']) : $field;
                 $result->addselect(DB::raw($coltab['name']));
@@ -307,22 +307,21 @@ class CBController extends Controller
             }
 
             if (strpos($field, '.') !== false) {
-                $result->addselect($field);
-            } else {
-                $result->addselect($table.'.'.$field);
+                $result->addselect($field);                
+            } else {                
+                $result->addselect($table.'.'.$field);                
             }
 
             $field_array = explode('.', $field);
 
             if (isset($field_array[1])) {
                 $field = $field_array[1];
-                $table = $field_array[0];
+                $table = $field_array[0];                
             } else {
-                $table = $this->table;
+                $table = $this->table;                
             }
 
-            if ($join) {
-
+            if ($join) {                
                 $join_exp = explode(',', $join);
 
                 $join_table = $join_exp[0];
@@ -374,15 +373,14 @@ class CBController extends Controller
                     $columns_table[$index]['field_with'] = $join_alias1.'.'.$join_column1;
                     $columns_table[$index]['field_raw'] = $join_column1;
                 }
-            } else {
-
+            } else {                
                 if(isset($field_array[1])) {                    
                     $result->addselect($table.'.'.$field.' as '.$table.'_'.$field);
                     $columns_table[$index]['type_data'] = CRUDBooster::getFieldType($table, $field);
                     $columns_table[$index]['field'] = $table.'_'.$field;
                     $columns_table[$index]['field_raw'] = $table.'.'.$field;
-                }else{
-                    $result->addselect($table.'.'.$field);
+                }else{                    
+                    //$result->addselect($table.'.'.$field);
                     $columns_table[$index]['type_data'] = CRUDBooster::getFieldType($table, $field);
                     $columns_table[$index]['field'] = $field;
                     $columns_table[$index]['field_raw'] = $field;
@@ -1145,6 +1143,7 @@ class CBController extends Controller
     {
 
         $hide_form = (Request::get('hide_form')) ? unserialize(Request::get('hide_form')) : [];
+        
 
         foreach ($this->data_inputan as $ro) {
             $name = $ro['name'];
@@ -1284,7 +1283,7 @@ class CBController extends Controller
 
     public function postAddSave()
     {
-        $this->cbLoader();
+        $this->cbLoader();        
         if (! CRUDBooster::isCreate() && $this->global_privilege == false) {
             CRUDBooster::insertLog(trans('crudbooster.log_try_add_save', [
                 'name' => Request::input($this->title_field),
@@ -1384,7 +1383,8 @@ class CBController extends Controller
         $this->return_url = ($this->return_url) ? $this->return_url : Request::get('return_url');
 
         //insert log
-        CRUDBooster::insertLog(trans("crudbooster.log_add", ['name' => $this->arr[$this->title_field], 'module' => CRUDBooster::getCurrentModule()->name]));
+        //CRUDBooster::insertLog(trans("crudbooster.log_add", ['name' => $this->{$this->title_field}, 'module' => CRUDBooster::getCurrentModule()->name]));
+        CRUDBooster::insertLog(trans("crudbooster.log_add", ['name' => $lastInsertId, 'module' => CRUDBooster::getCurrentModule()->name]));
 
         if ($this->return_url) {
             if (Request::get('submit') == trans('crudbooster.button_save_more')) {
@@ -1428,7 +1428,8 @@ class CBController extends Controller
         $row = DB::table($this->table)->where($this->primary_key, $id)->first();
 
         if (! CRUDBooster::isUpdate() && $this->global_privilege == false) {
-            CRUDBooster::insertLog(trans("crudbooster.log_try_add", ['name' => $row->{$this->title_field}, 'module' => CRUDBooster::getCurrentModule()->name]));
+            //CRUDBooster::insertLog(trans("crudbooster.log_try_add", ['name' => $row->{$this->title_field}, 'module' => CRUDBooster::getCurrentModule()->name]));
+            CRUDBooster::insertLog(trans("crudbooster.log_try_add", ['name' => $id, 'module' => CRUDBooster::getCurrentModule()->name]));
             CRUDBooster::redirect(CRUDBooster::adminPath(), trans('crudbooster.denied_access'));
         }
 
@@ -1536,8 +1537,13 @@ class CBController extends Controller
 
         //insert log
         $old_values = json_decode(json_encode($row), true);
-        CRUDBooster::insertLog(trans("crudbooster.log_update", [
+        /*CRUDBooster::insertLog(trans("crudbooster.log_update", [
             'name' => $this->arr[$this->title_field],
+            'module' => CRUDBooster::getCurrentModule()->name,
+        ]), LogsController::displayDiff($old_values, $this->arr));*/
+
+        CRUDBooster::insertLog(trans("crudbooster.log_update", [
+            'name' => $id,
             'module' => CRUDBooster::getCurrentModule()->name,
         ]), LogsController::displayDiff($old_values, $this->arr));
 
