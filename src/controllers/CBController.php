@@ -1564,15 +1564,19 @@ class CBController extends Controller
         $row = DB::table($this->table)->where($this->primary_key, $id)->first();
 
         if (! CRUDBooster::isDelete() && $this->global_privilege == false || $this->button_delete == false) {
-            CRUDBooster::insertLog(trans("crudbooster.log_try_delete", [
+            /*CRUDBooster::insertLog(trans("crudbooster.log_try_delete", [
                 'name' => $row->{$this->title_field},
+                'module' => CRUDBooster::getCurrentModule()->name,
+            ]));*/
+            CRUDBooster::insertLog(trans("crudbooster.log_try_delete", [
+                'name' => $id,
                 'module' => CRUDBooster::getCurrentModule()->name,
             ]));
             CRUDBooster::redirect(CRUDBooster::adminPath(), trans('crudbooster.denied_access'));
         }
 
         //insert log
-        CRUDBooster::insertLog(trans("crudbooster.log_delete", ['name' => $row->{$this->title_field}, 'module' => CRUDBooster::getCurrentModule()->name]));
+        CRUDBooster::insertLog(trans("crudbooster.log_delete", ['name' => $id, 'module' => CRUDBooster::getCurrentModule()->name]));
 
         $this->hook_before_delete($id);
 
