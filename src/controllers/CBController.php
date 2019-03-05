@@ -1302,8 +1302,7 @@ class CBController extends Controller
         $this->hook_before_add($this->arr);
 
 //         $this->arr[$this->primary_key] = $id = CRUDBooster::newId($this->table); //error on sql server
-        $lastInsertId = $id = DB::table($this->table)->insertGetId($this->arr);
-
+        $lastInsertId = $id = DB::table($this->table)->insertGetId($this->arr);        
         //Looping Data Input Again After Insert
         foreach ($this->data_inputan as $ro) {
             $name = $ro['name'];
@@ -1357,7 +1356,7 @@ class CBController extends Controller
             if ($ro['type'] == 'child') {
                 $name = str_slug($ro['label'], '');
                 $columns = $ro['columns'];
-                $getColName = Request::get($name.'-'.$columns[0]['name']);
+                $getColName = Request::get($name.'-'.$columns[0]['name']);                
                 $count_input_data = ($getColName)?(count($getColName) - 1):0;
                 $child_array = [];
 
@@ -1373,7 +1372,7 @@ class CBController extends Controller
                 }
 
                 $childtable = CRUDBooster::parseSqlTable($ro['table'])['table'];
-                if (($count_input_data)>0)   
+                if (($count_input_data)>=0)   
                     DB::table($childtable)->insert($child_array);
             }
         }
@@ -1498,7 +1497,7 @@ class CBController extends Controller
             if ($ro['type'] == 'child') {
                 $name = str_slug($ro['label'], '');
                 $columns = $ro['columns'];
-                $getColName = Request::get($name.'-'.$columns[0]['name']);
+                $getColName = Request::get($name.'-'.$columns[0]['name']);                
                 $count_input_data = ($getColName)?(count($getColName) - 1):0;
                 $child_array = [];
                 $childtable = CRUDBooster::parseSqlTable($ro['table'])['table'];
@@ -1507,17 +1506,15 @@ class CBController extends Controller
                 DB::table($childtable)->where($fk, $id)->delete();
                 $lastId = CRUDBooster::newId($childtable);
                 $childtablePK = CB::pk($childtable);
+                
 
-
-
-                for ($i = 0; $i <= $count_input_data; $i++) {
-
+                for ($i = 0; $i <= $count_input_data; $i++) {                    
                     $column_data = [];
                     $column_data[$childtablePK] = $lastId;
-                    $column_data[$fk] = $id;
+                    $column_data[$fk] = $id;                    
                     foreach ($columns as $col) {
                         $colname = $col['name'];
-                        $column_data[$colname] = Request::get($name.'-'.$colname)[$i];
+                        $column_data[$colname] = Request::get($name.'-'.$colname)[$i];                        
                     }
                     $child_array[] = $column_data;
 
@@ -1526,7 +1523,7 @@ class CBController extends Controller
 
                 $child_array = array_reverse($child_array);
 
-                if (($count_input_data)>0)
+                if (($count_input_data)>=0)
                     DB::table($childtable)->insert($child_array);
             }
         }
