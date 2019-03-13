@@ -574,6 +574,12 @@ $name = str_slug($form['label'], '');
                                             $data_child->addselect($join_table.'.'.$join_field.' as '.$join_table.'_'.$join_field);
                                         }
                                     }
+                                    elseif ($c['datatable']) {
+                                            $join_table = explode(',', $c['datatable'])[0];
+                                            $join_field = explode(',', $c['datatable'])[1];
+                                            $data_child->join($join_table, $join_table.'.id', '=', $c['name']);
+                                            $data_child->addselect($join_table.'.'.$join_field.' as '.$join_table.'_'.$join_field);
+                                    }
                                 }
 
                                 $data_child = $data_child->orderby($form['table'].'.id', 'desc')->get();
@@ -615,10 +621,21 @@ $name = str_slug($form['label'], '');
                                                     echo "<input type='hidden' name='".$name."-".$col['name']."[]' value='".$d->{$col['name']}."'/>";
                                                 }
                                             } else {
-                                                echo "<span class='td-label'>";
-                                                echo $d->{$col['name']};
-                                                echo "</span>";
-                                                echo "<input type='hidden' name='".$name."-".$col['name']."[]' value='".$d->{$col['name']}."'/>";
+                                                if ($col['datatable']) {                                                    
+                                                    $join_table = explode(',', $col['datatable'])[0];
+                                                    $join_field = explode(',', $col['datatable'])[1];                                                    
+                                                    echo "<span class='td-label'>";
+                                                    echo $d->{$join_table.'_'.$join_field};
+                                                    echo "</span>";
+                                                    echo "<input type='hidden' name='".$name."-".$col['name']."[]' value='".$d->{$col['name']}."'/>";
+                                                }
+                                                else
+                                                {
+                                                    echo "<span class='td-label'>";
+                                                    echo $d->{$col['name']};
+                                                    echo "</span>";
+                                                    echo "<input type='hidden' name='".$name."-".$col['name']."[]' value='".$d->{$col['name']}."'/>";
+                                                }
                                             }
                                             ?>
                                         </td>
