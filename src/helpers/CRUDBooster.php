@@ -791,6 +791,21 @@ class CRUDBooster
         });
     }
 
+
+    public static function sendEmailDB($db="",$table="", $config = [])
+    {
+        if ($db=="") return;
+        if ($table=="") return;
+        if (!DB::connection($db)) return;
+
+        DB::connection($db)->table($table)->insert(["emailto"=>$config['to'],"data"=>json_encode($config['data']),"template"=>$config["template"]]);
+
+        $to = $config['to'];
+        $data = $config['data'];
+        $template = $config['template'];        
+        
+    }
+
     public static function valid($arr = [], $type = 'json')
     {
         $input_arr = Request::all();
