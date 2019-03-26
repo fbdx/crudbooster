@@ -1225,8 +1225,6 @@ class CBController extends Controller {
 		$this->validation();
 		$this->input_assignment();
 
-		$email = $this->arr['email'] ?? NULL;
-
 		if(Schema::hasColumn($this->table, 'created_at'))
 		{
 		    $this->arr['created_at'] = date('Y-m-d H:i:s');
@@ -1238,38 +1236,38 @@ class CBController extends Controller {
 				
 		DB::table($this->table)->insert($this->arr);
 
-		// if(isset($email) && $this->gigya_based)
-		// {
-		// 	$mainMergeId = $this->arr[$this->primary_key];
+		if(isset($this->arr['email']) && $this->gigya_based)
+		{
+			$mainMergeId = $this->arr[$this->primary_key];
 
-		// 	$response = $this->searchViaEmail($email);
+			$response = $this->searchViaEmail($this->arr['email']);
 
-		// 	$results = $response['results'];
+			$results = $response['results'];
 
-		// 	$profile = $results[0]['profile'] ?? NULL;
+			$profile = $results[0]['profile'];
 
-		// 	if($profile == null){
-		// 		$initRegisterGigya = $this->initRegistration();
-		// 		$regToken = $initRegisterGigya['regToken'];
-		// 		$rowArray = $this->arr;
-		// 		$setInputData = $this->arrayMappingtoGigya($rowArray);
-		// 		$data = $this->setGigyaCustomInformation($mainMergeId);
-		// 		// dd($data);
-		// 		$userRegisterGigya = $this->setAccountInfo($regToken,$setInputData,$data);
+			if($profile == null){
+				$initRegisterGigya = $this->initRegistration();
+				$regToken = $initRegisterGigya['regToken'];
+				$rowArray = $this->arr;
+				$setInputData = $this->arrayMappingtoGigya($rowArray);
+				$data = $this->setGigyaCustomInformation($mainMergeId);
+				// dd($data);
+				$userRegisterGigya = $this->setAccountInfo($regToken,$setInputData,$data);
 
-		// 	} else {	
+			} else {	
 
-		// 		$profile = $this->arrayMappingtoSD($profile);
-		// 		foreach ($this->arr as $key1 => $value1) {
-		// 			foreach ($profile as $key2 => $value2) {
-		// 				if($key2 == $key1){
-		// 					$this->arr[$key1] = $profile->$key2;
-		// 				}
-		// 			}
-		// 		}
+				$profile = $this->arrayMappingtoSD($profile);
+				foreach ($this->arr as $key1 => $value1) {
+					foreach ($profile as $key2 => $value2) {
+						if($key2 == $key1){
+							$this->arr[$key1] = $profile->$key2;
+						}
+					}
+				}
 				
-		// 	}
-		// }	
+			}
+		}	
 
 		//Looping Data Input Again After Insert
 		foreach($this->data_inputan as $ro) {
@@ -1488,11 +1486,10 @@ class CBController extends Controller {
 		$this->cbLoader();
 
 		$row = DB::table($this->table)->where($this->primary_key,$id)->first();
-		$email = $row->email ?? NULL;
 
-		if(isset($email) && $this->gigya_based)
+		if(isset($row->email) && $this->gigya_based)
 		{
-			$response = $this->searchViaEmail($email);
+			$response = $this->searchViaEmail($row->email);
 			$results = $response['results'];
 			$profile = $results[0]['profile'];
 
@@ -1537,7 +1534,6 @@ class CBController extends Controller {
 	public function postEditSave($id) {
 		$this->cbLoader();
 		$row = DB::table($this->table)->where($this->primary_key,$id)->first();
-		$email = $row->email ?? NULL;
 
 		if(!CRUDBooster::isUpdate() && $this->global_privilege==FALSE) {
 			CRUDBooster::insertLog(trans("crudbooster.log_try_add",['name'=>$row->{$this->title_field},'module'=>CRUDBooster::getCurrentModule()->name]));
@@ -1737,9 +1733,9 @@ class CBController extends Controller {
 
 		DB::table($this->table)->where($this->primary_key,$id)->update($this->arr);
 
-		if(isset($email) && $this->gigya_based)
+		if(isset($row->email) && $this->gigya_based)
 		{
-			$this->updateCustomerRecord($email,$setInputData,$id);
+			$this->updateCustomerRecord($row->email,$setInputData,$id);
 		}
 
 		$this->hook_after_edit($id);
@@ -1985,11 +1981,10 @@ class CBController extends Controller {
 		$this->cbLoader();
 		$keyy =  config('gigyaaccess.GIGYAAPIKEY');
 		$row  = DB::table($this->table)->where($this->primary_key,$id)->first();
-		$email = $row->email ?? NULL;
 
-		if(isset($email) && $this->gigya_based)
+		if(isset($row->email) && $this->gigya_based)
 		{
-			$response = $this->searchViaEmail($email);
+			$response = $this->searchViaEmail($row->email);
 
 			$results = $response['results'];
 			$profile = $results[0]['profile'];
@@ -2012,7 +2007,6 @@ class CBController extends Controller {
 				}
 			}
 		}
-		// $row        = DB::table($this->table)->where($this->primary_key,$id)->first();
 
 		if(!CRUDBooster::isRead() && $this->global_privilege==FALSE || $this->button_detail==FALSE) {
 			CRUDBooster::insertLog(trans("crudbooster.log_try_view",['name'=>$row->{$this->title_field},'module'=>CRUDBooster::getCurrentModule()->name]));
