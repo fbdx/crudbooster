@@ -3,6 +3,8 @@
 error_reporting(E_ALL ^ E_NOTICE);
 
 use crocodicstudio\crudbooster\controllers\Controller;
+use App\Customer;
+use App\Mainmerge;
 use Illuminate\Support\Facades\Session;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Request;
@@ -92,7 +94,7 @@ class CBController extends Controller {
 	public $option_id			  = FALSE;
 	public $option_fields		  = array();
 	public $import_consignment	  = FALSE;
-	public $gigya_based	  		  = FALSE;
+	public $gigya_based			  = FALSE;
 
 	public function __construct()
 	{
@@ -146,7 +148,7 @@ class CBController extends Controller {
 		$this->data['sub_module']            = $this->sub_module;
 		$this->data['parent_field'] 		 = (g('parent_field'))?:$this->parent_field;
 		$this->data['parent_id'] 		 	 = (g('parent_id'))?:$this->parent_id;
-
+  
 		if(CRUDBooster::getCurrentMethod() == 'getProfile') {
 			Session::put('current_row_id',CRUDBooster::myId());
 			$this->data['return_url'] = Request::fullUrl();			
@@ -275,7 +277,7 @@ class CBController extends Controller {
 
 			if($join) {
 
-				$join_exp     = explode(',', $join);
+				$join_exp    = explode(',', $join);
 
 				$join_table  = $join_exp[0];
 				$joinTablePK = CB::pk($join_table);
@@ -1214,13 +1216,16 @@ class CBController extends Controller {
 
 	public function postAddSave() {
 		$this->cbLoader();
+
 		if(!CRUDBooster::isCreate() && $this->global_privilege==FALSE) {
 			CRUDBooster::insertLog(trans('crudbooster.log_try_add_save',['name'=>Request::input($this->title_field),'module'=>CRUDBooster::getCurrentModule()->name ]));
 			CRUDBooster::redirect(CRUDBooster::adminPath(),trans("crudbooster.denied_access"));
 		}
 
 		$this->validation();
-		$this->input_assignment();		
+		$this->input_assignment();
+
+		$email = $this->arr['email'] ?? NULL;
 
 		if(Schema::hasColumn($this->table, 'created_at'))
 		{
@@ -1231,8 +1236,40 @@ class CBController extends Controller {
 
 		$this->arr[$this->primary_key] = $id = CRUDBooster::newId($this->table);
 				
-		DB::table($this->table)->insert($this->arr);		
+		DB::table($this->table)->insert($this->arr);
 
+		// if(isset($email) && $this->gigya_based)
+		// {
+		// 	$mainMergeId = $this->arr[$this->primary_key];
+
+		// 	$response = $this->searchViaEmail($email);
+
+		// 	$results = $response['results'];
+
+		// 	$profile = $results[0]['profile'] ?? NULL;
+
+		// 	if($profile == null){
+		// 		$initRegisterGigya = $this->initRegistration();
+		// 		$regToken = $initRegisterGigya['regToken'];
+		// 		$rowArray = $this->arr;
+		// 		$setInputData = $this->arrayMappingtoGigya($rowArray);
+		// 		$data = $this->setGigyaCustomInformation($mainMergeId);
+		// 		// dd($data);
+		// 		$userRegisterGigya = $this->setAccountInfo($regToken,$setInputData,$data);
+
+		// 	} else {	
+
+		// 		$profile = $this->arrayMappingtoSD($profile);
+		// 		foreach ($this->arr as $key1 => $value1) {
+		// 			foreach ($profile as $key2 => $value2) {
+		// 				if($key2 == $key1){
+		// 					$this->arr[$key1] = $profile->$key2;
+		// 				}
+		// 			}
+		// 		}
+				
+		// 	}
+		// }	
 
 		//Looping Data Input Again After Insert
 		foreach($this->data_inputan as $ro) {
@@ -1449,30 +1486,36 @@ class CBController extends Controller {
 
 	public function getEdit($id){
 		$this->cbLoader();
-		$row             = DB::table($this->table)->where($this->primary_key,$id)->first();
-		$response = $this->searchViaEmail($row->email);
-		$results = $response['results'];
-		$email = $row->email;
-		$profile = $results[0]['profile'];
 
-		if($profile == null){
-			$initRegisterGigya = $this->initRegistration();
-			$regToken = $initRegisterGigya['regToken'];
-			$rowArray = (array) $row;
-			// dd($rowArray);
-			$setInputData = $this->arrayMappingtoGigya($rowArray);
-			$userRegisterGigya = $this->setAccountInfo($regToken,$setInputData);
-			// dd($userRegisterGigya);
-		} else {	
-			$profile = $this->arrayMappingtoSD($profile);
-			foreach ($row as $key1 => $value1) {
-				foreach ($profile as $key2 => $value2) {
-					if($key2 == $key1){
-						$row->$key1 = $profile->$key2;
+		$row = DB::table($this->table)->where($this->primary_key,$id)->first();
+		$email = $row->email ?? NULL;
+
+		if(isset($email) && $this->gigya_based)
+		{
+			$response = $this->searchViaEmail($email);
+			$results = $response['results'];
+			$profile = $results[0]['profile'];
+
+			if($profile == null){
+				$initRegisterGigya = $this->initRegistration();
+				$regToken = $initRegisterGigya['regToken'];
+				$rowArray = (array) $row;
+				// dd($rowArray);
+				$setInputData = $this->arrayMappingtoGigya($rowArray);
+				$userRegisterGigya = $this->setAccountInfo($regToken,$setInputData);
+				// dd($userRegisterGigya);
+			} else {	
+				$profile = $this->arrayMappingtoSD($profile);
+				foreach ($row as $key1 => $value1) {
+					foreach ($profile as $key2 => $value2) {
+						if($key2 == $key1){
+							$row->$key1 = $profile->$key2;
+						}
 					}
 				}
 			}
 		}
+
 		if(!CRUDBooster::isRead() && $this->global_privilege==FALSE || $this->button_edit==FALSE) {
 			CRUDBooster::insertLog(trans("crudbooster.log_try_edit",['name'=>$row->{$this->title_field},'module'=>CRUDBooster::getCurrentModule()->name]));
 			CRUDBooster::redirect(CRUDBooster::adminPath(),trans('crudbooster.denied_access'));
@@ -1492,28 +1535,24 @@ class CBController extends Controller {
 
 	public $countChild = 0;
 	public function postEditSave($id) {
-
 		$this->cbLoader();
 		$row = DB::table($this->table)->where($this->primary_key,$id)->first();
-		$email = $row->email;
-		// dd($email);
+		$email = $row->email ?? NULL;
+
 		if(!CRUDBooster::isUpdate() && $this->global_privilege==FALSE) {
 			CRUDBooster::insertLog(trans("crudbooster.log_try_add",['name'=>$row->{$this->title_field},'module'=>CRUDBooster::getCurrentModule()->name]));
 			CRUDBooster::redirect(CRUDBooster::adminPath(),trans('crudbooster.denied_access'));
 		}
 
 		$this->validation($id);
-		$this->input_assignment($id);				
+		$this->input_assignment($id);			
 
 		if (Schema::hasColumn($this->table, 'updated_at'))
 		{
 		    $this->arr['updated_at'] = date('Y-m-d H:i:s');
 		}
-		
 
 		$this->hook_before_edit($this->arr,$id);		
-
-		
 
 		//Looping Data Input Again After Insert
 		// dd($this->data_inputan);
@@ -1698,7 +1737,10 @@ class CBController extends Controller {
 
 		DB::table($this->table)->where($this->primary_key,$id)->update($this->arr);
 
-		$this->updateCustomerRecord($email,$setInputData);
+		if(isset($email) && $this->gigya_based)
+		{
+			$this->updateCustomerRecord($email,$setInputData,$id);
+		}
 
 		$this->hook_after_edit($id);
 
@@ -1718,20 +1760,22 @@ class CBController extends Controller {
 		}
 	}
 
-	public function updateCustomerRecord($email, $setInputData)
+	public function updateCustomerRecord($email, $setInputData, $mainMergeId)
     {
     	$response = $this->initRegistration();
     	$regtoken = $response["regToken"];
 
 	    if ($regtoken!="")
         {
-	    	// $setInputData['phones'][0] = array("number"=>$setInputData['mobileno']);
 	    	$setInputData = $this->arrayMappingtoGigya($setInputData);
+
+	    	$data = $this->setGigyaCustomInformation($mainMergeId);
+
 	    	$response = $this->searchViaEmail($email);
+
 	    	if($response['errorCode']==0)
 		   	{
-	            $response = $this->setAccountInfo($regtoken,$setInputData);
-	            // dump($response);
+	            $response = $this->setAccountInfo($regtoken,$setInputData,$data);
 	        }
 		}
     	else
@@ -1741,6 +1785,173 @@ class CBController extends Controller {
 	        error_log($response->getLog());
 	    }
 	}
+
+	public function setGigyaCustomInformation($mainMergeId)
+	{
+		$data["marketCode"] = "20503";
+    	$data["consumerType"] = "PRIVATE";
+    	$data["countryCode"] = "MY";
+    	$data["initialAppSourceCode"] = "MYNINWEB_MIG";
+    	$data["externalApplication"]["applicationCode"] = "MYNINWEB_MIG";
+    	$data["externalApplication"]["internalIdentifier"] = $this->generateUid();
+
+    	$mainMerge = Mainmerge::find($mainMergeId);
+    	$customer = Customer::find($mainMerge->customer_id);
+
+    	$childArray = [];
+
+    	if(isset($customer))
+    	{
+			foreach($customer->mainMergeMany as $key => $value)
+			{
+			    $childArray[$key]["applicationInternalIdentifier"] = $this->generateUid();
+			    $childArray[$key]["birthDateReliability"] = (string) $value->is_pregnant;
+			    $childArray[$key]["firstName"] = $value->childname;
+			    $childArray[$key]["birthDate"] = $value->childdob;
+
+			    // if(!empty($value->currentgumbrand))
+			    // {
+			    //     $childArray[$key]["areaOfInterest"]["interestCode"]   = "GG_CHILD_MILK_BRAND";
+			    //     $childArray[$key]["areaOfInterest"]["answerDetails"]  = $this->getChildAreaOfInterestCodeName($value->currentgumbrand);
+			    //     $childArray[$key]["areaOfInterest"]["creationDate"]   = $this->generateTime();
+			    //     $childArray[$key]["areaOfInterest"]["lastUpdateDate"] = $this->generateTime();
+			    // }
+			    
+			    // if(!empty($value->currentbabyfoodbrand))
+			    // {
+			    //     $childArray[$key]["feeding"] = $this->getChildFeedingCodeName($value->currentbabyfoodbrand);
+			    // }
+
+			    if($value->pregnancyweek > 0 && $value->pregnancyweek < 40){
+
+			        $estimateDateofDelivery = $this->estimateDateofDelivery($value->pregnancyweek);
+			        $childArray[$key]["birthDateReliability"] = "4";
+			        $childArray[$key]['birthDate'] = $estimateDateofDelivery;
+			    }
+			}
+    	}
+    	else
+    	{
+    		$mainMerges = DB::table($this->table)->where("email",$mainMerge->email)->get();
+
+    		foreach($mainMerges as $key => $value)
+    		{
+    			$childArray[$key]["applicationInternalIdentifier"] = $this->generateUid();
+			    $childArray[$key]["birthDateReliability"] = (string) $value->is_pregnant;
+			    $childArray[$key]["firstName"] = $value->childname;
+			    $childArray[$key]["birthDate"] = $value->childdob;
+
+			    // if(!empty($value->currentgumbrand))
+			    // {
+			    //     $childArray[0]["areaOfInterest"]["interestCode"]   = "GG_CHILD_MILK_BRAND";
+			    //     $childArray[0]["areaOfInterest"]["answerDetails"]  = $this->getChildAreaOfInterestCodeName($value->currentgumbrand);
+			    //     $childArray[0]["areaOfInterest"]["creationDate"]   = $this->generateTime();
+			    //     $childArray[0]["areaOfInterest"]["lastUpdateDate"] = $this->generateTime();
+			    // }
+			    
+			    // if(!empty($value->currentbabyfoodbrand))
+			    // {
+			    //     $childArray[0]["feeding"] = $this->getChildFeedingCodeName($value->currentbabyfoodbrand);
+			    // }
+
+			    if($value->pregnancyweek > 0 && $value->pregnancyweek < 40){
+
+			        $estimateDateofDelivery = $this->estimateDateofDelivery($value->pregnancyweek);
+			        $childArray[$key]["birthDateReliability"] = "4";
+			        $childArray[$key]['birthDate'] = $estimateDateofDelivery;
+			    }
+
+    		}
+    	}
+
+    	$data["child"] = $childArray;
+
+        return $data;
+
+	}
+
+	public function estimateDateofDelivery($pregnancyweek)
+    {
+        $maxPregnantMonth = 40;
+        $balancePregnancyWeek = $maxPregnantMonth - $pregnancyweek;
+        
+        $startDate = strtotime("last Wednesday");
+        $endDate = date("Y-m-d",strtotime("+".$balancePregnancyWeek." week", $startDate));
+
+        return $endDate;
+    }
+
+    public function getMotherAreaOfInterestCodeName($name)
+    {
+        $motherBrands = DB::table('maternalmilkbrand')->get();
+
+        $codeName = "NONE";
+
+        foreach($motherBrands as $motherBrand)
+        {
+            if($motherBrand->name == $name)
+            {
+                 $codeName = $motherBrand->codename;
+            }       
+        }
+
+        return $codeName;
+    }
+
+    public function getChildAreaOfInterestCodeName($name)
+    {
+        $childBrands = DB::table('currentgumbrand')->get();
+
+        $codeName = "NONE";
+
+        foreach($childBrands as $childBrand)
+        {
+            if($childBrand->name == $name)
+            {
+                $codeName = $childBrand->codename;
+            }
+        }
+
+        return $codeName;
+    }
+
+    public function getChildFeedingCodeName($name)
+    {
+        $childFoods = DB::table('currentbabyfoodbrand')->get();
+
+        $codeName = "NONE";
+
+        foreach($childFoods as $childFood)
+        {
+            if($childFood->name == $name)
+            {
+                $codeName = $childFood->codename;
+            }
+        }
+
+        return $codeName;
+    }
+
+    public function generateUid()
+    {
+        return sprintf('%04x%04x-%04x-%04x-%04x-%04x%04x%04x',
+        mt_rand(0, 0xffff), mt_rand(0, 0xffff),
+        mt_rand(0, 0xffff),
+        mt_rand(0, 0x0fff) | 0x4000,
+        mt_rand(0, 0x3fff) | 0x8000,
+        mt_rand(0, 0xffff), mt_rand(0, 0xffff), mt_rand(0, 0xffff));
+    }
+
+    public function generateTime()
+    {
+         $t = microtime(true); 
+
+         $micro = sprintf("%03d",($t - floor($t)) * 1000); 
+
+         $utc = gmdate('Y-m-d\TH:i:s:', $t).$micro.'Z';
+
+         return $utc;
+    }
 
 	public function getDelete($id) {
 		$this->cbLoader();
@@ -1773,27 +1984,30 @@ class CBController extends Controller {
 	public function getDetail($id)	{
 		$this->cbLoader();
 		$keyy =  config('gigyaaccess.GIGYAAPIKEY');
-		$row             = DB::table($this->table)->where($this->primary_key,$id)->first();
+		$row  = DB::table($this->table)->where($this->primary_key,$id)->first();
+		$email = $row->email ?? NULL;
 
-		$response = $this->searchViaEmail($row->email);
+		if(isset($email) && $this->gigya_based)
+		{
+			$response = $this->searchViaEmail($email);
 
-		$results = $response['results'];
-		$email = $row->email;
-		$profile = $results[0]['profile'];
+			$results = $response['results'];
+			$profile = $results[0]['profile'];
 
-		if($profile == null){
-			$initRegisterGigya = $this->initRegistration();
-			$regToken = $initRegisterGigya['regToken'];
-			$rowArray = (array) $row;
-			$setInputData = $this->arrayMappingtoGigya($rowArray);
-			$userRegisterGigya = $this->setAccountInfo($regToken,$setInputData);
-		} else {
-			$profile = $this->arrayMappingtoSD($profile);
-			// dump($profile);
-			foreach ($row as $key1 => $value1) {
-				foreach ($profile as $key2 => $value2) {
-					if($key2 == $key1){
-						$row->$key1 = $profile->$key2;
+			if($profile == null){
+				$initRegisterGigya = $this->initRegistration();
+				$regToken = $initRegisterGigya['regToken'];
+				$rowArray = (array) $row;
+				$setInputData = $this->arrayMappingtoGigya($rowArray);
+				$data = $this->setGigyaCustomInformation($id);
+				$userRegisterGigya = $this->setAccountInfo($regToken,$setInputData,$data);
+			} else {
+				$profile = $this->arrayMappingtoSD($profile);
+				foreach ($row as $key1 => $value1) {
+					foreach ($profile as $key2 => $value2) {
+						if($key2 == $key1){
+							$row->$key1 = $profile->$key2;
+						}
 					}
 				}
 			}
@@ -1825,7 +2039,6 @@ class CBController extends Controller {
 	    	return false;
 	    }
 	        
-
 	    $header = null;
 	    $data = array();
 	    if (($handle = fopen($filename, 'r')) !== false)
