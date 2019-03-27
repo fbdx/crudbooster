@@ -1494,7 +1494,6 @@ class CBController extends Controller {
 			$response = $this->searchViaEmail($row->email);
 			$results = $response['results'];
 			$profile = $results[0]['profile'];
-			dd($results);
 
 			if($profile == null){
 				$initRegisterGigya = $this->initRegistration();
@@ -1777,8 +1776,6 @@ class CBController extends Controller {
 	    	if($response['errorCode']==0)
 		   	{
 	            $response = $this->setAccountInfo($regtoken,$setInputData,$data, $subscriptions);
-
-	            dd($response);
 	        }
 		}
     	else
