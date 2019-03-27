@@ -1252,8 +1252,10 @@ class CBController extends Controller {
 				$rowArray = $this->arr;
 				$setInputData = $this->arrayMappingtoGigya($rowArray);
 				$data = $this->setGigyaCustomInformation($mainMergeId);
+			    $subscriptions = $this->setGigyaSubscriptions();
+
 				// dd($data);
-				$userRegisterGigya = $this->setAccountInfo($regToken,$setInputData,$data);
+				$userRegisterGigya = $this->setAccountInfo($regToken,$setInputData,$data,$subscriptions);
 
 			} else {	
 
@@ -1492,6 +1494,7 @@ class CBController extends Controller {
 			$response = $this->searchViaEmail($row->email);
 			$results = $response['results'];
 			$profile = $results[0]['profile'];
+			dd($results);
 
 			if($profile == null){
 				$initRegisterGigya = $this->initRegistration();
@@ -1767,11 +1770,15 @@ class CBController extends Controller {
 
 	    	$data = $this->setGigyaCustomInformation($mainMergeId);
 
+	    	$subscriptions = $this->setGigyaSubscriptions();
+
 	    	$response = $this->searchViaEmail($email);
 
 	    	if($response['errorCode']==0)
 		   	{
-	            $response = $this->setAccountInfo($regtoken,$setInputData,$data);
+	            $response = $this->setAccountInfo($regtoken,$setInputData,$data, $subscriptions);
+
+	            dd($response);
 	        }
 		}
     	else
@@ -1794,6 +1801,14 @@ class CBController extends Controller {
     	$mainMerge = Mainmerge::find($mainMergeId);
     	$customer = Customer::find($mainMerge->customer_id);
 
+    	if(!empty($mainMerge->maternalmilkbrand))
+        {
+            $data["areaOfInterest"]["interestCode"]   = "GG_CONSUMER_MILK_BRAND";
+            $data["areaOfInterest"]["answerDetails"]  = $this->getMotherAreaOfInterestCodeName($mainMerge->maternalmilkbrand);
+            $data["areaOfInterest"]["creationDate"]   = $this->generateTime();
+            $data["areaOfInterest"]["lastUpdateDate"] = $this->generateTime();
+        }
+
     	$childArray = [];
 
     	if(isset($customer))
@@ -1805,18 +1820,18 @@ class CBController extends Controller {
 			    $childArray[$key]["firstName"] = $value->childname;
 			    $childArray[$key]["birthDate"] = $value->childdob;
 
-			    // if(!empty($value->currentgumbrand))
-			    // {
-			    //     $childArray[$key]["areaOfInterest"]["interestCode"]   = "GG_CHILD_MILK_BRAND";
-			    //     $childArray[$key]["areaOfInterest"]["answerDetails"]  = $this->getChildAreaOfInterestCodeName($value->currentgumbrand);
-			    //     $childArray[$key]["areaOfInterest"]["creationDate"]   = $this->generateTime();
-			    //     $childArray[$key]["areaOfInterest"]["lastUpdateDate"] = $this->generateTime();
-			    // }
+			    if(!empty($value->currentgumbrand))
+			    {
+			        $childArray[$key]["areaOfInterest"]["interestCode"]   = "GG_CHILD_MILK_BRAND";
+			        $childArray[$key]["areaOfInterest"]["answerDetails"]  = $this->getChildAreaOfInterestCodeName($value->currentgumbrand);
+			        $childArray[$key]["areaOfInterest"]["creationDate"]   = $this->generateTime();
+			        $childArray[$key]["areaOfInterest"]["lastUpdateDate"] = $this->generateTime();
+			    }
 			    
-			    // if(!empty($value->currentbabyfoodbrand))
-			    // {
-			    //     $childArray[$key]["feeding"] = $this->getChildFeedingCodeName($value->currentbabyfoodbrand);
-			    // }
+			    if(!empty($value->currentbabyfoodbrand))
+			    {
+			        $childArray[$key]["feeding"] = $this->getChildFeedingCodeName($value->currentbabyfoodbrand);
+			    }
 
 			    if($value->pregnancyweek > 0 && $value->pregnancyweek < 40){
 
@@ -1837,18 +1852,18 @@ class CBController extends Controller {
 			    $childArray[$key]["firstName"] = $value->childname;
 			    $childArray[$key]["birthDate"] = $value->childdob;
 
-			    // if(!empty($value->currentgumbrand))
-			    // {
-			    //     $childArray[0]["areaOfInterest"]["interestCode"]   = "GG_CHILD_MILK_BRAND";
-			    //     $childArray[0]["areaOfInterest"]["answerDetails"]  = $this->getChildAreaOfInterestCodeName($value->currentgumbrand);
-			    //     $childArray[0]["areaOfInterest"]["creationDate"]   = $this->generateTime();
-			    //     $childArray[0]["areaOfInterest"]["lastUpdateDate"] = $this->generateTime();
-			    // }
+			    if(!empty($value->currentgumbrand))
+			    {
+			        $childArray[$key]["areaOfInterest"]["interestCode"]   = "GG_CHILD_MILK_BRAND";
+			        $childArray[$key]["areaOfInterest"]["answerDetails"]  = $this->getChildAreaOfInterestCodeName($value->currentgumbrand);
+			        $childArray[$key]["areaOfInterest"]["creationDate"]   = $this->generateTime();
+			        $childArray[$key]["areaOfInterest"]["lastUpdateDate"] = $this->generateTime();
+			    }
 			    
-			    // if(!empty($value->currentbabyfoodbrand))
-			    // {
-			    //     $childArray[0]["feeding"] = $this->getChildFeedingCodeName($value->currentbabyfoodbrand);
-			    // }
+			    if(!empty($value->currentbabyfoodbrand))
+			    {
+			        $childArray[0]["feeding"] = $this->getChildFeedingCodeName($value->currentbabyfoodbrand);
+			    }
 
 			    if($value->pregnancyweek > 0 && $value->pregnancyweek < 40){
 
@@ -1856,7 +1871,6 @@ class CBController extends Controller {
 			        $childArray[$key]["birthDateReliability"] = "4";
 			        $childArray[$key]['birthDate'] = $estimateDateofDelivery;
 			    }
-
     		}
     	}
 
@@ -1864,6 +1878,24 @@ class CBController extends Controller {
 
         return $data;
 
+	}
+
+
+	public function setGigyaSubscriptions()
+	{
+	    $subscriptions["MYinfantnut_RGinfantnut"]["email"]["isSubscribed"] = true;
+	    $subscriptions["MYinfantnut_RGinfantnut"]["email"]["lastUpdatedSubscriptionState"] = $this->generateTime();
+	    $subscriptions["MYinfantnut_RGinfantnut"]["email"]["tags"][0] = "sourceApplication:MYNINWEB_MIG";
+
+	    $subscriptions["MYnestlegrp_SBcrossnl"]["email"]["isSubscribed"] = true;
+	    $subscriptions["MYnestlegrp_SBcrossnl"]["email"]["lastUpdatedSubscriptionState"] = $this->generateTime();
+	    $subscriptions["MYnestlegrp_SBcrossnl"]["email"]["tags"][0] = "sourceApplication:MYNINWEB_MIG";
+
+	    $subscriptions["MYinfantnut_SBsmspromo"]["email"]["isSubscribed"] = true;
+	    $subscriptions["MYinfantnut_SBsmspromo"]["email"]["lastUpdatedSubscriptionState"] = $this->generateTime();
+	    $subscriptions["MYinfantnut_SBsmspromo"]["email"]["tags"][0] = "sourceApplication:MYNINWEB_MIG";
+
+	    return $subscriptions;
 	}
 
 	public function estimateDateofDelivery($pregnancyweek)
@@ -1944,7 +1976,7 @@ class CBController extends Controller {
 
          $micro = sprintf("%03d",($t - floor($t)) * 1000); 
 
-         $utc = gmdate('Y-m-d\TH:i:s:', $t).$micro.'Z';
+         $utc = gmdate('Y-m-d\TH:i:s.', $t).$micro.'Z';
 
          return $utc;
     }
@@ -1995,7 +2027,8 @@ class CBController extends Controller {
 				$rowArray = (array) $row;
 				$setInputData = $this->arrayMappingtoGigya($rowArray);
 				$data = $this->setGigyaCustomInformation($id);
-				$userRegisterGigya = $this->setAccountInfo($regToken,$setInputData,$data);
+				$subscriptions = $this->setGigyaSubscriptions();
+				$userRegisterGigya = $this->setAccountInfo($regToken,$setInputData,$data,$subscriptions);
 			} else {
 				$profile = $this->arrayMappingtoSD($profile);
 				foreach ($row as $key1 => $value1) {
