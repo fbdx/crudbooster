@@ -1874,7 +1874,6 @@ class CBController extends Controller {
     	$data["child"] = $childArray;
 
         return $data;
-
 	}
 
 
