@@ -1246,28 +1246,21 @@ class CBController extends Controller {
 
 			$profile = $results[0]['profile'];
 
-			if($profile == null){
-				$initRegisterGigya = $this->initRegistration();
-				$regToken = $initRegisterGigya['regToken'];
-				$rowArray = $this->arr;
-				$setInputData = $this->arrayMappingtoGigya($rowArray);
-				$data = $this->setGigyaCustomInformation($mainMergeId);
-			    $subscriptions = $this->setGigyaSubscriptions();
+			$initRegisterGigya = $this->initRegistration();
+			$regToken = $initRegisterGigya['regToken'];
+			$rowArray = $this->arr;
+			$setInputData = $this->arrayMappingtoGigya($rowArray);
+			$data = $this->setGigyaCustomInformation($mainMergeId);
+		    $subscriptions = $this->setGigyaSubscriptions();
+			$userRegisterGigya = $this->setAccountInfo($regToken,$setInputData,$data,$subscriptions);
 
-				// dd($data);
-				$userRegisterGigya = $this->setAccountInfo($regToken,$setInputData,$data,$subscriptions);
-
-			} else {	
-
-				$profile = $this->arrayMappingtoSD($profile);
-				foreach ($this->arr as $key1 => $value1) {
-					foreach ($profile as $key2 => $value2) {
-						if($key2 == $key1){
-							$this->arr[$key1] = $profile->$key2;
-						}
+			$profile = $this->arrayMappingtoSD($profile);
+			foreach ($this->arr as $key1 => $value1) {
+				foreach ($profile as $key2 => $value2) {
+					if($key2 == $key1){
+						$this->arr[$key1] = $profile->$key2;
 					}
 				}
-				
 			}
 		}	
 
