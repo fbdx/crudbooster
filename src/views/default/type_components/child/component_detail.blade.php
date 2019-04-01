@@ -73,7 +73,7 @@
                                         echo "<a href='".asset($d->{$col['name']})."' class='fancybox'><img data-label='$filename' src='".asset($d->{$col['name']})."' width='50px' height='50px'/></a>";
                                         echo "<input type='hidden' name='".$name."-".$col['name']."[]' value='".$d->{$col['name']}."'/>";
                                     } else {
-                                        echo "<a data-label='$filename' href='".asset($d->{$col['name']})."'>$filename</a>";
+                                        echo "<a data-label='$filename' href='".asset($d->{$col['name']})."' target='_blank'>$filename</a>";
                                         echo "<input type='hidden' name='".$name."-".$col['name']."[]' value='".$d->{$col['name']}."'/>";
                                     }
                                 } else {

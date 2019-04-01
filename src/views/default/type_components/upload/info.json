@@ -4,6 +4,8 @@
   "attribute": {
     "optional": {
       "style": "string inline stylesheet",
+	  "groupclass": "class in form group",
+      "formclass": "class in form",
       "help": "string help-block",
       "readonly": "boolean",
       "disabled": "boolean"

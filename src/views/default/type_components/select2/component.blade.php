@@ -168,7 +168,7 @@
     </label>
 
     <div class="{{$col_width?:'col-sm-10'}}">
-        <select style='width:100%' class='form-control {{@$form["formclass"]}}' id="{{$name}}"
+        <select style='width:100%' class='form-control {{@$form["formclass"]}}' id="{{$name}}" {{$disabled}} 
                 {{$required}} {!!$placeholder!!} name="{{$name}}{{($form['relationship_table'])?'[]':''}}" {{ ($form['relationship_table'])?'multiple="multiple"':'' }} >
             @if($form['dataenum'])
                 <option value=''>{{trans('crudbooster.text_prefix_option')}} {{$form['label']}}</option>
