@@ -1354,10 +1354,10 @@ class CBController extends Controller
             }
 
             if ($ro['type'] == 'child') {
-                $name = str_slug($ro['label'], '');
+                $name = strtolower(str_slug($ro['label'], ''));
                 $columns = $ro['columns'];
                 $getColName = Request::get($name.'-'.$columns[0]['name']);                
-                $count_input_data = ($getColName)?(count($getColName) - 1):0;
+                $count_input_data = ($getColName)?(count($getColName)):0;                
                 $child_array = [];
 
                 for ($i = 0; $i <= $count_input_data; $i++) {
@@ -1370,9 +1370,9 @@ class CBController extends Controller
                     }
                     $child_array[] = $column_data;
                 }
-
-                $childtable = CRUDBooster::parseSqlTable($ro['table'])['table'];
-                if (($count_input_data)>=0)   
+                
+                $childtable = CRUDBooster::parseSqlTable($ro['table'])['table'];                
+                if (($count_input_data)>0)   
                     DB::table($childtable)->insert($child_array);
             }
         }
