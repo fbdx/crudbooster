@@ -1240,18 +1240,18 @@ class CBController extends Controller {
 		{
 			$mainMergeId = $this->arr[$this->primary_key];
 
-			$response = $this->searchViaEmail($this->arr['email']);
+			// $response = $this->searchViaEmail($this->arr['email']);
 
-			$results = $response['results'];
+			// $results = $response['results'];
 
-			$profile = $results[0]['profile'];
+			// $profile = $results[0]['profile'];
 
 			$initRegisterGigya = $this->initRegistration();
-			$regToken = $initRegisterGigya['regToken'];
-			$rowArray = $this->arr;
-			$setInputData = $this->arrayMappingtoGigya($rowArray);
-			$data = $this->setGigyaCustomInformation($mainMergeId);
-		    $subscriptions = $this->setGigyaSubscriptions();
+			$regToken 		   = $initRegisterGigya['regToken'];
+			$rowArray 		   = $this->arr;
+			$setInputData      = $this->arrayMappingtoGigya($rowArray);
+			$data 			   = $this->setGigyaCustomInformation($mainMergeId);
+		    $subscriptions 	   = $this->setGigyaSubscriptions();
 			$userRegisterGigya = $this->setAccountInfo($regToken,$setInputData,$data,$subscriptions);
 
 			// if(isset($profile))
@@ -1492,6 +1492,7 @@ class CBController extends Controller {
 			$results = $response['results'];
 			$profile = $results[0]['profile'];
 
+			// dd($response);
 			if($profile == null){
 				$initRegisterGigya = $this->initRegistration();
 				$regToken = $initRegisterGigya['regToken'];
@@ -1804,6 +1805,7 @@ class CBController extends Controller {
         }
 
     	$childArray = [];
+    	$count = 0;
 
     	if(isset($customer))
     	{
@@ -1811,34 +1813,35 @@ class CBController extends Controller {
 			{
 				if($value->childname !="" && $value->childdob !='0000-00-00')
 				{
-				    $childArray[$key]["applicationInternalIdentifier"] = $this->generateUid();
-				    $childArray[$key]["birthDateReliability"] = (string) $value->is_pregnant;
-				    $childArray[$key]["firstName"] = $value->childname;
+				    $childArray[$count]["applicationInternalIdentifier"] = $this->generateUid();
+				    $childArray[$count]["birthDateReliability"] = (string) $value->is_pregnant;
+				    $childArray[$count]["firstName"] = $value->childname;
 				    if(isset($value->childdob))
 				    {
-					    $childArray[$key]["birthDate"] = $value->childdob;
+					    $childArray[$count]["birthDate"] = $value->childdob;
 				    }
 
 				    if(!empty($value->currentgumbrand))
 				    {
-				        $childArray[$key]["areaOfInterest"]["interestCode"]   = "GG_CHILD_MILK_BRAND";
-				        $childArray[$key]["areaOfInterest"]["answerDetails"]  = $this->getChildAreaOfInterestCodeName($value->currentgumbrand);
-				        $childArray[$key]["areaOfInterest"]["creationDate"]   = $this->generateTime();
-				        $childArray[$key]["areaOfInterest"]["lastUpdateDate"] = $this->generateTime();
+				        $childArray[$count]["areaOfInterest"]["interestCode"]   = "GG_CHILD_MILK_BRAND";
+				        $childArray[$count]["areaOfInterest"]["answerDetails"]  = $this->getChildAreaOfInterestCodeName($value->currentgumbrand);
+				        $childArray[$count]["areaOfInterest"]["creationDate"]   = $this->generateTime();
+				        $childArray[$count]["areaOfInterest"]["lastUpdateDate"] = $this->generateTime();
 				    }
 				    
 				    if(!empty($value->currentbabyfoodbrand))
 				    {
-				        $childArray[$key]["feeding"] = $this->getChildFeedingCodeName($value->currentbabyfoodbrand);
+				        $childArray[$count]["feeding"] = $this->getChildFeedingCodeName($value->currentbabyfoodbrand);
 				    }
 
 				    if($value->pregnancyweek > 0 && $value->pregnancyweek < 40)
 				    {
 				        $estimateDateofDelivery = $this->estimateDateofDelivery($value->pregnancyweek);
-				        $childArray[$key]["birthDateReliability"] = "4";
-				        $childArray[$key]['birthDate'] = $estimateDateofDelivery;
+				        $childArray[$count]["birthDateReliability"] = "4";
+				        $childArray[$count]['birthDate'] = $estimateDateofDelivery;
 				    }
 					
+					$count ++;
 				}
 			}
     	}
@@ -1850,20 +1853,20 @@ class CBController extends Controller {
     		{
     			if($value->childname !="" && $value->childdob !='0000-00-00')
 				{
-	    			$childArray[$key]["applicationInternalIdentifier"] = $this->generateUid();
-				    $childArray[$key]["birthDateReliability"] = (string) $value->is_pregnant;
-				    $childArray[$key]["firstName"] = $value->childname;
+	    			$childArray[$count]["applicationInternalIdentifier"] = $this->generateUid();
+				    $childArray[$count]["birthDateReliability"] = (string) $value->is_pregnant;
+				    $childArray[$count]["firstName"] = $value->childname;
 				    if(isset($value->childdob))
 				    {
-					    $childArray[$key]["birthDate"] = $value->childdob;
+					    $childArray[$count]["birthDate"] = $value->childdob;
 				    }
 
 				    if(!empty($value->currentgumbrand))
 				    {
-				        $childArray[$key]["areaOfInterest"]["interestCode"]   = "GG_CHILD_MILK_BRAND";
-				        $childArray[$key]["areaOfInterest"]["answerDetails"]  = $this->getChildAreaOfInterestCodeName($value->currentgumbrand);
-				        $childArray[$key]["areaOfInterest"]["creationDate"]   = $this->generateTime();
-				        $childArray[$key]["areaOfInterest"]["lastUpdateDate"] = $this->generateTime();
+				        $childArray[$count]["areaOfInterest"]["interestCode"]   = "GG_CHILD_MILK_BRAND";
+				        $childArray[$count]["areaOfInterest"]["answerDetails"]  = $this->getChildAreaOfInterestCodeName($value->currentgumbrand);
+				        $childArray[$count]["areaOfInterest"]["creationDate"]   = $this->generateTime();
+				        $childArray[$count]["areaOfInterest"]["lastUpdateDate"] = $this->generateTime();
 				    }
 				    
 				    if(!empty($value->currentbabyfoodbrand))
@@ -1874,9 +1877,11 @@ class CBController extends Controller {
 				    if($value->pregnancyweek > 0 && $value->pregnancyweek < 40)
 				    {
 				        $estimateDateofDelivery = $this->estimateDateofDelivery($value->pregnancyweek);
-				        $childArray[$key]["birthDateReliability"] = "4";
-				        $childArray[$key]['birthDate'] = $estimateDateofDelivery;
+				        $childArray[$count]["birthDateReliability"] = "4";
+				        $childArray[$count]['birthDate'] = $estimateDateofDelivery;
 				    }
+
+				    $count ++;
 				}
     		}
     	}
