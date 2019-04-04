@@ -1809,33 +1809,37 @@ class CBController extends Controller {
     	{
 			foreach($customer->mainMergeMany as $key => $value)
 			{
-			    $childArray[$key]["applicationInternalIdentifier"] = $this->generateUid();
-			    $childArray[$key]["birthDateReliability"] = (string) $value->is_pregnant;
-			    $childArray[$key]["firstName"] = $value->childname;
-			    if(isset($value->childdob))
-			    {
-				    $childArray[$key]["birthDate"] = $value->childdob;
-			    }
+				if($value->childname !="" && $value->childdob !='0000-00-00')
+				{
+				    $childArray[$key]["applicationInternalIdentifier"] = $this->generateUid();
+				    $childArray[$key]["birthDateReliability"] = (string) $value->is_pregnant;
+				    $childArray[$key]["firstName"] = $value->childname;
+				    if(isset($value->childdob))
+				    {
+					    $childArray[$key]["birthDate"] = $value->childdob;
+				    }
 
-			    if(!empty($value->currentgumbrand))
-			    {
-			        $childArray[$key]["areaOfInterest"]["interestCode"]   = "GG_CHILD_MILK_BRAND";
-			        $childArray[$key]["areaOfInterest"]["answerDetails"]  = $this->getChildAreaOfInterestCodeName($value->currentgumbrand);
-			        $childArray[$key]["areaOfInterest"]["creationDate"]   = $this->generateTime();
-			        $childArray[$key]["areaOfInterest"]["lastUpdateDate"] = $this->generateTime();
-			    }
-			    
-			    if(!empty($value->currentbabyfoodbrand))
-			    {
-			        $childArray[$key]["feeding"] = $this->getChildFeedingCodeName($value->currentbabyfoodbrand);
-			    }
+				    if(!empty($value->currentgumbrand))
+				    {
+				        $childArray[$key]["areaOfInterest"]["interestCode"]   = "GG_CHILD_MILK_BRAND";
+				        $childArray[$key]["areaOfInterest"]["answerDetails"]  = $this->getChildAreaOfInterestCodeName($value->currentgumbrand);
+				        $childArray[$key]["areaOfInterest"]["creationDate"]   = $this->generateTime();
+				        $childArray[$key]["areaOfInterest"]["lastUpdateDate"] = $this->generateTime();
+				    }
+				    
+				    if(!empty($value->currentbabyfoodbrand))
+				    {
+				        $childArray[$key]["feeding"] = $this->getChildFeedingCodeName($value->currentbabyfoodbrand);
+				    }
 
-			    if($value->pregnancyweek > 0 && $value->pregnancyweek < 40){
-
-			        $estimateDateofDelivery = $this->estimateDateofDelivery($value->pregnancyweek);
-			        $childArray[$key]["birthDateReliability"] = "4";
-			        $childArray[$key]['birthDate'] = $estimateDateofDelivery;
-			    }
+				    if($value->pregnancyweek > 0 && $value->pregnancyweek < 40)
+				    {
+				        $estimateDateofDelivery = $this->estimateDateofDelivery($value->pregnancyweek);
+				        $childArray[$key]["birthDateReliability"] = "4";
+				        $childArray[$key]['birthDate'] = $estimateDateofDelivery;
+				    }
+					
+				}
 			}
     	}
     	else
@@ -1844,33 +1848,36 @@ class CBController extends Controller {
 
     		foreach($mainMerges as $key => $value)
     		{
-    			$childArray[$key]["applicationInternalIdentifier"] = $this->generateUid();
-			    $childArray[$key]["birthDateReliability"] = (string) $value->is_pregnant;
-			    $childArray[$key]["firstName"] = $value->childname;
-			    if(isset($value->childdob))
-			    {
-				    $childArray[$key]["birthDate"] = $value->childdob;
-			    }
+    			if($value->childname !="" && $value->childdob !='0000-00-00')
+				{
+	    			$childArray[$key]["applicationInternalIdentifier"] = $this->generateUid();
+				    $childArray[$key]["birthDateReliability"] = (string) $value->is_pregnant;
+				    $childArray[$key]["firstName"] = $value->childname;
+				    if(isset($value->childdob))
+				    {
+					    $childArray[$key]["birthDate"] = $value->childdob;
+				    }
 
-			    if(!empty($value->currentgumbrand))
-			    {
-			        $childArray[$key]["areaOfInterest"]["interestCode"]   = "GG_CHILD_MILK_BRAND";
-			        $childArray[$key]["areaOfInterest"]["answerDetails"]  = $this->getChildAreaOfInterestCodeName($value->currentgumbrand);
-			        $childArray[$key]["areaOfInterest"]["creationDate"]   = $this->generateTime();
-			        $childArray[$key]["areaOfInterest"]["lastUpdateDate"] = $this->generateTime();
-			    }
-			    
-			    if(!empty($value->currentbabyfoodbrand))
-			    {
-			        $childArray[0]["feeding"] = $this->getChildFeedingCodeName($value->currentbabyfoodbrand);
-			    }
+				    if(!empty($value->currentgumbrand))
+				    {
+				        $childArray[$key]["areaOfInterest"]["interestCode"]   = "GG_CHILD_MILK_BRAND";
+				        $childArray[$key]["areaOfInterest"]["answerDetails"]  = $this->getChildAreaOfInterestCodeName($value->currentgumbrand);
+				        $childArray[$key]["areaOfInterest"]["creationDate"]   = $this->generateTime();
+				        $childArray[$key]["areaOfInterest"]["lastUpdateDate"] = $this->generateTime();
+				    }
+				    
+				    if(!empty($value->currentbabyfoodbrand))
+				    {
+				        $childArray[0]["feeding"] = $this->getChildFeedingCodeName($value->currentbabyfoodbrand);
+				    }
 
-			    if($value->pregnancyweek > 0 && $value->pregnancyweek < 40){
-
-			        $estimateDateofDelivery = $this->estimateDateofDelivery($value->pregnancyweek);
-			        $childArray[$key]["birthDateReliability"] = "4";
-			        $childArray[$key]['birthDate'] = $estimateDateofDelivery;
-			    }
+				    if($value->pregnancyweek > 0 && $value->pregnancyweek < 40)
+				    {
+				        $estimateDateofDelivery = $this->estimateDateofDelivery($value->pregnancyweek);
+				        $childArray[$key]["birthDateReliability"] = "4";
+				        $childArray[$key]['birthDate'] = $estimateDateofDelivery;
+				    }
+				}
     		}
     	}
 
