@@ -1253,6 +1253,19 @@ class CBController extends Controller {
 			$data = $this->setGigyaCustomInformation($mainMergeId);
 		    $subscriptions = $this->setGigyaSubscriptions();
 			$userRegisterGigya = $this->setAccountInfo($regToken,$setInputData,$data,$subscriptions);
+
+			// if(isset($profile))
+			// {
+			// 	$profile = $this->arrayMappingtoSD($profile);
+			// 	foreach ($this->arr as $key1 => $value1) {
+			// 		foreach ($profile as $key2 => $value2) {
+			// 			if($key2 == $key1){
+			// 				$this->arr[$key1] = $profile->$key2;
+			// 			}
+			// 		}
+			// 	}
+			// }
+
 		}	
 
 		//Looping Data Input Again After Insert
@@ -1799,7 +1812,10 @@ class CBController extends Controller {
 			    $childArray[$key]["applicationInternalIdentifier"] = $this->generateUid();
 			    $childArray[$key]["birthDateReliability"] = (string) $value->is_pregnant;
 			    $childArray[$key]["firstName"] = $value->childname;
-			    $childArray[$key]["birthDate"] = $value->childdob;
+			    if(isset($value->childdob))
+			    {
+				    $childArray[$key]["birthDate"] = $value->childdob;
+			    }
 
 			    if(!empty($value->currentgumbrand))
 			    {
@@ -1831,7 +1847,10 @@ class CBController extends Controller {
     			$childArray[$key]["applicationInternalIdentifier"] = $this->generateUid();
 			    $childArray[$key]["birthDateReliability"] = (string) $value->is_pregnant;
 			    $childArray[$key]["firstName"] = $value->childname;
-			    $childArray[$key]["birthDate"] = $value->childdob;
+			    if(isset($value->childdob))
+			    {
+				    $childArray[$key]["birthDate"] = $value->childdob;
+			    }
 
 			    if(!empty($value->currentgumbrand))
 			    {
