@@ -1451,9 +1451,6 @@ class CBController extends Controller {
 	}
 
 	public function arrayMappingtoGigya($profile){
-		// $row = new \stdClass();
-		// dump($profile['phones'][0]['number']);
-		// dd("anjay",$profile);
 
 		foreach ($profile as $key => $value) {
 			if($key == 'postcode'){
@@ -1477,8 +1474,6 @@ class CBController extends Controller {
 			}*/
 		}
 		return $row;
-		// dump($row);
-		// die();
 	}
 
 	public function getEdit($id){
@@ -1547,6 +1542,7 @@ class CBController extends Controller {
 		{
 		    $this->arr['updated_at'] = date('Y-m-d H:i:s');
 		}
+
 
 		$this->hook_before_edit($this->arr,$id);		
 
@@ -1720,16 +1716,16 @@ class CBController extends Controller {
 		// dd($childArray);
 		// dd($UID,$setInputData,$childArray,$areaInterestData);
 
-		if(strpos(CRUDBooster::mainpath(), 'admin/gigyacustomer') !== false){
-			$mainmergeDate = DB::table('mainmerge')->where('customer_id',$id)->max('m_date');
-			$carelineDateCreated = DB::table('careline')->where('customer_id',$id)->max('date_created'); 
-			$carelineData = DB::table('careline')->select('callstatus','currentstatus','date_created','telecomaction')->where('customer_id',$id)->where('date_created','=',$carelineDateCreated)->first();
-			$this->arr['careline_max_datecreated'] = $carelineData->date_created;
-			$this->arr['careline_callstatus'] = $carelineData->callstatus;
-			$this->arr['careline_currentstatus'] = $carelineData->currentstatus;
-			$this->arr['careline_telecomaction'] = $carelineData->telecomaction;
-			$this->arr['mainmerge_max_mdate'] = $mainmergeDate;
-		}
+		// if(strpos(CRUDBooster::mainpath(), 'admin/gigyacustomer') !== false){
+		// 	$mainmergeDate = DB::table('mainmerge')->where('customer_id',$id)->max('m_date');
+		// 	$carelineDateCreated = DB::table('careline')->where('customer_id',$id)->max('date_created'); 
+		// 	$carelineData = DB::table('careline')->select('callstatus','currentstatus','date_created','telecomaction')->where('customer_id',$id)->where('date_created','=',$carelineDateCreated)->first();
+		// 	$this->arr['careline_max_datecreated'] = $carelineData->date_created;
+		// 	$this->arr['careline_callstatus'] = $carelineData->callstatus;
+		// 	$this->arr['careline_currentstatus'] = $carelineData->currentstatus;
+		// 	$this->arr['careline_telecomaction'] = $carelineData->telecomaction;
+		// 	$this->arr['mainmerge_max_mdate'] = $mainmergeDate;
+		// }
 
 		DB::table($this->table)->where($this->primary_key,$id)->update($this->arr);
 
