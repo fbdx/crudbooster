@@ -1404,9 +1404,7 @@ class CBController extends Controller {
 			
 		}
 
-
 		$this->hook_after_add($this->arr[$this->primary_key]);
-
 
 		$this->return_url = ($this->return_url)?$this->return_url:Request::get('return_url');
 
@@ -1786,18 +1784,18 @@ class CBController extends Controller {
     	$data["consumerType"] = "PRIVATE";
     	$data["countryCode"] = "MY";
     	$data["initialAppSourceCode"] = "MYNINWEB_MIG";
-    	$data["externalApplication"]["applicationCode"] = "MYNINWEB_MIG";
-    	$data["externalApplication"]["internalIdentifier"] = $this->generateUid();
+    	$data["externalApplication"][0]["applicationCode"] = "MYNINWEB_MIG";
+    	$data["externalApplication"][0]["internalIdentifier"] = $this->generateUid();
 
     	$mainMerge = Mainmerge::find($mainMergeId);
     	$customer = Customer::find($mainMerge->customer_id);
 
     	if(!empty($mainMerge->maternalmilkbrand))
         {
-            $data["areaOfInterest"]["interestCode"]   = "GG_CONSUMER_MILK_BRAND";
-            $data["areaOfInterest"]["answerDetails"]  = $this->getMotherAreaOfInterestCodeName($mainMerge->maternalmilkbrand);
-            $data["areaOfInterest"]["creationDate"]   = $this->generateTime();
-            $data["areaOfInterest"]["lastUpdateDate"] = $this->generateTime();
+            $data["areaOfInterest"][0]["interestCode"]   = "GG_CONSUMER_MILK_BRAND";
+            $data["areaOfInterest"][0]["answerDetails"]  = $this->getMotherAreaOfInterestCodeName($mainMerge->maternalmilkbrand);
+            $data["areaOfInterest"][0]["creationDate"]   = $this->generateTime();
+            $data["areaOfInterest"][0]["lastUpdateDate"] = $this->generateTime();
         }
 
     	$childArray = [];
@@ -1819,10 +1817,10 @@ class CBController extends Controller {
 
 				    if(!empty($value->currentgumbrand))
 				    {
-				        $childArray[$count]["areaOfInterest"]["interestCode"]   = "GG_CHILD_MILK_BRAND";
-				        $childArray[$count]["areaOfInterest"]["answerDetails"]  = $this->getChildAreaOfInterestCodeName($value->currentgumbrand);
-				        $childArray[$count]["areaOfInterest"]["creationDate"]   = $this->generateTime();
-				        $childArray[$count]["areaOfInterest"]["lastUpdateDate"] = $this->generateTime();
+				        $childArray[$count]["areaOfInterest"][0]["interestCode"]   = "GG_CHILD_MILK_BRAND";
+				        $childArray[$count]["areaOfInterest"][0]["answerDetails"]  = $this->getChildAreaOfInterestCodeName($value->currentgumbrand);
+				        $childArray[$count]["areaOfInterest"][0]["creationDate"]   = $this->generateTime();
+				        $childArray[$count]["areaOfInterest"][0]["lastUpdateDate"] = $this->generateTime();
 				    }
 				    
 				    if(!empty($value->currentbabyfoodbrand))
