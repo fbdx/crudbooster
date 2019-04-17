@@ -1857,10 +1857,10 @@ class CBController extends Controller {
 
 				    if(!empty($value->currentgumbrand))
 				    {
-				        $childArray[$count]["areaOfInterest"]["interestCode"]   = "GG_CHILD_MILK_BRAND";
-				        $childArray[$count]["areaOfInterest"]["answerDetails"]  = $this->getChildAreaOfInterestCodeName($value->currentgumbrand);
-				        $childArray[$count]["areaOfInterest"]["creationDate"]   = $this->generateTime();
-				        $childArray[$count]["areaOfInterest"]["lastUpdateDate"] = $this->generateTime();
+				        $childArray[$count]["areaOfInterest"][0]["interestCode"]   = "GG_CHILD_MILK_BRAND";
+				        $childArray[$count]["areaOfInterest"][0]["answerDetails"]  = $this->getChildAreaOfInterestCodeName($value->currentgumbrand);
+				        $childArray[$count]["areaOfInterest"][0]["creationDate"]   = $this->generateTime();
+				        $childArray[$count]["areaOfInterest"][0]["lastUpdateDate"] = $this->generateTime();
 				    }
 				    
 				    if(!empty($value->currentbabyfoodbrand))
