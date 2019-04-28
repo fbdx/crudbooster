@@ -1,6 +1,6 @@
 <?php namespace crocodicstudio\crudbooster\controllers;
 
-error_reporting(E_ALL ^ E_NOTICE);
+error_reporting(E_ALL ^ E_NOTICE ^ E_WARNING);
 
 use crocodicstudio\crudbooster\controllers\Controller;
 use Illuminate\Support\Facades\Session;
