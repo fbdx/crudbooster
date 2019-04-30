@@ -235,6 +235,21 @@ class CRUDBooster
         }
     }
 
+    public static function myPrivileges($privilegeid)
+    {
+        if (Session::get('admin_privileges')==$privilegeid) return true;
+
+        $secpriv = DB::table('secondarypriv')
+        ->where('cms_users_id', Session::get('admin_id'))
+        ->where('cms_privileges_id', $privilegeid)
+        ->first();
+
+        if ($secpriv!=null)
+            return true;
+        else
+            return false;                
+    }
+
     public static function myPrivilegeId()
     {
         return Session::get('admin_privileges');

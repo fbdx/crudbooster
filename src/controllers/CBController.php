@@ -1361,14 +1361,18 @@ class CBController extends Controller
                 $child_array = [];
 
                 for ($i = 0; $i <= $count_input_data; $i++) {
+                    $ar = true;
                     $fk = $ro['foreign_key'];
                     $column_data = [];
-                    $column_data[$fk] = $id;
+                    $column_data[$fk] = $id;                    
                     foreach ($columns as $col) {
                         $colname = $col['name'];
                         $column_data[$colname] = Request::get($name.'-'.$colname)[$i];
+                        if ($column_data[$colname] == null)
+                            $ar=false;
                     }
-                    $child_array[] = $column_data;
+                    if ($ar)
+                        $child_array[] = $column_data;
                 }
                 
                 $childtable = CRUDBooster::parseSqlTable($ro['table'])['table'];                
@@ -1498,32 +1502,37 @@ class CBController extends Controller
                 $name = str_slug($ro['label'], '');
                 $columns = $ro['columns'];
                 $getColName = Request::get($name.'-'.$columns[0]['name']);                
-                $count_input_data = ($getColName)?(count($getColName) - 1):0;
+                $count_input_data = ($getColName)?(count($getColName)):0;
                 $child_array = [];
                 $childtable = CRUDBooster::parseSqlTable($ro['table'])['table'];
                 $fk = $ro['foreign_key'];
 
-                DB::table($childtable)->where($fk, $id)->delete();
-                $lastId = CRUDBooster::newId($childtable);
-                $childtablePK = CB::pk($childtable);
+
                 
 
-                for ($i = 0; $i <= $count_input_data; $i++) {                    
+                DB::table($childtable)->where($fk, $id)->delete();
+                $lastId = CRUDBooster::newId($childtable);
+                $childtablePK = CB::pk($childtable);                                
+
+                for ($i = 0; $i < $count_input_data; $i++) {                    
                     $column_data = [];
                     $column_data[$childtablePK] = $lastId;
                     $column_data[$fk] = $id;                    
                     foreach ($columns as $col) {
+                        $ar = true;
                         $colname = $col['name'];
-                        $column_data[$colname] = Request::get($name.'-'.$colname)[$i];                        
+                        $column_data[$colname] = Request::get($name.'-'.$colname)[$i];
+                        if ($column_data[$colname] == null)
+                            $ar=false;
                     }
-                    $child_array[] = $column_data;
+                    if ($ar)
+                        $child_array[] = $column_data;
 
                     $lastId++;
                 }
-
+                
                 $child_array = array_reverse($child_array);
-
-                if (($count_input_data)>=0)
+                if (($count_input_data)>0)
                     DB::table($childtable)->insert($child_array);
             }
         }
