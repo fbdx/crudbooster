@@ -3,8 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <title>{{ ($page_title)?CRUDBooster::getSetting('appname').': '.strip_tags($page_title):"Admin Area" }}</title>
-	<meta name="csrf-token" content="{{ csrf_token() }}" />
-	<meta name='generator' content='CRUDBooster 5.3'/>
+  <meta name="csrf-token" content="{{ csrf_token() }}" />
+  <meta name='generator' content='CRUDBooster 5.3'/>
     <meta name='robots' content='noindex,nofollow'/>
     <link rel="shortcut icon" href="{{ CRUDBooster::getSetting('favicon')?asset(CRUDBooster::getSetting('favicon')):asset('vendor/crudbooster/assets/logo_crudbooster.png') }}">
     <meta content='width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no' name='viewport'>
@@ -97,7 +97,6 @@
             @endif                          
             @endif
 
-              
             @if($button_export && CRUDBooster::getCurrentMethod() == 'getIndex')
             <a href="javascript:void(0)" id='btn_export_data' data-url-parameter='{{$build_query}}' title='Export Data' class="btn btn-sm btn-primary btn-export-data">
               <i class="fa fa-upload"></i> {{trans("crudbooster.button_export")}}
@@ -109,6 +108,26 @@
               <i class="fa fa-download"></i> {{trans("crudbooster.button_import")}}
             </a>
             @endif
+
+            <button type="button" id="gigya_refresh" class="btn btn-success">Gigya Refresh</button>
+
+            <script type="text/javascript">
+              $(document).ready(function () {
+                $('#gigya_refresh').click(function(){
+                  $.ajax({
+                    url:"{{ CRUDBooster::mainpath('gigya-refresh') }}",
+                    method: 'GET',
+                    success:function(data, status, xhr)
+                    {
+                      alert(status);
+                    },
+                    error: function (jqXhr, textStatus, errorMessage) {
+                        alert(errorMessage);
+                    }
+                  });
+                });
+              });
+            </script>
 
             <!--ADD ACTIon-->
              @if(count($index_button))                          
@@ -136,28 +155,28 @@
           @else
           <h1>{{CRUDBooster::getSetting('appname')}} <small>Information</small></h1>
           @endif
-        </section>	
-		
+        </section>  
+    
 
         <!-- Main content -->
         <section id='content_section' class="content">
 
-        	@if(@$alerts)
-        		@foreach(@$alerts as $alert)
-        			<div class='callout callout-{{$alert[type]}}'>        				
-        					{!! $alert['message'] !!}
-        			</div>
-        		@endforeach
-        	@endif
+          @if(@$alerts)
+            @foreach(@$alerts as $alert)
+              <div class='callout callout-{{$alert[type]}}'>                
+                  {!! $alert['message'] !!}
+              </div>
+            @endforeach
+          @endif
 
 
-			@if (Session::get('message')!='')
-			<div class='alert alert-{{ Session::get("message_type") }}'>
-				<button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>
-				<h4><i class="icon fa fa-info"></i> {{ trans("crudbooster.alert_".Session::get("message_type")) }}</h4>
-				{!!Session::get('message')!!}
-			</div>
-			@endif
+      @if (Session::get('message')!='')
+      <div class='alert alert-{{ Session::get("message_type") }}'>
+        <button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>
+        <h4><i class="icon fa fa-info"></i> {{ trans("crudbooster.alert_".Session::get("message_type")) }}</h4>
+        {!!Session::get('message')!!}
+      </div>
+      @endif
 
 
 
