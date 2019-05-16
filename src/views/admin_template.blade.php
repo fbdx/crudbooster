@@ -123,6 +123,7 @@
                     success:function(data, status, xhr)
                     {
                       alert(status);
+                      $('#gigya_refresh').prop('disabled', true);
                     },
                     error: function (jqXhr, textStatus, errorMessage) {
                         alert(errorMessage);
