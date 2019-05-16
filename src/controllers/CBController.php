@@ -1,6 +1,7 @@
 <?php namespace crocodicstudio\crudbooster\controllers;
 
-error_reporting(E_ALL ^ E_NOTICE);
+error_reporting(E_ALL ^ E_NOTICE ^ E_WARNING);
+// added to ignore warning
 
 use crocodicstudio\crudbooster\controllers\Controller;
 use App\Customer;
