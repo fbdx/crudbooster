@@ -76,6 +76,7 @@
         <section class="content-header">
           <?php 
             $module = CRUDBooster::getCurrentModule();
+            $path = CRUDBooster::mainpath();
           ?>
           @if($module)
           <h1>
@@ -109,7 +110,9 @@
             </a>
             @endif
 
-            <button type="button" id="gigya_refresh" class="btn btn-success">Gigya Refresh</button>
+            @if($module->name == 'Database')
+              <button type="button" id="gigya_refresh" class="btn btn-success">Gigya Refresh</button>
+            @endif
 
             <script type="text/javascript">
               $(document).ready(function () {
@@ -120,6 +123,7 @@
                     success:function(data, status, xhr)
                     {
                       alert(status);
+                      $('#gigya_refresh').prop('disabled', true);
                     },
                     error: function (jqXhr, textStatus, errorMessage) {
                         alert(errorMessage);
