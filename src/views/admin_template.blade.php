@@ -110,8 +110,10 @@
             </a>
             @endif
 
-            @if($module->name == 'Database')
-              <button type="button" id="gigya_refresh" class="btn btn-success">Gigya Refresh</button>
+            @if(CRUDBooster::isSuperadmin())
+              @if($module->name == 'Database')
+                <button type="button" id="gigya_refresh" class="btn btn-success">Gigya Refresh</button>
+              @endif
             @endif
 
             <script type="text/javascript">
