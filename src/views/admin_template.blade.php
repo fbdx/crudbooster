@@ -111,7 +111,7 @@
             @endif
 
             @if(CRUDBooster::isSuperadmin())
-              @if($module->name == 'Database')
+              @if($module->name == 'Database' || $module->name == 'customer')
                 <button type="button" id="gigya_refresh" class="btn btn-success">Gigya Refresh</button>
               @endif
             @endif
