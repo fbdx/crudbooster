@@ -119,13 +119,13 @@
             <script type="text/javascript">
               $(document).ready(function () {
                 $('#gigya_refresh').click(function(){
+                  $('#gigya_refresh').prop('disabled', true);
                   $.ajax({
                     url:"{{ CRUDBooster::mainpath('gigya-refresh') }}",
                     method: 'GET',
                     success:function(data, status, xhr)
                     {
                       alert(status);
-                      $('#gigya_refresh').prop('disabled', true);
                     },
                     error: function (jqXhr, textStatus, errorMessage) {
                         alert(errorMessage);
