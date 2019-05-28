@@ -110,7 +110,7 @@
             </a>
             @endif
 
-            @if(CRUDBooster::isSuperadmin())
+            {{-- @if(CRUDBooster::isSuperadmin())
               @if($module->name == 'Database')
                 <button type="button" id="gigya_refresh" class="btn btn-success">Gigya Refresh</button>
               @endif
@@ -133,7 +133,7 @@
                   });
                 });
               });
-            </script>
+            </script> --}}
 
             <!--ADD ACTIon-->
              @if(count($index_button))                          
