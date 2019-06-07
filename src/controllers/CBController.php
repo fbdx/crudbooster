@@ -1,7 +1,6 @@
 <?php namespace crocodicstudio\crudbooster\controllers;
 
-error_reporting(E_ALL ^ E_NOTICE ^ E_WARNING);
-// added to ignore warning
+error_reporting(E_ALL ^ E_NOTICE);
 
 use crocodicstudio\crudbooster\controllers\Controller;
 use App\Customer;
@@ -1784,8 +1783,8 @@ class CBController extends Controller {
 		$data["marketCode"] = "20503";
     	$data["consumerType"] = "PRIVATE";
     	$data["countryCode"] = "MY";
-    	$data["initialAppSourceCode"] = "MYNINWEB_MIG";
-    	$data["externalApplication"][0]["applicationCode"] = "MYNINWEB_MIG";
+    	$data["initialAppSourceCode"] = "MYNINWEB_SD";
+    	$data["externalApplication"][0]["applicationCode"] = "MYNINWEB_SD";
     	$data["externalApplication"][0]["internalIdentifier"] = $this->generateUid();
 
     	$mainMerge = Mainmerge::find($mainMergeId);
@@ -1891,15 +1890,15 @@ class CBController extends Controller {
 	{
 	    $subscriptions["MYinfantnut_RGinfantnut"]["email"]["isSubscribed"] = true;
 	    $subscriptions["MYinfantnut_RGinfantnut"]["email"]["lastUpdatedSubscriptionState"] = $this->generateTime();
-	    $subscriptions["MYinfantnut_RGinfantnut"]["email"]["tags"][0] = "sourceApplication:MYNINWEB_MIG";
+	    $subscriptions["MYinfantnut_RGinfantnut"]["email"]["tags"][0] = "sourceApplication:MYNINWEB_SD";
 
 	    $subscriptions["MYnestlegrp_SBcrossnl"]["email"]["isSubscribed"] = true;
 	    $subscriptions["MYnestlegrp_SBcrossnl"]["email"]["lastUpdatedSubscriptionState"] = $this->generateTime();
-	    $subscriptions["MYnestlegrp_SBcrossnl"]["email"]["tags"][0] = "sourceApplication:MYNINWEB_MIG";
+	    $subscriptions["MYnestlegrp_SBcrossnl"]["email"]["tags"][0] = "sourceApplication:MYNINWEB_SD";
 
 	    $subscriptions["MYinfantnut_SBsmspromo"]["email"]["isSubscribed"] = true;
 	    $subscriptions["MYinfantnut_SBsmspromo"]["email"]["lastUpdatedSubscriptionState"] = $this->generateTime();
-	    $subscriptions["MYinfantnut_SBsmspromo"]["email"]["tags"][0] = "sourceApplication:MYNINWEB_MIG";
+	    $subscriptions["MYinfantnut_SBsmspromo"]["email"]["tags"][0] = "sourceApplication:MYNINWEB_SD";
 
 	    return $subscriptions;
 	}
