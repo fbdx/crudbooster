@@ -30,15 +30,14 @@ use App\Traits\GigyaApi;
 use App\Traits\SetSmartDataInfoToGigya;
 use Config;
 
-
 class CBController extends Controller {
 
 	use GigyaApi;
 	use SetSmartDataInfoToGigya;
 	
-	private $gigya_api_key;
-	private $gigya_secret_key;
-	private $gigya_user_key;
+	// private $gigya_api_key;
+	// private $gigya_secret_key;
+	// private $gigya_user_key;
 
 	public $data_inputan;
 	public $columns_table;
