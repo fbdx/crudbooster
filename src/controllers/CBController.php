@@ -1253,7 +1253,7 @@ class CBController extends Controller {
 			$rowArray 		   = $this->arr;
 			$setInputData      = $this->arrayMappingtoGigya($rowArray);
 			$data 			   = $this->setGigyaCustomInformation($mainMergeId);
-		    $subscriptions 	   = $this->setGigyaSubscriptions();
+		    $subscriptions 	   = $this->setGigyaSubscriptions($mainMergeId);
 			$userRegisterGigya = $this->setAccountInfo($regToken,$setInputData,$data,$subscriptions);
 
 			// if(isset($profile))
@@ -1763,7 +1763,7 @@ class CBController extends Controller {
 
 	    	$data = $this->setGigyaCustomInformation($mainMergeId);
 
-	    	$subscriptions = $this->setGigyaSubscriptions();
+	    	$subscriptions = $this->setGigyaSubscriptions($mainMergeId);
 
 	    	$response = $this->searchViaEmail($email);
 
@@ -1826,7 +1826,7 @@ class CBController extends Controller {
 				$rowArray = (array) $row;
 				$setInputData = $this->arrayMappingtoGigya($rowArray);
 				$data = $this->setGigyaCustomInformation($id);
-				$subscriptions = $this->setGigyaSubscriptions();
+				$subscriptions = $this->setGigyaSubscriptions($id);
 				$userRegisterGigya = $this->setAccountInfo($regToken,$setInputData,$data,$subscriptions);
 			} else {
 				$profile = $this->arrayMappingtoSD($profile);
