@@ -1552,6 +1552,11 @@ class CBController extends Controller {
 
 		foreach($this->data_inputan as $ro) {
 
+			if($ro['name'] == 'gigya_children' || $ro['name'] == 'sd_children')
+			{
+				continue;
+			}
+			
 			$name = $ro['name'];
 			
 			$type = $ro['type'];
