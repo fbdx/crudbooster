@@ -1272,6 +1272,12 @@ class CBController extends Controller {
 
 		//Looping Data Input Again After Insert
 		foreach($this->data_inputan as $ro) {
+
+			if($ro['name'] == 'gigya_children' || $ro['name'] == 'sd_children')
+			{
+				continue;
+			}
+			
 			$name = $ro['name'];
 			if(!$name) continue;
 
@@ -1556,7 +1562,7 @@ class CBController extends Controller {
 			{
 				continue;
 			}
-			
+
 			$name = $ro['name'];
 			
 			$type = $ro['type'];
