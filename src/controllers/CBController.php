@@ -1456,32 +1456,6 @@ class CBController extends Controller {
 		return $row;
 	}
 
-	public function arrayMappingtoGigya($profile){
-
-		foreach ($profile as $key => $value) {
-			if($key == 'postcode'){
-				$row['zip'] = $profile['postcode'];
-			} elseif($key == 'firstname') {
-				$row['firstName'] = $profile['firstname'];
-			} elseif($key == 'lastname'){
-				$row['lastName'] = $profile['lastname'];
-			} elseif($key == 'city') {
-				$row['city'] = $profile['city'];
-			} elseif($key == 'mobileno') {
-				$row['phones'][0] = array("number"=>$profile['mobileno']);
-			} elseif($key == 'address1') {
-				$row['address'] = $profile['address1'].",".$profile['address2'];
-			} elseif($key == 'state') {
-				$row['state'] = $profile['state']; 
-			} elseif($key == 'email'){
-				$row['email'] = $profile['email'];
-			}/*else {
-				$row[$key] = $profile[$key];
-			}*/
-		}
-		return $row;
-	}
-
 	public function getEdit($id){
 		$this->cbLoader();
 
