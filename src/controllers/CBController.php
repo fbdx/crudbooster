@@ -97,6 +97,7 @@ class CBController extends Controller {
 	public $option_fields		  = array();
 	public $import_consignment	  = FALSE;
 	public $gigya_based			  = FALSE;
+	public $gigya_customer        = FALSE;
 
 	public function __construct()
 	{
@@ -1241,12 +1242,6 @@ class CBController extends Controller {
 		{
 			$mainMergeId = $this->arr[$this->primary_key];
 
-			// $response = $this->searchViaEmail($this->arr['email']);
-
-			// $results = $response['results'];
-
-			// $profile = $results[0]['profile'];
-
 			$initRegisterGigya = $this->initRegistration();
 			$regToken 		   = $initRegisterGigya['regToken'];
 			$rowArray 		   = $this->arr;
@@ -1254,20 +1249,20 @@ class CBController extends Controller {
 			$data 			   = $this->setGigyaCustomInformation($mainMergeId);
 		    $subscriptions 	   = $this->setGigyaSubscriptions($mainMergeId);
 			$userRegisterGigya = $this->setAccountInfo($regToken,$setInputData,$data,$subscriptions);
+		}
 
-			// if(isset($profile))
-			// {
-			// 	$profile = $this->arrayMappingtoSD($profile);
-			// 	foreach ($this->arr as $key1 => $value1) {
-			// 		foreach ($profile as $key2 => $value2) {
-			// 			if($key2 == $key1){
-			// 				$this->arr[$key1] = $profile->$key2;
-			// 			}
-			// 		}
-			// 	}
-			// }
+		if(isset($this->arr['email']) && $this->gigya_customer)
+		{
+			$customerId = $this->arr[$this->primary_key];
 
-		}	
+			$initRegisterGigya = $this->initRegistration();
+			$regToken 		   = $initRegisterGigya['regToken'];
+			$rowArray 		   = $this->arr;
+			$setInputData      = $this->arrayMappingtoGigya($rowArray);
+			$data 			   = NULL;
+		    $subscriptions 	   = $this->setGigyaSubscriptions($customerId);
+			$userRegisterGigya = $this->setAccountInfo($regToken,$setInputData,$data,$subscriptions);
+		}
 
 		//Looping Data Input Again After Insert
 		foreach($this->data_inputan as $ro) {
