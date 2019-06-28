@@ -1713,6 +1713,16 @@ class CBController extends Controller {
 			$this->updateCustomerRecord($row->email,$setInputData,$id);
 		}
 
+		if(isset($this->arr['email']) && $this->gigya_customer)
+		{
+			$initRegisterGigya = $this->initRegistration();
+			$regToken 		   = $initRegisterGigya['regToken'];
+			$setInputData      = $this->arrayMappingtoGigya($setInputData);
+			$data 			   = $this->setCustomerGigyaCustomInformation($id);
+		    $subscriptions 	   = $this->setGigyaSubscriptions($id);
+			$userRegisterGigya = $this->setAccountInfo($regToken,$setInputData,$data,$subscriptions);
+		}
+
 		$this->hook_after_edit($id);
 
 		$this->return_url = ($this->return_url)?$this->return_url:Request::get('return_url');
