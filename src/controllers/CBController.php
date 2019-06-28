@@ -1259,7 +1259,7 @@ class CBController extends Controller {
 			$regToken 		   = $initRegisterGigya['regToken'];
 			$rowArray 		   = $this->arr;
 			$setInputData      = $this->arrayMappingtoGigya($rowArray);
-			$data 			   = NULL;
+			$data 			   = $this->setCustomerGigyaCustomInformation($customerId);
 		    $subscriptions 	   = $this->setGigyaSubscriptions($customerId);
 			$userRegisterGigya = $this->setAccountInfo($regToken,$setInputData,$data,$subscriptions);
 		}
