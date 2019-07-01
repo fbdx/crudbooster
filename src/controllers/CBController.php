@@ -1234,7 +1234,12 @@ class CBController extends Controller {
 
 		$this->hook_before_add($this->arr);
 
-		$this->arr[$this->primary_key] = $id = CRUDBooster::newId($this->table);
+		$this->arr[$this->primary_key] = $id = CRUDBooster::newId($this->table); 
+
+		if($this->gigya_customer)
+		{
+			$this->arr['is_gigya_customer'] = 1;
+		}
 				
 		DB::table($this->table)->insert($this->arr);
 
@@ -1705,6 +1710,11 @@ class CBController extends Controller {
 		// 	$this->arr['careline_telecomaction'] = $carelineData->telecomaction;
 		// 	$this->arr['mainmerge_max_mdate'] = $mainmergeDate;
 		// }
+
+		if($this->gigya_customer)
+		{
+			$this->arr['is_gigya_customer'] = 1;
+		}
 
 		DB::table($this->table)->where($this->primary_key,$id)->update($this->arr);
 
