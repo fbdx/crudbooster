@@ -1243,6 +1243,13 @@ class CBController extends Controller {
 				
 		DB::table($this->table)->insert($this->arr);
 
+		$UID = NULL;
+
+		if(isset($this->arr['UID']))
+		{
+			$UID = $this->arr['UID'];
+		}
+
 		if(isset($this->arr['email']) && $this->gigya_based)
 		{
 			$mainMergeId = $this->arr[$this->primary_key];
@@ -1253,7 +1260,7 @@ class CBController extends Controller {
 			$setInputData      = $this->arrayMappingtoGigya($rowArray);
 			$data 			   = $this->setGigyaCustomInformation($mainMergeId);
 		    $subscriptions 	   = $this->setGigyaSubscriptions($mainMergeId);
-			$userRegisterGigya = $this->setAccountInfo($regToken,$setInputData,$data,$subscriptions);
+			$userRegisterGigya = $this->setAccountInfo($UID,$regToken,$setInputData,$data,$subscriptions);
 		}
 
 		if(isset($this->arr['email']) && $this->gigya_customer)
@@ -1266,7 +1273,7 @@ class CBController extends Controller {
 			$setInputData      = $this->arrayMappingtoGigya($rowArray);
 			$data 			   = $this->setCustomerGigyaCustomInformation($customerId);
 		    $subscriptions 	   = $this->setGigyaSubscriptions($customerId);
-			$userRegisterGigya = $this->setAccountInfo($regToken,$setInputData,$data,$subscriptions);
+			$userRegisterGigya = $this->setAccountInfo($UID,$regToken,$setInputData,$data,$subscriptions);
 		}
 
 		//Looping Data Input Again After Insert
@@ -1404,7 +1411,6 @@ class CBController extends Controller {
 						DB::table($childtable) 
 						->where('id', $tempId[$i])
 						->update($child_array[$i]);
-
 					}
 				}
 			}
@@ -1505,6 +1511,7 @@ class CBController extends Controller {
 
 	public $countChild = 0;
 	public function postEditSave($id) {
+		
 		$this->cbLoader();
 		$row = DB::table($this->table)->where($this->primary_key,$id)->first();
 
@@ -1711,6 +1718,11 @@ class CBController extends Controller {
 		// 	$this->arr['mainmerge_max_mdate'] = $mainmergeDate;
 		// }
 
+		if(isset($row->UID))
+		{
+			$UID = $row->UID;
+		}
+
 		if($this->gigya_customer)
 		{
 			$this->arr['is_gigya_customer'] = 1;
@@ -1720,7 +1732,7 @@ class CBController extends Controller {
 
 		if(isset($row->email) && $this->gigya_based)
 		{
-			$this->updateCustomerRecord($row->email,$setInputData,$id);
+			$this->updateCustomerRecord($UID,$row->email,$setInputData,$id);
 		}
 
 		if(isset($this->arr['email']) && $this->gigya_customer)
@@ -1730,7 +1742,7 @@ class CBController extends Controller {
 			$setInputData      = $this->arrayMappingtoGigya($setInputData);
 			$data 			   = $this->setCustomerGigyaCustomInformation($id);
 		    $subscriptions 	   = $this->setGigyaSubscriptions($id);
-			$userRegisterGigya = $this->setAccountInfo($regToken,$setInputData,$data,$subscriptions);
+			$userRegisterGigya = $this->setAccountInfo($UID, $regToken,$setInputData,$data,$subscriptions);
 		}
 
 		$this->hook_after_edit($id);
@@ -1751,7 +1763,7 @@ class CBController extends Controller {
 		}
 	}
 
-	public function updateCustomerRecord($email, $setInputData, $mainMergeId)
+	public function updateCustomerRecord($UID, $email, $setInputData, $mainMergeId)
     {
     	$response = $this->initRegistration();
     	$regtoken = $response["regToken"];
@@ -1768,7 +1780,7 @@ class CBController extends Controller {
 
 	    	if($response['errorCode']==0)
 		   	{
-	            $response = $this->setAccountInfo($regtoken,$setInputData,$data, $subscriptions);
+	            $response = $this->setAccountInfo($UID, $regtoken,$setInputData,$data, $subscriptions);
 	        }
 		}
     	else
