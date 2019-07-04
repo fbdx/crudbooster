@@ -1252,6 +1252,15 @@ class CBController extends Controller {
 
 		if(isset($this->arr['email']) && $this->gigya_based)
 		{
+			$response = $this->searchViaEmail($this->arr['email']);
+
+			$results = $response['results'];
+
+			if($results)
+			{
+				$UID = $results[0]['UID'];
+			}
+
 			$mainMergeId = $this->arr[$this->primary_key];
 
 			$initRegisterGigya = $this->initRegistration();
@@ -1439,12 +1448,10 @@ class CBController extends Controller {
 		}
 	}
 
-	public function arrayMappingtoSD($profile){
+	public function arrayMappingtoSD($profile, $data){
 		$row = new \stdClass();
-		// dd($profile);
+
 		foreach ($profile as $key => $value) {
-			// dump($key);
-			// dd($profile['zip']);
 			if($key == 'zip'){
 				$row->postcode = $profile['zip'];
 			} elseif($key == 'firstName') {
@@ -1452,11 +1459,14 @@ class CBController extends Controller {
 			} elseif($key == 'lastName'){
 				$row->lastname = $profile['lastName'];
 			} elseif($key == 'phones') {
-				$row->mobileno = $profile['phones'][0]['number'];
+				$row->mobileno = $data['mobile'][0]['number'];
 			} else {
 				$row->$key = $profile[$key];
 			}
 		}
+
+		$row->mobileno = $data['mobile'];
+
 		return $row;
 	}
 
@@ -1470,6 +1480,7 @@ class CBController extends Controller {
 			$response = $this->searchViaEmail($row->email);
 			$results = $response['results'];
 			$profile = $results[0]['profile'];
+			$data = $results[0]['data'];
 
 			// dd($response);
 			if($profile == null){
@@ -1481,7 +1492,7 @@ class CBController extends Controller {
 				$userRegisterGigya = $this->setAccountInfo($regToken,$setInputData);
 				// dd($userRegisterGigya);
 			} else {	
-				$profile = $this->arrayMappingtoSD($profile);
+				$profile = $this->arrayMappingtoSD($profile, $data);
 				foreach ($row as $key1 => $value1) {
 					foreach ($profile as $key2 => $value2) {
 						if($key2 == $key1){
