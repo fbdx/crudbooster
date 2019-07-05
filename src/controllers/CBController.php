@@ -1460,6 +1460,8 @@ class CBController extends Controller {
 				$row->lastname = $profile['lastName'];
 			} elseif($key == 'phones') {
 				$row->mobileno = $profile['phones'][0]['number'];
+			} elseif($key == 'address') {
+				$row->address1 = $profile['address'];
 			} else {
 				$row->$key = $profile[$key];
 			}
