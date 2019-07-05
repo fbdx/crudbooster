@@ -34,10 +34,6 @@ class CBController extends Controller {
 
 	use GigyaApi;
 	use SetSmartDataInfoToGigya;
-	
-	// private $gigya_api_key;
-	// private $gigya_secret_key;
-	// private $gigya_user_key;
 
 	public $data_inputan;
 	public $columns_table;
@@ -1467,7 +1463,10 @@ class CBController extends Controller {
 			}
 		}
 
-		$row->mobileno = $data['mobile'];
+		if(!isset($row->mobileno))
+		{
+			$row->mobileno = $data['mobile'];
+		}
 
 		return $row;
 	}
@@ -1484,15 +1483,12 @@ class CBController extends Controller {
 			$profile = $results[0]['profile'];
 			$data = $results[0]['data'];
 
-			// dd($response);
 			if($profile == null){
 				$initRegisterGigya = $this->initRegistration();
 				$regToken = $initRegisterGigya['regToken'];
 				$rowArray = (array) $row;
-				// dd($rowArray);
 				$setInputData = $this->arrayMappingtoGigya($rowArray);
 				$userRegisterGigya = $this->setAccountInfo($regToken,$setInputData);
-				// dd($userRegisterGigya);
 			} else {	
 				$profile = $this->arrayMappingtoSD($profile, $data);
 				foreach ($row as $key1 => $value1) {
@@ -1843,6 +1839,7 @@ class CBController extends Controller {
 
 			$results = $response['results'];
 			$profile = $results[0]['profile'];
+			$data    = $results[0]['data'];
 
 			if($profile == null){
 				$initRegisterGigya = $this->initRegistration();
@@ -1853,7 +1850,7 @@ class CBController extends Controller {
 				$subscriptions = $this->setGigyaSubscriptions($id);
 				$userRegisterGigya = $this->setAccountInfo($regToken,$setInputData,$data,$subscriptions);
 			} else {
-				$profile = $this->arrayMappingtoSD($profile);
+				$profile = $this->arrayMappingtoSD($profile, $data);
 				foreach ($row as $key1 => $value1) {
 					foreach ($profile as $key2 => $value2) {
 						if($key2 == $key1){
