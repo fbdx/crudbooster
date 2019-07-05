@@ -1483,13 +1483,8 @@ class CBController extends Controller {
 			$profile = $results[0]['profile'];
 			$data = $results[0]['data'];
 
-			if($profile == null){
-				$initRegisterGigya = $this->initRegistration();
-				$regToken = $initRegisterGigya['regToken'];
-				$rowArray = (array) $row;
-				$setInputData = $this->arrayMappingtoGigya($rowArray);
-				$userRegisterGigya = $this->setAccountInfo($regToken,$setInputData);
-			} else {	
+			if($profile)
+			{
 				$profile = $this->arrayMappingtoSD($profile, $data);
 				foreach ($row as $key1 => $value1) {
 					foreach ($profile as $key2 => $value2) {
@@ -1727,9 +1722,17 @@ class CBController extends Controller {
 		// 	$this->arr['mainmerge_max_mdate'] = $mainmergeDate;
 		// }
 
-		if(isset($row->UID))
+		$UID = null;
+
+		if(isset($row->email))
 		{
-			$UID = $row->UID;
+			$response = $this->searchViaEmail($row->email);
+			$results = $response['results'];
+
+			if($results)
+			{
+				$UID = $results[0]['UID'];
+			}
 		}
 
 		if($this->gigya_customer)
@@ -1780,11 +1783,8 @@ class CBController extends Controller {
 	    if ($regtoken!="")
         {
 	    	$setInputData = $this->arrayMappingtoGigya($setInputData);
-
 	    	$data = $this->setGigyaCustomInformation($mainMergeId);
-
 	    	$subscriptions = $this->setGigyaSubscriptions($mainMergeId);
-
 	    	$response = $this->searchViaEmail($email);
 
 	    	if($response['errorCode']==0)
@@ -1840,16 +1840,11 @@ class CBController extends Controller {
 			$results = $response['results'];
 			$profile = $results[0]['profile'];
 			$data    = $results[0]['data'];
+			$UID     = null;
 
-			if($profile == null){
-				$initRegisterGigya = $this->initRegistration();
-				$regToken = $initRegisterGigya['regToken'];
-				$rowArray = (array) $row;
-				$setInputData = $this->arrayMappingtoGigya($rowArray);
-				$data = $this->setGigyaCustomInformation($id);
-				$subscriptions = $this->setGigyaSubscriptions($id);
-				$userRegisterGigya = $this->setAccountInfo($regToken,$setInputData,$data,$subscriptions);
-			} else {
+			if($results)
+			{
+				// $UID = $results[0]['UID'];
 				$profile = $this->arrayMappingtoSD($profile, $data);
 				foreach ($row as $key1 => $value1) {
 					foreach ($profile as $key2 => $value2) {
@@ -1858,6 +1853,16 @@ class CBController extends Controller {
 						}
 					}
 				}
+			}
+			else
+			{
+				$initRegisterGigya = $this->initRegistration();
+				$regToken = $initRegisterGigya['regToken'];
+				$rowArray = (array) $row;
+				$setInputData = $this->arrayMappingtoGigya($rowArray);
+				$data = $this->setGigyaCustomInformation($id);
+				$subscriptions = $this->setGigyaSubscriptions($id);
+				$userRegisterGigya = $this->setAccountInfo($UID,$regToken,$setInputData,$data,$subscriptions);
 			}
 		}
 
