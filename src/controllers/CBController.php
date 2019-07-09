@@ -1262,7 +1262,7 @@ class CBController extends Controller {
 	    	$rowArray = $this->arr;
 	    	$recordId = $this->arr[$this->primary_key];
 
-	    	$this->synchroToGigya($UID,$regToken,$row->email,$rowArray,$recordId,$this->arr);
+	    	$this->synchroToGigya($UID,$regToken,$rowArray['email'],$rowArray,$recordId,$this->arr);
 		}
 
 		//Looping Data Input Again After Insert
