@@ -1239,31 +1239,31 @@ class CBController extends Controller {
 				
 		DB::table($this->table)->insert($this->arr);
 
-		$UID = NULL;
+		$UID      = NULL;
+		$regToken = NULL;
 
-		if(isset($this->arr['UID']))
+		$response = $this->searchViaEmail($this->arr['email']);
+
+		$results = $response['results'];
+
+		if($results[0]["hasFullAccount"])
 		{
-			$UID = $this->arr['UID'];
+			$UID = $results[0]['UID'];
 		}
+
+    	if(!isset($UID))
+    	{
+    		$register = $this->initRegistration();
+    		$regToken = $register["regToken"];
+    	}
 
 		if(isset($this->arr['email']) && $this->gigya_based)
 		{
-			$response = $this->searchViaEmail($this->arr['email']);
-
-			$results = $response['results'];
-
-			if($results)
-			{
-				$UID = $results[0]['UID'];
-			}
-
 			$mainMergeId = $this->arr[$this->primary_key];
 
-			$initRegisterGigya = $this->initRegistration();
-			$regToken 		   = $initRegisterGigya['regToken'];
 			$rowArray 		   = $this->arr;
 			$setInputData      = $this->arrayMappingtoGigya($rowArray);
-			$data 			   = $this->setGigyaCustomInformation($mainMergeId);
+			$data 			   = $this->setMainmergeGigyaCustomInformation($mainMergeId);
 		    $subscriptions 	   = $this->setGigyaSubscriptions($mainMergeId);
 			$userRegisterGigya = $this->setAccountInfo($UID,$regToken,$setInputData,$data,$subscriptions);
 		}
@@ -1272,8 +1272,6 @@ class CBController extends Controller {
 		{
 			$customerId = $this->arr[$this->primary_key];
 
-			$initRegisterGigya = $this->initRegistration();
-			$regToken 		   = $initRegisterGigya['regToken'];
 			$rowArray 		   = $this->arr;
 			$setInputData      = $this->arrayMappingtoGigya($rowArray);
 			$data 			   = $this->setCustomerGigyaCustomInformation($customerId);
@@ -1722,14 +1720,14 @@ class CBController extends Controller {
 		// 	$this->arr['mainmerge_max_mdate'] = $mainmergeDate;
 		// }
 
-		$UID = null;
+		$UID = NULL;
 
 		if(isset($row->email))
 		{
 			$response = $this->searchViaEmail($row->email);
 			$results = $response['results'];
 
-			if($results)
+			if($results[0]["hasFullAccount"])
 			{
 				$UID = $results[0]['UID'];
 			}
@@ -1744,13 +1742,19 @@ class CBController extends Controller {
 
 		if(isset($row->email) && $this->gigya_based)
 		{
-			$this->updateCustomerRecord($UID,$row->email,$setInputData,$id);
+			$this->updateMainmergeGigyaRecord($UID,$row->email,$setInputData,$id);
 		}
 
 		if(isset($this->arr['email']) && $this->gigya_customer)
 		{
-			$initRegisterGigya = $this->initRegistration();
-			$regToken 		   = $initRegisterGigya['regToken'];
+			$regToken = null;
+
+	    	if(!isset($UID))
+	    	{
+	    		$register = $this->initRegistration();
+	    		$regToken = $register["regToken"];
+	    	}
+
 			$setInputData      = $this->arrayMappingtoGigya($setInputData);
 			$data 			   = $this->setCustomerGigyaCustomInformation($id);
 		    $subscriptions 	   = $this->setGigyaSubscriptions($id);
@@ -1775,29 +1779,20 @@ class CBController extends Controller {
 		}
 	}
 
-	public function updateCustomerRecord($UID, $email, $setInputData, $mainMergeId)
+	public function updateMainmergeGigyaRecord($UID, $email, $setInputData, $mainMergeId)
     {
-    	$response = $this->initRegistration();
-    	$regtoken = $response["regToken"];
+    	$regtoken = null;
 
-	    if ($regtoken!="")
-        {
-	    	$setInputData = $this->arrayMappingtoGigya($setInputData);
-	    	$data = $this->setGigyaCustomInformation($mainMergeId);
-	    	$subscriptions = $this->setGigyaSubscriptions($mainMergeId);
-	    	$response = $this->searchViaEmail($email);
-
-	    	if($response['errorCode']==0)
-		   	{
-	            $response = $this->setAccountInfo($UID, $regtoken,$setInputData,$data, $subscriptions);
-	        }
-		}
-    	else
-	    {
-
-	        echo ("Uh-oh, we got the following error: " . $response->getErrorMessage());
-	        error_log($response->getLog());
-	    }
+    	if(!isset($UID))
+    	{
+    		$register = $this->initRegistration();
+    		$regtoken = $register["regToken"];
+    	}
+	   
+    	$setInputData  = $this->arrayMappingtoGigya($setInputData);
+    	$data          = $this->setMainmergeGigyaCustomInformation($mainMergeId);
+    	$subscriptions = $this->setGigyaSubscriptions($mainMergeId);
+	    $response      = $this->setAccountInfo($UID, $regtoken,$setInputData,$data,$subscriptions);
 	}
 
 	public function getDelete($id) {
@@ -1830,7 +1825,6 @@ class CBController extends Controller {
 
 	public function getDetail($id)	{
 		$this->cbLoader();
-		$keyy =  config('gigyaaccess.GIGYAAPIKEY');
 		$row  = DB::table($this->table)->where($this->primary_key,$id)->first();
 
 		if(isset($row->email) && $this->gigya_based)
@@ -1857,11 +1851,11 @@ class CBController extends Controller {
 			else
 			{
 				$initRegisterGigya = $this->initRegistration();
-				$regToken = $initRegisterGigya['regToken'];
-				$rowArray = (array) $row;
-				$setInputData = $this->arrayMappingtoGigya($rowArray);
-				$data = $this->setGigyaCustomInformation($id);
-				$subscriptions = $this->setGigyaSubscriptions($id);
+				$regToken          = $initRegisterGigya['regToken'];
+				$rowArray 		   = (array) $row;
+				$setInputData 	   = $this->arrayMappingtoGigya($rowArray);
+				$data 			   = $this->setMainmergeGigyaCustomInformation($id);
+				$subscriptions     = $this->setGigyaSubscriptions($id);
 				$userRegisterGigya = $this->setAccountInfo($UID,$regToken,$setInputData,$data,$subscriptions);
 			}
 		}
