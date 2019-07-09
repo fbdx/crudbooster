@@ -1239,44 +1239,30 @@ class CBController extends Controller {
 				
 		DB::table($this->table)->insert($this->arr);
 
-		$UID      = NULL;
-		$regToken = NULL;
-
-		$response = $this->searchViaEmail($this->arr['email']);
-
-		$results = $response['results'];
-
-		if($results[0]["hasFullAccount"])
+		if($this->gigya_based || $this->gigya_customer)
 		{
-			$UID = $results[0]['UID'];
-		}
+			$UID      = NULL;
+			$regToken = NULL;
 
-    	if(!isset($UID))
-    	{
-    		$register = $this->initRegistration();
-    		$regToken = $register["regToken"];
-    	}
+			$response = $this->searchViaEmail($this->arr['email']);
 
-		if(isset($this->arr['email']) && $this->gigya_based)
-		{
-			$mainMergeId = $this->arr[$this->primary_key];
+			$results = $response['results'];
 
-			$rowArray 		   = $this->arr;
-			$setInputData      = $this->arrayMappingtoGigya($rowArray);
-			$data 			   = $this->setMainmergeGigyaCustomInformation($mainMergeId);
-		    $subscriptions 	   = $this->setGigyaSubscriptions($mainMergeId);
-			$userRegisterGigya = $this->setAccountInfo($UID,$regToken,$setInputData,$data,$subscriptions);
-		}
+			if($results[0]["hasFullAccount"])
+			{
+				$UID = $results[0]['UID'];
+			}
 
-		if(isset($this->arr['email']) && $this->gigya_customer)
-		{
-			$customerId = $this->arr[$this->primary_key];
+	    	if(!isset($UID))
+	    	{
+	    		$register = $this->initRegistration();
+	    		$regToken = $register["regToken"];
+	    	}
 
-			$rowArray 		   = $this->arr;
-			$setInputData      = $this->arrayMappingtoGigya($rowArray);
-			$data 			   = $this->setCustomerGigyaCustomInformation($customerId);
-		    $subscriptions 	   = $this->setGigyaSubscriptions($customerId);
-			$userRegisterGigya = $this->setAccountInfo($UID,$regToken,$setInputData,$data,$subscriptions);
+	    	$rowArray = $this->arr;
+	    	$recordId = $this->arr[$this->primary_key];
+
+	    	$this->synchroToGigya($UID,$regToken,$row->email,$rowArray,$recordId,$this->arr);
 		}
 
 		//Looping Data Input Again After Insert
@@ -1694,35 +1680,12 @@ class CBController extends Controller {
 			$setInputData['address2'] = '';
 		}
 		
-		// $setInputData['address'] = $setInputData['address1'].",".$setInputData['address2'].",".$setInputData['city']; 
-		// $removeKeys = array("optin","address1","address2","city","m_source","m_subsource","m_lang","m_date","childname","childdob","m_product","switched","reasonnotsuitable","remarks","currentgumbrand","currentbabyfoodbrand","previousbrand","previousbabyfood","consigmentno","calls_detail","children", "sample_request", "careline_detail","area_of_interest","pregnant","pregnantstage","pregnancyweek","pregnantremarks","currentlybreastfeeding","maternalmilkbrand","userid","mother");
-		// foreach ($removeKeys as $key) {
-		// 	unset($setInputData[$key]);
-		// }
-
-		// $childArray = $childData[0];
-		// unset($childArray['customerid']);
-
-		// $areaInterestData = $areaInterestData[0];
-		// unset($areaInterestData['customerid']);
-
-		// dd($childArray);
-		// dd($UID,$setInputData,$childArray,$areaInterestData);
-
-		// if(strpos(CRUDBooster::mainpath(), 'admin/gigyacustomer') !== false){
-		// 	$mainmergeDate = DB::table('mainmerge')->where('customer_id',$id)->max('m_date');
-		// 	$carelineDateCreated = DB::table('careline')->where('customer_id',$id)->max('date_created'); 
-		// 	$carelineData = DB::table('careline')->select('callstatus','currentstatus','date_created','telecomaction')->where('customer_id',$id)->where('date_created','=',$carelineDateCreated)->first();
-		// 	$this->arr['careline_max_datecreated'] = $carelineData->date_created;
-		// 	$this->arr['careline_callstatus'] = $carelineData->callstatus;
-		// 	$this->arr['careline_currentstatus'] = $carelineData->currentstatus;
-		// 	$this->arr['careline_telecomaction'] = $carelineData->telecomaction;
-		// 	$this->arr['mainmerge_max_mdate'] = $mainmergeDate;
-		// }
+		DB::table($this->table)->where($this->primary_key,$id)->update($this->arr);
 
 		$UID = NULL;
+		$regToken = NULL;
 
-		if(isset($row->email))
+		if($this->gigya_customer || $this->gigya_based)
 		{
 			$response = $this->searchViaEmail($row->email);
 			$results = $response['results'];
@@ -1731,34 +1694,14 @@ class CBController extends Controller {
 			{
 				$UID = $results[0]['UID'];
 			}
-		}
 
-		if($this->gigya_customer)
-		{
-			$this->arr['is_gigya_customer'] = 1;
-		}
-
-		DB::table($this->table)->where($this->primary_key,$id)->update($this->arr);
-
-		if(isset($row->email) && $this->gigya_based)
-		{
-			$this->updateMainmergeGigyaRecord($UID,$row->email,$setInputData,$id);
-		}
-
-		if(isset($this->arr['email']) && $this->gigya_customer)
-		{
-			$regToken = null;
-
-	    	if(!isset($UID))
+			if(!isset($UID))
 	    	{
 	    		$register = $this->initRegistration();
 	    		$regToken = $register["regToken"];
 	    	}
 
-			$setInputData      = $this->arrayMappingtoGigya($setInputData);
-			$data 			   = $this->setCustomerGigyaCustomInformation($id);
-		    $subscriptions 	   = $this->setGigyaSubscriptions($id);
-			$userRegisterGigya = $this->setAccountInfo($UID, $regToken,$setInputData,$data,$subscriptions);
+			$this->synchroToGigya($UID,$regToken,$row->email,$setInputData,$id,$this->arr);
 		}
 
 		$this->hook_after_edit($id);
@@ -1779,20 +1722,24 @@ class CBController extends Controller {
 		}
 	}
 
-	public function updateMainmergeGigyaRecord($UID, $email, $setInputData, $mainMergeId)
-    {
-    	$regtoken = null;
+	public function synchroToGigya($UID, $regToken, $email, $rowArray, $id, $formData)
+    {  
+    	$setInputData  = $this->arrayMappingtoGigya($rowArray);
 
-    	if(!isset($UID))
+    	if($this->gigya_based)
     	{
-    		$register = $this->initRegistration();
-    		$regtoken = $register["regToken"];
+    		$data = $this->setMainmergeGigyaCustomInformation($id);
     	}
-	   
-    	$setInputData  = $this->arrayMappingtoGigya($setInputData);
-    	$data          = $this->setMainmergeGigyaCustomInformation($mainMergeId);
-    	$subscriptions = $this->setGigyaSubscriptions($mainMergeId);
-	    $response      = $this->setAccountInfo($UID, $regtoken,$setInputData,$data,$subscriptions);
+
+    	if($this->gigya_customer)
+    	{
+    		$formData['is_gigya_customer'] = 1;
+			DB::table($this->table)->where($this->primary_key,$id)->update($formData);
+    		$data = $this->setCustomerGigyaCustomInformation($id);
+    	}
+
+    	$subscriptions = $this->setGigyaSubscriptions($id);
+	    $response      = $this->setAccountInfo($UID, $regToken,$setInputData,$data,$subscriptions);
 	}
 
 	public function getDelete($id) {
