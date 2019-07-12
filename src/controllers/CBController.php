@@ -1463,9 +1463,9 @@ class CBController extends Controller {
 		if(isset($row->email) && $this->gigya_based)
 		{
 			$response = $this->searchViaEmail($row->email);
-			$results = $response['results'];
-			$profile = $results[0]['profile'];
-			$data = $results[0]['data'];
+			$results  = $response['results'];
+			$profile  = $results[0]['profile'];
+			$data     = $results[0]['data'];
 
 			if($profile)
 			{
