@@ -7,6 +7,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
+use Socialite;
 use CRUDBooster;
 
 use Illuminate\Support\Facades\Schema;
@@ -66,14 +67,38 @@ class AdminController extends CBController {
 	      $ip=$_SERVER['REMOTE_ADDR'];	
 	    }
 
- 	    // dump($ip);
-
  		if(array_search($ip, $whitelistIP) === false){	
-			return redirect("https://www.startwellstaywell.com.my/"); 
+			return redirect("https://www.startwellstaywell.com.my/");
 		} else {	
-			return view('crudbooster::login');	
+			return view('crudbooster::login');
 		}		
 	}
+
+	public function redirectToProvider()
+    {
+        return Socialite::driver('google')->redirect();
+    }
+
+    public function handleProviderCallback()
+    {
+		$googleUser = Socialite::driver('google')->stateless()->user();
+
+		$cmsUser = DB::table(config('crudbooster.USER_TABLE'))->where("email",$googleUser->email)->first();
+
+		if($cmsUser) 
+		{
+			$success = $this->saveIntoSessionAndRedirect($cmsUser);
+
+			if($success)
+			{
+				return redirect()->route('AdminControllerGetIndex');
+			}
+		}
+		else
+		{
+			return view('crudbooster::main');	
+		}
+    }
  
 	public function postLogin() {		
 
@@ -92,38 +117,61 @@ class AdminController extends CBController {
 
 		$email 		= Request::input("email");
 		$password 	= Request::input("password");
-		$users 		= DB::table(config('crudbooster.USER_TABLE'))->where("email",$email)->first(); 		
+		$user 		= DB::table(config('crudbooster.USER_TABLE'))->where("email",$email)->first(); 		
 
-		if(\Hash::check($password,$users->password)) {
-			$priv = DB::table("cms_privileges")->where("id",$users->id_cms_privileges)->first();
+		if(\Hash::check($password,$user->password)) {	
 
-			$roles = DB::table('cms_privileges_roles')
-			->where('id_cms_privileges',$users->id_cms_privileges)
-			->join('cms_moduls','cms_moduls.id','=','id_cms_moduls')
-			->select('cms_moduls.name','cms_moduls.path','is_visible','is_create','is_read','is_edit','is_delete')
-			->get();
+			$success = $this->saveIntoSessionAndRedirect($user);
+
+			if($success)
+			{
+				return redirect()->route('AdminControllerGetIndex'); 
+			}
+
+		}else{
+			return redirect()->route('getLogin')->with('message', trans('crudbooster.alert_password_wrong'));			
+		}		
+	}
+
+	public function saveIntoSessionAndRedirect($user)
+	{
+		$success = false; 
+
+		$priv = DB::table("cms_privileges")->where("id",$user->id_cms_privileges)->first();
+
+		$roles = DB::table('cms_privileges_roles')
+		->where('id_cms_privileges',$user->id_cms_privileges)
+		->join('cms_moduls','cms_moduls.id','=','id_cms_moduls')
+		->select('cms_moduls.name','cms_moduls.path','is_visible','is_create','is_read','is_edit','is_delete')
+		->get();
+		
+		$photo = ($user->photo)?asset($user->photo):'https://www.gravatar.com/avatar/'.md5($user->email).'?s=100';
+
+		try{
 			
-			$photo = ($users->photo)?asset($users->photo):'https://www.gravatar.com/avatar/'.md5($users->email).'?s=100';
-			Session::put('admin_id',$users->id);			
+			Session::put('admin_id',$user->id);			
 			Session::put('admin_is_superadmin',$priv->is_superadmin);
-			Session::put('admin_name',$users->name);	
+			Session::put('admin_name',$user->name);	
 			Session::put('admin_photo',$photo);
 			Session::put('admin_privileges_roles',$roles);
-			Session::put("admin_privileges",$users->id_cms_privileges);
+			Session::put("admin_privileges",$user->id_cms_privileges);
 			Session::put('admin_privileges_name',$priv->name);			
 			Session::put('admin_lock',0);
 			Session::put('theme_color',$priv->theme_color);
 			Session::put("appname",CRUDBooster::getSetting('appname'));		
 
-			CRUDBooster::insertLog(trans("crudbooster.log_login",['email'=>$users->email,'ip'=>Request::server('REMOTE_ADDR')]));		
+			CRUDBooster::insertLog(trans("crudbooster.log_login",['email'=>$user->email,'ip'=>Request::server('REMOTE_ADDR')]));
 
 			$cb_hook_session = new \App\Http\Controllers\CBHook;
 			$cb_hook_session->afterLogin();
 
-			return redirect()->route('AdminControllerGetIndex'); 
-		}else{
-			return redirect()->route('getLogin')->with('message', trans('crudbooster.alert_password_wrong'));			
-		}		
+			$success = true;
+
+		} catch(\Exception $e) {
+			echo 'Message: ' .$e->getMessage();
+		}
+
+		return $success;
 	}
 
 	public function getForgot() {		
@@ -156,7 +204,6 @@ class AdminController extends CBController {
 		CRUDBooster::insertLog(trans("crudbooster.log_forgot",['email'=>g('email'),'ip'=>Request::server('REMOTE_ADDR')]));
 
 		return redirect()->route('getLogin')->with('message', trans("crudbooster.message_forgot_password"));
-
 	}	
 
 	public function getLogout() {
