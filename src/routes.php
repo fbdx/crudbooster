@@ -28,7 +28,6 @@ Route::group(['middleware'=>['web'],'namespace'=>$namespace],function() {
 	Route::get('thumbnail/{folder}/{filename}', ['uses'=>'ThumbnailController@getFile','as'=>'thumbnailController']);		
 });
 
-
 /* ROUTER FOR WEB */
 Route::group(['middleware'=>['web'],'prefix'=>config('crudbooster.ADMIN_PATH'),'namespace'=>$namespace], function () {
 		
@@ -39,12 +38,12 @@ Route::group(['middleware'=>['web'],'prefix'=>config('crudbooster.ADMIN_PATH'),'
 	Route::post('register', ['uses'=>'AdminController@postRegister','as'=>'postRegister']);
 	Route::get('register', ['uses'=>'AdminController@getRegister','as'=>'getRegister']);
 	Route::get('logout', ['uses'=>'AdminController@getLogout','as'=>'getLogout']);				
-	// Route::get('login', 'AdminController@redirectToProvider');	
-	// Route::get('login/callback', 'AdminController@handleProviderCallback');
+	Route::get('login/google', ['uses'=>'AdminController@redirectToProvider', 'as'=>'googleLogin']);	
+	Route::get('login/callback', ['uses'=>'AdminController@handleProviderCallback', 'as'=>'googleCallback']);
 	Route::get('login', ['uses'=>'AdminController@getLogin','as'=>'getLogin']);	
 	Route::post('login', ['uses'=>'AdminController@postLogin','as'=>'postLogin']);
-});
 
+});
 
 // ROUTER FOR OWN CONTROLLER FROM CB
 Route::group(['middleware'=>['web','\crocodicstudio\crudbooster\middlewares\CBBackend'],'prefix'=>config('crudbooster.ADMIN_PATH'),'namespace'=>'App\Http\Controllers'], function () {
@@ -71,7 +70,6 @@ Route::group(['middleware'=>['web','\crocodicstudio\crudbooster\middlewares\CBBa
 	CRUDBooster::routeController('api_generator','ApiCustomController',$namespace='\crocodicstudio\crudbooster\controllers');	
 	
 	try{
-
 		$master_controller = glob(__DIR__.'/controllers/*.php');
 		foreach($master_controller as &$m) $m = str_replace('.php','',basename($m));		
 		

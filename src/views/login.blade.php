@@ -60,16 +60,16 @@
         </a>
       </div><!-- /.login-logo -->      
       <div class="login-box-body">
-	  
-    		@if ( Session::get('message') != '' )
-        		<div class='alert alert-warning'>
-        			{{ Session::get('message') }}
-        		</div>	
-    		@endif 
-		
+    
+        @if ( Session::get('message') != '' )
+            <div class='alert alert-warning'>
+              {{ Session::get('message') }}
+            </div>  
+        @endif 
+    
         <p class='login-box-msg'>{{trans("crudbooster.login_message")}}</p>
         <form autocomplete='off' action="{{ route('postLogin') }}" method="post">
-		  <input type="hidden" name="_token" value="{{ csrf_token() }}" />
+      <input type="hidden" name="_token" value="{{ csrf_token() }}" />
           <div class="form-group has-feedback">
             <input autocomplete='off'  type="text" class="form-control" name='email' required placeholder="Email"/>
             <span class="glyphicon glyphicon-user form-control-feedback"></span>
@@ -85,12 +85,16 @@
           </div>       
           
           <div class='row'>
-            <div class='col-xs-12' align="center"><p style="padding:10px 0px 10px 0px">{{trans("crudbooster.text_forgot_password")}} <a href='{{route("getForgot")}}'>{{trans("crudbooster.click_here")}}</a>   </p></div>
+            <div class='col-xs-12' align="center"><p style="padding:10px 0px 10px 0px">{{trans("crudbooster.text_forgot_password")}} <a href='{{route("getForgot")}}'>{{trans("crudbooster.click_here")}}</a>   </p>
+            </div>
+            <div class='col-xs-12' align="center"><p style="padding:10px 0px 10px 0px">
+              <a href='{{route("googleLogin")}}'>Google Login</a></p>
+            </div>
           </div>
         </form>
         
 
-		<br/>
+    <br/>
         <!--a href="#">I forgot my password</a-->
 
       </div><!-- /.login-box-body -->
