@@ -71,7 +71,7 @@ class AdminController extends CBController {
 	    // dump($ip);
 
  		if(array_search($ip, $whitelistIP) === false){	
-			return redirect("https://www.startwellstaywell.com.my/");
+			return view('crudbooster::main');
 		} else {	
 			return view('crudbooster::login');	
 		}		
