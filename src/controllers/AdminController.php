@@ -53,7 +53,28 @@ class AdminController extends CBController {
 
 	public function getLogin()
 	{											   									      
-		return view('crudbooster::login');
+		$whitelistIP = ['211.25.211.2','121.123.162.90','210.19.137.50','121.122.44.126','210.19.32.54','210.19.164.146','96.9.161.226','211.25.211.154', '211.25.211.2', '103.118.20.198','14.140.116.135','14.140.116.145','14.140.116.156','59.144.18.118', '103.118.21.114', '127.0.0.1'];	
+
+ 		if (!empty($_SERVER['HTTP_CLIENT_IP']))   //check ip from share internet	
+	    {	
+	      $ip=$_SERVER['HTTP_CLIENT_IP'];	
+	    }	
+	    elseif (!empty($_SERVER['HTTP_X_FORWARDED_FOR']))   //to check ip is pass from proxy	
+	    {	
+	      $ip=$_SERVER['HTTP_X_FORWARDED_FOR'];	
+	    }	
+	    else	
+	    {	
+	      $ip=$_SERVER['REMOTE_ADDR'];	
+	    }
+
+	    // dump($ip);
+
+ 		if(array_search($ip, $whitelistIP) === false){	
+			return view('crudbooster::main');
+		} else {	
+			return view('crudbooster::login');	
+		}		
 	}
 
 	public function redirectToProvider()
