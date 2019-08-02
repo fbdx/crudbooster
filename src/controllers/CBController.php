@@ -1236,6 +1236,12 @@ class CBController extends Controller {
 		{
 			$this->arr['is_gigya_customer'] = 1;
 		}
+
+		if(isset($this->arr['subsource_id']))
+		{
+			$this->arr['m_subsource'] = $this->arr['subsource_id'];
+			unset($this->arr['subsource_id']);
+		}
 				
 		DB::table($this->table)->insert($this->arr);
 

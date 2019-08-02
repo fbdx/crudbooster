@@ -54,7 +54,7 @@
                               @if($button_cancel && CRUDBooster::getCurrentMethod() != 'getDetail')                       
                                 @if(g('return_url'))
                                 <a href='{{g("return_url")}}' class='btn btn-default'><i class='fa fa-chevron-circle-left'></i> {{trans("crudbooster.button_back")}}</a>
-                                @else 
+                                @else
                                 <a href='{{CRUDBooster::mainpath("?".http_build_query(@$_GET)) }}' class='btn btn-default'><i class='fa fa-chevron-circle-left'></i> {{trans("crudbooster.button_back")}}</a>
                                 @endif
                               @endif
@@ -85,5 +85,17 @@
           {!! $validator !!}
           <!-- validation code end -->
         @endif
+
+        <script type="text/javascript">
+          $(document).ready(function () { 
+            $('#form-group-optin_subscriptions').hide(); 
+              $('#optin').change(function() {
+                if($('#optin').val()=='Yes')
+                {
+                  $('#form-group-optin_subscriptions').show();
+                }
+              });
+          });
+        </script>
 
 @endsection
