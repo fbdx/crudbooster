@@ -1728,26 +1728,6 @@ class CBController extends Controller {
 		}
 	}
 
-	public function synchroToGigya($UID, $regToken, $email, $rowArray, $id, $formData)
-    {  
-    	$setInputData  = $this->arrayMappingtoGigya($rowArray);
-
-    	if($this->gigya_based)
-    	{
-    		$data = $this->setMainmergeGigyaCustomInformation($id);
-    	}
-
-    	if($this->gigya_customer)
-    	{
-    		$formData['is_gigya_customer'] = 1;
-			DB::table($this->table)->where($this->primary_key,$id)->update($formData);
-    		$data = $this->setCustomerGigyaCustomInformation($id);
-    	}
-
-    	$subscriptions = $this->setGigyaSubscriptions($id);
-	    $response      = $this->setAccountInfo($UID, $regToken,$setInputData,$data,$subscriptions);
-	}
-
 	public function getDelete($id) {
 		$this->cbLoader();
 		$row = DB::table($this->table)->where($this->primary_key,$id)->first();
