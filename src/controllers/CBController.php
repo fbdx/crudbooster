@@ -1685,6 +1685,12 @@ class CBController extends Controller {
 		if ($setInputData['address2'] == 'NA' || $setInputData['address2'] == 'na') {
 			$setInputData['address2'] = '';
 		}
+
+		if(isset($this->arr['subsource_id']))
+		{
+			$this->arr['m_subsource'] = $this->arr['subsource_id'];
+			unset($this->arr['subsource_id']);
+		}
 		
 		DB::table($this->table)->where($this->primary_key,$id)->update($this->arr);
 
