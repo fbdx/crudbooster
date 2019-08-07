@@ -61,7 +61,8 @@
     <div class="box">
       <div class="box-header">  
         @if(strpos(CRUDBooster::mainpath(), 'admin/customer') !== false)
-          @if($button_bulk_action && (CRUDBooster::myPrivilegeId() !== 4))
+          {{-- @if($button_bulk_action && (CRUDBooster::myPrivilegeId() !== 4)) --}}
+          @if($button_bulk_action)
           <div class="pull-{{ trans('crudbooster.left') }}">          
             <div class="selected-action" style="display:inline-block;position:relative;">
                 <button type="button" class="btn btn-default btn-sm dropdown-toggle" data-toggle="dropdown" aria-expanded="false"><i class='fa fa-check-square-o'></i> {{trans("crudbooster.button_selected_action")}}
