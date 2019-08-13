@@ -1,0 +1,13 @@
+{{-- @if($col['name']=='birthDate')
+  <div class="input-group">
+  {{-- $name_column == childrenbirthDate --}}
+    <span class="input-group-addon"><a href='javascript:void(0)' onclick='$("#{{$name_column}}").data("daterangepicker").toggle()' id="birthdate"><i class='fa fa-calendar'></i></a></span>
+    {{-- <p></p> --}}
+    <input type='text' title="{{$form['label']}}" readonly {{$required}} {{$readonly}} {!!$placeholder!!} {{$disabled}} class='form-control notfocus expectedDatePicker {{$col['required']?"required":""}}' name="{{$name_column}}" id="{{$name_column}}" value='{{$value}}'/>
+
+  </div>
+@else --}}
+{{-- @endif --}}
+
+
+{{ -- strpos($current_path, 'admin/customer') && --}}
