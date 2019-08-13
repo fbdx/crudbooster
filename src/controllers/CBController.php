@@ -2,6 +2,7 @@
 
 error_reporting(E_ALL ^ E_NOTICE ^ E_WARNING);
 
+
 use crocodicstudio\crudbooster\controllers\Controller;
 use App\Customer;
 use App\Mainmerge;
@@ -1274,10 +1275,10 @@ class CBController extends Controller {
 		//Looping Data Input Again After Insert
 		foreach($this->data_inputan as $ro) {
 
-			if($ro['name'] == 'gigya_children' || $ro['name'] == 'sd_children')
-			{
-				continue;
-			}
+			// if($ro['name'] == 'gigya_children' || $ro['name'] == 'sd_children')
+			// {
+			// 	continue;
+			// }
 			
 			$name = $ro['name'];
 			if(!$name) continue;
@@ -1395,6 +1396,8 @@ class CBController extends Controller {
 								unset($child_array['id']);
 								$lastId = CRUDBooster::newId($childtable);
 								$child_array[$i]['id'] = $lastId;
+								$child_array[$i]['UID'] = $this->generateUid();
+								$child_array[$i]['applicationInternalIdentifier'] = $this->generateUid();
 								DB::table($childtable)->insert($child_array);
 							}
 
@@ -1526,15 +1529,9 @@ class CBController extends Controller {
 		$this->hook_before_edit($this->arr,$id);		
 
 		//Looping Data Input Again After Insert
-		// dd($this->data_inputan);
 		
 
 		foreach($this->data_inputan as $ro) {
-
-			if($ro['name'] == 'gigya_children' || $ro['name'] == 'sd_children')
-			{
-				continue;
-			}
 
 			$name = $ro['name'];
 			
@@ -1611,7 +1608,6 @@ class CBController extends Controller {
 					foreach ($this->col as $key => $value) {
 						$val = $value['name'];
 						$colMatch[] = $val;
-
 					}
 
 					$matchRow = [];
@@ -1638,44 +1634,46 @@ class CBController extends Controller {
 						if($child_array[$i]['id'] == NULL){
 							
 							if($childtable == 'mainmerge') {
-							$customer_array[] = $matchRow;
-							$test = (array) $customer_array[$i];
-							foreach($child_array as $key => $value)
-							{
-								$newArray = array_merge($child_array[$key],$test);
-							}
-							// dd($newArray);
-							unset($newArray['id']);
-							$newArray['mobileno'] = $newArray['phones'];
-							$newArray['postcode'] = $newArray['zip'];
-							$remove_array = ['phones','zip','careline_max_datecreated','careline_callstatus','careline_currentstatus','careline_telecomaction','mainmerge_max_mdate'];
-							$newArray = array_diff_key($newArray, array_flip($remove_array));
-							// dd($newArray);
-							$lastId = CRUDBooster::newId($childtable);
-							$newArray['id'] = $lastId;
-							date_default_timezone_set("Asia/Kuala_Lumpur");
-							$date = date('Y-m-d H:i:s');
-							$newArray['m_date'] = $date;
+								$customer_array[] = $matchRow;
+								$test = (array) $customer_array[$i];
+								foreach($child_array as $key => $value)
+								{
+									$newArray = array_merge($child_array[$key],$test);
+								}
+								// dd($newArray);
+								unset($newArray['id']);
+								$newArray['mobileno'] = $newArray['phones'];
+								$newArray['postcode'] = $newArray['zip'];
+								$remove_array = ['phones','zip','careline_max_datecreated','careline_callstatus','careline_currentstatus','careline_telecomaction','mainmerge_max_mdate'];
+								$newArray = array_diff_key($newArray, array_flip($remove_array));
+								// dd($newArray);
+								$lastId = CRUDBooster::newId($childtable);
+								$newArray['id'] = $lastId;
+								date_default_timezone_set("Asia/Kuala_Lumpur");
+								$date = date('Y-m-d H:i:s');
+								$newArray['m_date'] = $date;
 
-							DB::table($childtable)->insert($newArray);
+								DB::table($childtable)->insert($newArray);
 							}
 							else {
 								// dd($child_array);
 								unset($child_array['id']);
 								$lastId = CRUDBooster::newId($childtable);
 								$child_array[$i]['id'] = $lastId;
+								$child_array[$i]['UID'] = $this->generateUid();
+								$child_array[$i]['applicationInternalIdentifier'] = $this->generateUid();
 								DB::table($childtable)->insert($child_array);
 							}
-
 						}
 						// dd($child_array);
 						$tempId[] = $child_array[$i]['id'];
 						unset($child_array[$i]['id']);
 
+						// dd($child_array);
+
 						DB::table($childtable) 
 						->where('id', $tempId[$i])
 						->update($child_array[$i]);
-
 					}
 				}
 			}
