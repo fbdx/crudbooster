@@ -60,25 +60,49 @@
  
     <div class="box">
       <div class="box-header">  
-        @if($button_bulk_action && ( ($button_delete && CRUDBooster::isDelete()) || $button_selected) )
-        <div class="pull-{{ trans('crudbooster.left') }}">          
-          <div class="selected-action" style="display:inline-block;position:relative;">
-              <button type="button" class="btn btn-default btn-sm dropdown-toggle" data-toggle="dropdown" aria-expanded="false"><i class='fa fa-check-square-o'></i> {{trans("crudbooster.button_selected_action")}}
-                <span class="fa fa-caret-down"></span></button>                              
-              <ul class="dropdown-menu">    
-                @if($button_selected)
-                  @foreach($button_selected as $button)
-                    <li><a href="javascript:void(0)" data-name='{{$button["name"]}}' title='{{$button["label"]}}'><i class="fa fa-{{$button['icon']}}"></i> {{$button['label']}}</a></li>
-                  @endforeach
-                @endif
-                
-                @if($button_delete && CRUDBooster::isDelete())                                                                                                                                                         
-                <li><a href="javascript:void(0)" data-name='delete' title='{{trans('crudbooster.action_delete_selected')}}'><i class="fa fa-trash"></i> {{trans('crudbooster.action_delete_selected')}}</a></li>
-                @endif                
+        @if(strpos(CRUDBooster::mainpath(), 'admin/customer') !== false)
+          {{-- @if($button_bulk_action && (CRUDBooster::myPrivilegeId() !== 4)) --}}
+          @if($button_bulk_action)
+          <div class="pull-{{ trans('crudbooster.left') }}">          
+            <div class="selected-action" style="display:inline-block;position:relative;">
+                <button type="button" class="btn btn-default btn-sm dropdown-toggle" data-toggle="dropdown" aria-expanded="false"><i class='fa fa-check-square-o'></i> {{trans("crudbooster.button_selected_action")}}
+                  <span class="fa fa-caret-down"></span></button>                              
+                <ul class="dropdown-menu">    
+                  @if($button_selected)
+                    @foreach($button_selected as $button)
+                      <li><a href="javascript:void(0)" data-name='{{$button["name"]}}' title='{{$button["label"]}}'><i class="fa fa-{{$button['icon']}}"></i> {{$button['label']}}</a></li>
+                    @endforeach
+                  @endif
+                  
+                  @if($button_delete && CRUDBooster::isDelete())                                                                                                                                                         
+                  <li><a href="javascript:void(0)" data-name='delete' title='{{trans('crudbooster.action_delete_selected')}}'><i class="fa fa-trash"></i> {{trans('crudbooster.action_delete_selected')}}</a></li>
+                  @endif                
 
-              </ul><!--end-dropdown-menu-->
-          </div><!--end-selected-action-->        
-        </div><!--end-pull-left-->
+                </ul><!--end-dropdown-menu-->
+            </div><!--end-selected-action-->        
+          </div><!--end-pull-left-->
+          @endif
+        @else
+          @if($button_bulk_action && ( ($button_delete && CRUDBooster::isDelete()) || $button_selected) )
+          <div class="pull-{{ trans('crudbooster.left') }}">          
+            <div class="selected-action" style="display:inline-block;position:relative;">
+                <button type="button" class="btn btn-default btn-sm dropdown-toggle" data-toggle="dropdown" aria-expanded="false"><i class='fa fa-check-square-o'></i> {{trans("crudbooster.button_selected_action")}}
+                  <span class="fa fa-caret-down"></span></button>                              
+                <ul class="dropdown-menu">    
+                  @if($button_selected)
+                    @foreach($button_selected as $button)
+                      <li><a href="javascript:void(0)" data-name='{{$button["name"]}}' title='{{$button["label"]}}'><i class="fa fa-{{$button['icon']}}"></i> {{$button['label']}}</a></li>
+                    @endforeach
+                  @endif
+                  
+                  @if($button_delete && CRUDBooster::isDelete())                                                                                                                                                         
+                  <li><a href="javascript:void(0)" data-name='delete' title='{{trans('crudbooster.action_delete_selected')}}'><i class="fa fa-trash"></i> {{trans('crudbooster.action_delete_selected')}}</a></li>
+                  @endif                
+
+                </ul><!--end-dropdown-menu-->
+            </div><!--end-selected-action-->        
+          </div><!--end-pull-left-->
+          @endif
         @endif
         <div class="box-tools pull-{{ trans('crudbooster.right') }}" style="position: relative;margin-top: -5px;margin-right: -10px">
           

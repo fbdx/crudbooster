@@ -61,7 +61,7 @@
                         <!-- Menu Footer-->
                         <li class="user-footer">
                             <div class="pull-{{ trans('crudbooster.left') }}">
-                                <a href="{{ route('AdminCmsUsersControllerGetProfile') }}?m=0" class="btn btn-default btn-flat"><i class='fa fa-user'></i> {{trans("crudbooster.label_button_profile")}}</a>
+                                {{-- <a href="{{ route('AdminCmsUsersControllerGetProfile') }}?m=0" class="btn btn-default btn-flat"><i class='fa fa-user'></i> {{trans("crudbooster.label_button_profile")}}</a> --}}
                             </div>
                             <div class="pull-{{ trans('crudbooster.right') }}">
                                 <a title='Lock Screen' href="{{ route('getLockScreen') }}" class='btn btn-default btn-flat'><i class='fa fa-key'></i></a> 

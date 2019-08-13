@@ -3,16 +3,16 @@
 <head>
     <meta charset="UTF-8">
     <title>{{ ($page_title)?CRUDBooster::getSetting('appname').': '.strip_tags($page_title):"Admin Area" }}</title>
-	<meta name="csrf-token" content="{{ csrf_token() }}" />
-	<meta name='generator' content='CRUDBooster 5.3'/>
+  <meta name="csrf-token" content="{{ csrf_token() }}" />
+  <meta name='generator' content='CRUDBooster 5.3'/>
     <meta name='robots' content='noindex,nofollow'/>
     <link rel="shortcut icon" href="{{ CRUDBooster::getSetting('favicon')?asset(CRUDBooster::getSetting('favicon')):asset('vendor/crudbooster/assets/logo_crudbooster.png') }}">
     <meta content='width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no' name='viewport'>
-    
+
     @include('crudbooster::admin_template_plugins')
-    
+
     <!-- Theme style -->
-    <link href="{{ asset("vendor/crudbooster/assets/adminlte/dist/css/AdminLTE.min.css")}}" rel="stylesheet" type="text/css" />    
+    <link href="{{ asset("vendor/crudbooster/assets/adminlte/dist/css/AdminLTE.min.css")}}" rel="stylesheet" type="text/css" />
     <link href="{{ asset("vendor/crudbooster/assets/adminlte/dist/css/skins/_all-skins.min.css")}}" rel="stylesheet" type="text/css" />
 
     <!-- support rtl-->
@@ -38,7 +38,7 @@
       var site_url = "{{url('/')}}" ;
       @if($script_js)
         {!! $script_js !!}
-      @endif 
+      @endif
     </script>
     @if($load_js)
       @foreach($load_js as $js)
@@ -52,17 +52,17 @@
         .sub-module-tab li {background: #F9F9F9;cursor:pointer;}
         .sub-module-tab li.active {background: #ffffff;box-shadow: 0px -5px 10px #cccccc}
         .nav-tabs>li.active>a, .nav-tabs>li.active>a:focus, .nav-tabs>li.active>a:hover {border:none;}
-        .nav-tabs>li>a {border:none;}                
+        .nav-tabs>li>a {border:none;}
         .breadcrumb {
             margin:0 0 0 0;
             padding:0 0 0 0;
         }
         .form-group > label:first-child {display: block}
-        
+
     </style>
 </head>
 <body class="@php echo (Session::get('theme_color'))?:'skin-blue'; echo config('crudbooster.ADMIN_LAYOUT') @endphp">
-<div id='app' class="wrapper">    
+<div id='app' class="wrapper">
 
     <!-- Header -->
     @include('crudbooster::header')
@@ -74,15 +74,16 @@
     <div class="content-wrapper">
 
         <section class="content-header">
-          <?php 
+          <?php
             $module = CRUDBooster::getCurrentModule();
+            $path = CRUDBooster::mainpath();
           ?>
           @if($module)
           <h1>
             <i class='{{$module->icon}}'></i>  {{($page_title)?:$module->name}} &nbsp;&nbsp;
-            
-            <!--START BUTTON -->         
-                                        
+
+            <!--START BUTTON -->
+
             @if(CRUDBooster::getCurrentMethod() == 'getIndex')
             @if($button_show)
             <a href="{{ CRUDBooster::mainpath().'?'.http_build_query(Request::all()) }}" id='btn_show_data' class="btn btn-sm btn-primary" title="{{trans('crudbooster.action_show_data')}}">
@@ -90,14 +91,13 @@
             </a>
             @endif
 
-            @if($button_add && CRUDBooster::isCreate())                          
+            @if($button_add && CRUDBooster::isCreate())
             <a href="{{ CRUDBooster::mainpath('add').'?return_url='.urlencode(Request::fullUrl()).'&parent_id='.g('parent_id').'&parent_field='.$parent_field }}" id='btn_add_new_data' class="btn btn-sm btn-success" title="{{trans('crudbooster.action_add_data')}}">
               <i class="fa fa-plus-circle"></i> {{trans('crudbooster.action_add_data')}}
             </a>
-            @endif                          
+            @endif
             @endif
 
-              
             @if($button_export && CRUDBooster::getCurrentMethod() == 'getIndex')
             <a href="javascript:void(0)" id='btn_export_data' data-url-parameter='{{$build_query}}' title='Export Data' class="btn btn-sm btn-primary btn-export-data">
               <i class="fa fa-upload"></i> {{trans("crudbooster.button_export")}}
@@ -110,11 +110,36 @@
             </a>
             @endif
 
+            @if(CRUDBooster::isSuperadmin())
+              @if($module->name == 'Database' || $module->name == 'customer')
+                <button type="button" id="gigya_refresh" class="btn btn-success">Gigya Refresh</button>
+              @endif
+            @endif
+
+            <script type="text/javascript">
+              $(document).ready(function () {
+                $('#gigya_refresh').click(function(){
+                  $('#gigya_refresh').prop('disabled', true);
+                  $.ajax({
+                    url:"{{ CRUDBooster::adminPath('mainmerge/gigya-refresh') }}",
+                    method: 'GET',
+                    success:function(data, status, xhr)
+                    {
+                      alert(status);
+                    },
+                    error: function (jqXhr, textStatus, errorMessage) {
+                        alert(errorMessage);
+                    }
+                  });
+                });
+              });
+            </script>
+
             <!--ADD ACTIon-->
-             @if(count($index_button))                          
-               
+             @if(count($index_button))
+
                     @foreach($index_button as $ib)
-                     <a href='{{$ib["url"]}}' id='{{str_slug($ib["label"])}}' class='btn {{($ib['color'])?'btn-'.$ib['color']:'btn-primary'}} btn-sm' 
+                     <a href='{{$ib["url"]}}' id='{{str_slug($ib["label"])}}' class='btn {{($ib['color'])?'btn-'.$ib['color']:'btn-primary'}} btn-sm'
                       @if($ib['onClick']) onClick='return {{$ib["onClick"]}}' @endif
                       @if($ib['onMouseOever']) onMouseOever='return {{$ib["onMouseOever"]}}' @endif
                       @if($ib['onMoueseOut']) onMoueseOut='return {{$ib["onMoueseOut"]}}' @endif
@@ -123,7 +148,7 @@
                       >
                         <i class='{{$ib["icon"]}}'></i> {{$ib["label"]}}
                       </a>
-                    @endforeach                                                          
+                    @endforeach
             @endif
             <!-- END BUTTON -->
           </h1>
@@ -136,28 +161,28 @@
           @else
           <h1>{{CRUDBooster::getSetting('appname')}} <small>Information</small></h1>
           @endif
-        </section>	
-		
+        </section>
+
 
         <!-- Main content -->
         <section id='content_section' class="content">
 
-        	@if(@$alerts)
-        		@foreach(@$alerts as $alert)
-        			<div class='callout callout-{{$alert[type]}}'>        				
-        					{!! $alert['message'] !!}
-        			</div>
-        		@endforeach
-        	@endif
+          @if(@$alerts)
+            @foreach(@$alerts as $alert)
+              <div class='callout callout-{{$alert[type]}}'>
+                  {!! $alert['message'] !!}
+              </div>
+            @endforeach
+          @endif
 
 
-			@if (Session::get('message')!='')
-			<div class='alert alert-{{ Session::get("message_type") }}'>
-				<button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>
-				<h4><i class="icon fa fa-info"></i> {{ trans("crudbooster.alert_".Session::get("message_type")) }}</h4>
-				{!!Session::get('message')!!}
-			</div>
-			@endif
+      @if (Session::get('message')!='')
+      <div class='alert alert-{{ Session::get("message_type") }}'>
+        <button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>
+        <h4><i class="icon fa fa-info"></i> {{ trans("crudbooster.alert_".Session::get("message_type")) }}</h4>
+        {!!Session::get('message')!!}
+      </div>
+      @endif
 
 
 

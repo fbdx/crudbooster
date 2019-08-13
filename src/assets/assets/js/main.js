@@ -78,6 +78,147 @@
 				})
 			}
 
+			$(function() {
+				$('#current-milk-brand').hide();
+				$('#current-baby-food').hide();
+				$('#child-feeding').hide();
+				// $('#reason-not-suitable').hide(); // for admin/customer
+				// console.log(this);
+				// $('#remarks').hide(); // for admin/customer
+				var a = $("#reasonnotsuitable").val();
+				if(a == 'Others'){
+					$("#remarks").prop('readonly',false); //adminmainmergecontroller
+				} else{
+					$("#remarks").prop('readonly',true); //adminmainmergecontroller
+				}
+				console.log(a);
+			});
+
+			var dateToday = new Date();
+
+			$("#childrenbirthDateReliability").change(function () {
+				var k = $(this).val();
+	            k = k.toLowerCase().replace(/ /g,'');
+	            console.log(k);
+
+	            if(k == 'pregnant')
+	            {
+	            	$('.expectedDatePicker').daterangepicker({					
+						singleDatePicker: true,
+	        			showDropdowns: true,
+	        			minDate: dateToday,
+						format:'YYYY-MM-DD'
+					})
+
+					$('#current-milk-brand').hide();
+					$('#current-baby-food').hide();
+					$('#child-feeding').show();
+					
+	            }
+	            
+	            if(k == 'childisborn')
+	            {
+	            	$('.expectedDatePicker').daterangepicker({					
+						singleDatePicker: true,
+	        			showDropdowns: true,
+	        			maxDate: dateToday,
+						format:'YYYY-MM-DD'
+					})
+
+					$('#current-milk-brand').show();
+					$('#current-baby-food').show();
+					$('#child-feeding').hide();
+	            }
+
+	            if(k == ''){
+	            	$('#child-feeding').hide();
+	            	$('#current-milk-brand').hide();
+					$('#current-baby-food').hide();
+	            }
+	        
+	        });
+
+			$("#panel-form-children").ready(function() {
+
+				$('#childrenreasonnotsuitable').prop('disabled',true);
+				$("#childrenswitched").change(function() {
+				var switchVal = $(this).val();
+
+				if (switchVal == 'No') {
+					$('#childrenreasonnotsuitable').prop('disabled',false);
+					// $("#childrenreasonnotsuitable").addClass('required');
+
+					$("#childrenreasonnotsuitable").change(function(){
+						var notSuitableVal = $(this).val();
+						console.log(notSuitableVal);
+						if(notSuitableVal == 'Others'){
+							$('#childrenremarks').prop('readonly',false);
+						}else{
+							$('#childrenremarks').prop('readonly',true);
+						}
+					});
+
+				} else {
+					$('#childrenreasonnotsuitable').prop('disabled',true);
+					$("#childrenreasonnotsuitable").val('');
+					$("#childrenreasonnotsuitable").removeClass('required');
+					$('#childrenremarks').prop('readonly','false');
+					$('#childrenremarks').val('');
+				}
+				});
+			});
+
+			$("#panel-form-mother").ready(function() {
+
+				$('#motherreasonnotsuitable').prop('disabled',true);
+				$("#motherswitched").change(function() {
+				var switchVal = $(this).val();
+
+				if (switchVal == 'No') {
+					$('#motherreasonnotsuitable').prop('disabled',false);
+					// $("#childrenreasonnotsuitable").addClass('required');
+
+					$("#motherreasonnotsuitable").change(function(){
+						var notSuitableVal = $(this).val();
+						console.log(notSuitableVal);
+						if(notSuitableVal == 'Others'){
+							$('#motherremarks').prop('readonly',false);
+						}else{
+							$('#motherremarks').prop('readonly',true);
+						}
+					});
+
+				} else {
+					$('#motherreasonnotsuitable').prop('disabled',true);
+					$("#motherreasonnotsuitable").val('');
+					$("#motherreasonnotsuitable").removeClass('required');
+					$('#motherremarks').prop('readonly','false');
+					$('#motherremarks').val('');
+				}
+				});
+			})
+
+	        $("#reasonnotsuitable").change(function() {
+				var v = $(this).val();
+				v = v.toLowerCase().replace(/ /g,'');
+				console.log(v);
+				// if(v !== 'others'){
+				// 	$("#remarks").hide();
+				// }
+
+				if(v == 'others'){
+					$("#remarks").prop('readonly',false); //adminmainmergecontroller
+					$("#remarks").prop('required',true);
+				} else {
+					$("#remarks").prop('readonly',true);
+					$("#remarks").val('');
+				}
+
+			});
+
+
+
+
 			if($(".datetimepicker").length > 0) {
 				$(".datetimepicker").daterangepicker({
 					minDate: '1900-01-01',

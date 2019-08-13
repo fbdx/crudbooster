@@ -3,6 +3,14 @@
         
         <div >
 
+          @if (session('status'))
+              <div class="alert alert-danger">
+                  <p style="text-align: center;">
+                  {{ session('status') }}  
+                  </p>
+              </div>
+          @endif
+
         @if(CRUDBooster::getCurrentMethod() != 'getProfile' && $button_cancel)
           @if(g('return_url'))
           <p><a title='Return' href='{{g("return_url")}}'><i class='fa fa-chevron-circle-left '></i> &nbsp; {{trans("crudbooster.form_back_to_list",['module'=>CRUDBooster::getCurrentModule()->name])}}</a></p>       
@@ -46,7 +54,7 @@
                               @if($button_cancel && CRUDBooster::getCurrentMethod() != 'getDetail')                       
                                 @if(g('return_url'))
                                 <a href='{{g("return_url")}}' class='btn btn-default'><i class='fa fa-chevron-circle-left'></i> {{trans("crudbooster.button_back")}}</a>
-                                @else 
+                                @else
                                 <a href='{{CRUDBooster::mainpath("?".http_build_query(@$_GET)) }}' class='btn btn-default'><i class='fa fa-chevron-circle-left'></i> {{trans("crudbooster.button_back")}}</a>
                                 @endif
                               @endif
@@ -62,9 +70,7 @@
                                  
                               @endif
                             </div>
-                          </div>                             
-                              
-                          
+                          </div>
 
                         </div><!-- /.box-footer-->
 
@@ -79,5 +85,17 @@
           {!! $validator !!}
           <!-- validation code end -->
         @endif
+
+        <script type="text/javascript">
+          $(document).ready(function () { 
+            $('#form-group-optin_subscriptions').hide(); 
+              $('#optin').change(function() {
+                if($('#optin').val()=='Yes')
+                {
+                  $('#form-group-optin_subscriptions').show();
+                }
+              });
+          });
+        </script>
 
 @endsection

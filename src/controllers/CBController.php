@@ -1,9 +1,11 @@
 <?php namespace crocodicstudio\crudbooster\controllers;
 
 error_reporting(E_ALL ^ E_NOTICE ^ E_WARNING);
-//added for warning remove if necessary
+
 
 use crocodicstudio\crudbooster\controllers\Controller;
+use App\Customer;
+use App\Mainmerge;
 use Illuminate\Support\Facades\Session;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Request;
@@ -21,8 +23,18 @@ use CRUDBooster;
 use CB;
 use Schema;
 use JsValidator;
+use GSSDK;
+use GSRequest;
+use DateTime;
+use Carbon;
+use App\Traits\GigyaApi;
+use App\Traits\SetSmartDataInfoToGigya;
+use Config;
 
 class CBController extends Controller {
+
+	use GigyaApi;
+	use SetSmartDataInfoToGigya;
 
 	public $data_inputan;
 	public $columns_table;
@@ -81,14 +93,20 @@ class CBController extends Controller {
 	public $option_id			  = FALSE;
 	public $option_fields		  = array();
 	public $import_consignment	  = FALSE;
+	public $gigya_based			  = FALSE;
+	public $gigya_customer        = FALSE;
 
+	public function __construct()
+	{
+		$this->gigya_api_key  = config('gigyaaccess.GIGYAAPIKEY');
+		$this->gigya_secret_key = config('gigyaaccess.GIGYASECRETKEY');
+		$this->gigya_user_key = config('gigyaaccess.GIGYAUSERKEY');
+	}
 
 	public function cbLoader() {
 		$this->cbInit();
 
 		$this->checkHideForm();
-
-
 
 		$this->primary_key 					 = CB::pk($this->table);
 		$this->columns_table                 = $this->col;
@@ -130,7 +148,7 @@ class CBController extends Controller {
 		$this->data['sub_module']            = $this->sub_module;
 		$this->data['parent_field'] 		 = (g('parent_field'))?:$this->parent_field;
 		$this->data['parent_id'] 		 	 = (g('parent_id'))?:$this->parent_id;
-
+  
 		if(CRUDBooster::getCurrentMethod() == 'getProfile') {
 			Session::put('current_row_id',CRUDBooster::myId());
 			$this->data['return_url'] = Request::fullUrl();			
@@ -144,7 +162,7 @@ class CBController extends Controller {
 		echo view($template,$data);
 	}
 
-	private function checkHideForm() {
+	protected function checkHideForm() {
 		if(count($this->hide_form)) {
 			foreach($this->form as $i=>$f) {
 				if(in_array($f['name'], $this->hide_form)) {
@@ -154,7 +172,7 @@ class CBController extends Controller {
 		}
 	}
 
-	private function findNameFormType($name) {
+	protected function findNameFormType($name) {
 		$isFind = FALSE;
 		foreach($this->form as $i=>$f)
 		{
@@ -202,7 +220,7 @@ class CBController extends Controller {
 		$tablePK = $data['table_pk'];
 		$table_columns = CB::getTableColumns($this->table);
 		$result = DB::table($this->table)->select(DB::raw($this->table.".".$this->primary_key));
-
+		// dd($result);
 		if(Request::get('parent_id')) {
 			$table_parent = $this->table;
 			$table_parent = CRUDBooster::parseSqlTable($table_parent)['table'];
@@ -211,6 +229,7 @@ class CBController extends Controller {
 
 
 		$this->hook_query_index($result);
+
 
 		if(in_array('deleted_at', $table_columns)) {
 			$result->where($this->table.'.deleted_at',NULL);
@@ -221,8 +240,9 @@ class CBController extends Controller {
 		$join_table_temp  = array();
 		$table            = $this->table;
 		$columns_table    = $this->columns_table;
+		// dd($columns_table);
 		foreach($columns_table as $index => $coltab) {
-
+			// dump($coltab);
 			$join = @$coltab['join'];
 			$join_where = @$coltab['join_where'];
 			$join_id = @$coltab['join_id'];
@@ -257,7 +277,7 @@ class CBController extends Controller {
 
 			if($join) {
 
-				$join_exp     = explode(',', $join);
+				$join_exp    = explode(',', $join);
 
 				$join_table  = $join_exp[0];
 				$joinTablePK = CB::pk($join_table);
@@ -396,7 +416,6 @@ class CBController extends Controller {
 						break;
 					}
 
-
 				}
 			});
 
@@ -463,9 +482,12 @@ class CBController extends Controller {
 						$result->orderby($orderby_table.'.'.$k,$v);
 					}
 				}
+
 				$data['result'] = $result->paginate($limit);
 			}else{
+
 				$data['result'] = $result->orderby($this->table.'.'.$this->primary_key,'desc')->paginate($limit);
+
 			}
 		}
 
@@ -596,7 +618,7 @@ class CBController extends Controller {
 		$data['html_contents'] = $html_contents;
 		$data['limit'] = $result->count();
 		//echo $result->toSql()."<br>";
-
+		// dd($data);
 		return view("crudbooster::default.index",$data);
 	}
 
@@ -899,7 +921,6 @@ class CBController extends Controller {
 					$exp = array();
 				}
 
-
 				$validation = implode('|',$exp);
 
 				$array_input[$name] = $validation;
@@ -1194,13 +1215,14 @@ class CBController extends Controller {
 
 	public function postAddSave() {
 		$this->cbLoader();
+
 		if(!CRUDBooster::isCreate() && $this->global_privilege==FALSE) {
 			CRUDBooster::insertLog(trans('crudbooster.log_try_add_save',['name'=>Request::input($this->title_field),'module'=>CRUDBooster::getCurrentModule()->name ]));
 			CRUDBooster::redirect(CRUDBooster::adminPath(),trans("crudbooster.denied_access"));
 		}
 
 		$this->validation();
-		$this->input_assignment();		
+		$this->input_assignment();
 
 		if(Schema::hasColumn($this->table, 'created_at'))
 		{
@@ -1209,13 +1231,55 @@ class CBController extends Controller {
 
 		$this->hook_before_add($this->arr);
 
+		$this->arr[$this->primary_key] = $id = CRUDBooster::newId($this->table); 
 
-		$this->arr[$this->primary_key] = $id = CRUDBooster::newId($this->table);		
-		DB::table($this->table)->insert($this->arr);		
+		if($this->gigya_customer)
+		{
+			$this->arr['is_gigya_customer'] = 1;
+		}
 
+		if(isset($this->arr['subsource_id']))
+		{
+			$this->arr['m_subsource'] = $this->arr['subsource_id'];
+			unset($this->arr['subsource_id']);
+		}
+				
+		DB::table($this->table)->insert($this->arr);
+
+		if($this->gigya_based || $this->gigya_customer)
+		{
+			$UID      = NULL;
+			$regToken = NULL;
+
+			$response = $this->searchViaEmail($this->arr['email']);
+
+			$results = $response['results'];
+
+			if($results[0]["hasFullAccount"])
+			{
+				$UID = $results[0]['UID'];
+			}
+
+	    	if(!isset($UID))
+	    	{
+	    		$register = $this->initRegistration();
+	    		$regToken = $register["regToken"];
+	    	}
+
+	    	$rowArray = $this->arr;
+	    	$recordId = $this->arr[$this->primary_key];
+
+	    	$this->synchroToGigya($UID,$regToken,$rowArray['email'],$rowArray,$recordId,$this->arr);
+		}
 
 		//Looping Data Input Again After Insert
 		foreach($this->data_inputan as $ro) {
+
+			if($ro['name'] == 'gigya_children' || $ro['name'] == 'sd_children')
+			{
+				continue;
+			}
+			
 			$name = $ro['name'];
 			if(!$name) continue;
 
@@ -1266,33 +1330,89 @@ class CBController extends Controller {
 			}
 
 			if($ro['type']=='child') {
+
+				$tempId = array();
 				$name = str_slug($ro['label'],'');
-				$columns = $ro['columns'];				
-				$count_input_data = count(Request::get($name.'-'.$columns[0]['name']))-1;
-				$child_array = [];
+				$columns = $ro['columns'];
 
-				for($i=0;$i<=$count_input_data;$i++) {
+				if(Request::get($name.'-'.$columns[0]['name']))
+				{
+					$count_input_data = count(Request::get($name.'-'.$columns[0]['name']))-1;
+					$child_array = [];
+					$childtable = CRUDBooster::parseSqlTable($ro['table'])['table'];				
 					$fk = $ro['foreign_key'];
-					$column_data = [];
-					$column_data[$fk] = $id;
-					foreach($columns as $col) {
-						$colname = $col['name'];
-						$column_data[$colname] = Request::get($name.'-'.$colname)[$i];
+					$childtablePK = CB::pk($childtable);
+
+					$colMatch = array();
+					$row2 = (array) $row;
+					foreach ($this->col as $key => $value) {
+						$val = $value['name'];
+						$colMatch[] = $val;
+
 					}
-					$child_array[] = $column_data;
-				}	
 
-				$childtable = CRUDBooster::parseSqlTable($ro['table'])['table'];
-				DB::table($childtable)->insert($child_array);
+					$matchRow = [];
+					foreach ($colMatch as $key => $field) {
+						if(array_key_exists($field, $row2)){
+							$matchRow[$field] = $row2[$field];
+						}
+					}
+
+					for($i=0;$i<=$count_input_data;$i++) {
+						
+						$column_data = [];
+						// $column_data[$childtablePK] = $lastId;
+						$column_data[$fk] = $id;
+						foreach($columns as $col) {
+							$colname = $col['name'];
+							$column_data[$colname] = Request::get($name.'-'.$colname)[$i];
+						}
+
+						$child_array[] = $column_data;
+
+						if($child_array[$i]['id'] == NULL){
+							
+							if($childtable == 'mainmerge') {
+
+							$customer_array[] = $matchRow;
+							$test = (array) $customer_array[$i];
+							foreach($child_array as $key => $value)
+							{
+								$newArray = array_merge($child_array[$key],$test);
+							}
+							
+							unset($newArray['id']);
+
+							$lastId = CRUDBooster::newId($childtable);
+							$newArray['id'] = $lastId;
+							date_default_timezone_set("Asia/Kuala_Lumpur");
+							$date = date('Y-m-d H:i:s');
+							$newArray['m_date'] = $date;
+
+							DB::table($childtable)->insert($newArray);
+							}
+							else {
+								// dd($child_array);
+								unset($child_array['id']);
+								$lastId = CRUDBooster::newId($childtable);
+								$child_array[$i]['id'] = $lastId;
+								DB::table($childtable)->insert($child_array);
+							}
+
+						}
+						// dd($child_array);
+						$tempId[] = $child_array[$i]['id'];
+						unset($child_array[$i]['id']);
+
+						DB::table($childtable) 
+						->where('id', $tempId[$i])
+						->update($child_array[$i]);
+					}
+				}
 			}
-
-
-			
 		}
 
-
 		$this->hook_after_add($this->arr[$this->primary_key]);
-
 
 		$this->return_url = ($this->return_url)?$this->return_url:Request::get('return_url');
 
@@ -1315,15 +1435,62 @@ class CBController extends Controller {
 		}
 	}
 
+	public function arrayMappingtoSD($profile, $data){
+		$row = new \stdClass();
+
+		foreach ($profile as $key => $value) {
+			if($key == 'zip'){
+				$row->postcode = $profile['zip'];
+			} elseif($key == 'firstName') {
+				$row->firstname = $profile['firstName'];
+			} elseif($key == 'lastName'){
+				$row->lastname = $profile['lastName'];
+			} elseif($key == 'phones') {
+				$row->mobileno = $profile['phones'][0]['number'];
+			} elseif($key == 'address') {
+				$row->address1 = $profile['address'];
+			} else {
+				$row->$key = $profile[$key];
+			}
+		}
+
+		if(!isset($row->mobileno))
+		{
+			$row->mobileno = $data['mobile'];
+		}
+
+		return $row;
+	}
+
 	public function getEdit($id){
 		$this->cbLoader();
-		$row             = DB::table($this->table)->where($this->primary_key,$id)->first();
+
+		$row = DB::table($this->table)->where($this->primary_key,$id)->first();
+
+		if(isset($row->email) && $this->gigya_based)
+		{
+			$response = $this->searchViaEmail($row->email);
+			$results  = $response['results'];
+			$profile  = $results[0]['profile'];
+			$data     = $results[0]['data'];
+
+			if($profile)
+			{
+				$profile = $this->arrayMappingtoSD($profile, $data);
+				foreach ($row as $key1 => $value1) {
+					foreach ($profile as $key2 => $value2) {
+						if($key2 == $key1){
+							$row->$key1 = $profile->$key2;
+						}
+					}
+				}
+			}
+		}
 
 		if(!CRUDBooster::isRead() && $this->global_privilege==FALSE || $this->button_edit==FALSE) {
 			CRUDBooster::insertLog(trans("crudbooster.log_try_edit",['name'=>$row->{$this->title_field},'module'=>CRUDBooster::getCurrentModule()->name]));
 			CRUDBooster::redirect(CRUDBooster::adminPath(),trans('crudbooster.denied_access'));
 		}
-
 
 		$page_menu       = Route::getCurrentRoute()->getActionName();
 		$page_title 	 = trans("crudbooster.edit_data_page_title",['module'=>CRUDBooster::getCurrentModule()->name,'name'=>$row->{$this->title_field}]);
@@ -1333,22 +1500,15 @@ class CBController extends Controller {
 		$option_fields	 = $this->option_fields;
 		$table = $this->table;
 
-		// $mainmerge_id = DB::table('mainmerge')->where('customer_id', $id)->value('id');
-		
-		// if(DB::table('customer')){
-		// 	return view('crudbooster::default.form',compact('id','mainmerge_id','row','page_menu','page_title','command','option_id','option_fields'));	
-		// } else {
 		return view('crudbooster::default.form',compact('id','row','page_menu','page_title','command','option_id','option_fields','table'));
-		// }
 		
 	}
 
 	public $countChild = 0;
 	public function postEditSave($id) {
-
+		
 		$this->cbLoader();
 		$row = DB::table($this->table)->where($this->primary_key,$id)->first();
-
 
 		if(!CRUDBooster::isUpdate() && $this->global_privilege==FALSE) {
 			CRUDBooster::insertLog(trans("crudbooster.log_try_add",['name'=>$row->{$this->title_field},'module'=>CRUDBooster::getCurrentModule()->name]));
@@ -1356,22 +1516,26 @@ class CBController extends Controller {
 		}
 
 		$this->validation($id);
-		$this->input_assignment($id);				
+		$this->input_assignment($id);			
 
 		if (Schema::hasColumn($this->table, 'updated_at'))
 		{
 		    $this->arr['updated_at'] = date('Y-m-d H:i:s');
 		}
-		
+
 
 		$this->hook_before_edit($this->arr,$id);		
-		DB::table($this->table)->where($this->primary_key,$id)->update($this->arr);		
 
 		//Looping Data Input Again After Insert
 		// dd($this->data_inputan);
 		
 
 		foreach($this->data_inputan as $ro) {
+
+			if($ro['name'] == 'gigya_children' || $ro['name'] == 'sd_children')
+			{
+				continue;
+			}
 
 			$name = $ro['name'];
 			
@@ -1380,6 +1544,7 @@ class CBController extends Controller {
 			if(!$name) continue;
 
 			$inputdata = Request::get($name);
+			$setInputData[$name] = $inputdata;
 
 			//Insert Data Checkbox if Type Datatable
 			if($ro['type'] == 'checkbox') {
@@ -1404,7 +1569,6 @@ class CBController extends Controller {
 
 				}
 			}			
-
 
 			if($ro['type'] == 'select2') {
 				if($ro['relationship_table']) {
@@ -1435,55 +1599,125 @@ class CBController extends Controller {
 				$tempId = array();
 				$name = str_slug($ro['label'],'');
 				$columns = $ro['columns'];
-				$count_input_data = !empty(Request::get($name.'-'.$columns[0]['name']))-1;
-				$child_array = [];
-				$childtable = CRUDBooster::parseSqlTable($ro['table'])['table'];				
-				$fk = $ro['foreign_key'];
-				$childtablePK = CB::pk($childtable);
+				if(Request::get($name.'-'.$columns[0]['name']))
+				{
+					$count_input_data = count(Request::get($name.'-'.$columns[0]['name']))-1;
+					$child_array = [];
+					$childtable = CRUDBooster::parseSqlTable($ro['table'])['table'];				
+					$fk = $ro['foreign_key'];
+					$childtablePK = CB::pk($childtable);
 
-				for($i=0;$i<=$count_input_data;$i++) {
-					
-					$column_data = [];
-					// $column_data[$childtablePK] = $lastId;
-					$column_data[$fk] = $id;
-					foreach($columns as $col) {
-						$colname = $col['name'];
-						$column_data[$colname] = Request::get($name.'-'.$colname)[$i];
+					$colMatch = array();
+					$row2 = (array) $row;
+					foreach ($this->col as $key => $value) {
+						$val = $value['name'];
+						$colMatch[] = $val;
+
 					}
 
-					$child_array[] = $column_data;
-					// dd($child_array);
-					if($child_array[$i]['id'] == NULL){
+					$matchRow = [];
+					foreach ($colMatch as $key => $field) {
+						if(array_key_exists($field, $row2)){
+							$matchRow[$field] = $row2[$field];
+						}
+					}
+
+					// dd($newArray2,$colMatch,$row2);
+
+					for($i=0;$i<=$count_input_data;$i++) {
 						
-						// $customer_array[] = $row;
+						$column_data = [];
+						// $column_data[$childtablePK] = $lastId;
+						$column_data[$fk] = $id;
+						foreach($columns as $col) {
+							$colname = $col['name'];
+							$column_data[$colname] = Request::get($name.'-'.$colname)[$i];
+						}
 
-						// $test = (array) $customer_array[$i];
+						$child_array[] = $column_data;
 
-						// foreach($child_array as $key => $value)
-						// {
-						// 	$newArray = array_merge($child_array[$key],$test);
-						// }
-						unset($child_array['id']);
-						$lastId = CRUDBooster::newId($childtable);
-						$child_array[$i]['id'] = $lastId;
-						DB::table($childtable)->insert($child_array);
+						if($child_array[$i]['id'] == NULL){
+							
+							if($childtable == 'mainmerge') {
+							$customer_array[] = $matchRow;
+							$test = (array) $customer_array[$i];
+							foreach($child_array as $key => $value)
+							{
+								$newArray = array_merge($child_array[$key],$test);
+							}
+							// dd($newArray);
+							unset($newArray['id']);
+							$newArray['mobileno'] = $newArray['phones'];
+							$newArray['postcode'] = $newArray['zip'];
+							$remove_array = ['phones','zip','careline_max_datecreated','careline_callstatus','careline_currentstatus','careline_telecomaction','mainmerge_max_mdate'];
+							$newArray = array_diff_key($newArray, array_flip($remove_array));
+							// dd($newArray);
+							$lastId = CRUDBooster::newId($childtable);
+							$newArray['id'] = $lastId;
+							date_default_timezone_set("Asia/Kuala_Lumpur");
+							$date = date('Y-m-d H:i:s');
+							$newArray['m_date'] = $date;
+
+							DB::table($childtable)->insert($newArray);
+							}
+							else {
+								// dd($child_array);
+								unset($child_array['id']);
+								$lastId = CRUDBooster::newId($childtable);
+								$child_array[$i]['id'] = $lastId;
+								DB::table($childtable)->insert($child_array);
+							}
+
+						}
+						// dd($child_array);
+						$tempId[] = $child_array[$i]['id'];
+						unset($child_array[$i]['id']);
+
+						DB::table($childtable) 
+						->where('id', $tempId[$i])
+						->update($child_array[$i]);
+
 					}
-
-					$tempId[] = $child_array[$i]['id'];
-					unset($child_array[$i]['id']);
-
-					DB::table($childtable) 
-					->where('id', $tempId[$i])
-					->update($child_array[$i]);
-	
-				}	
-
+				}
 			}
 
 		}//end foreach
 
-		$this->hook_after_edit($id);
+		if ($setInputData['address2'] == 'NA' || $setInputData['address2'] == 'na') {
+			$setInputData['address2'] = '';
+		}
 
+		if(isset($this->arr['subsource_id']))
+		{
+			$this->arr['m_subsource'] = $this->arr['subsource_id'];
+			unset($this->arr['subsource_id']);
+		}
+		
+		DB::table($this->table)->where($this->primary_key,$id)->update($this->arr);
+
+		$UID = NULL;
+		$regToken = NULL;
+
+		if($this->gigya_customer || $this->gigya_based)
+		{
+			$response = $this->searchViaEmail($row->email);
+			$results = $response['results'];
+
+			if($results[0]["hasFullAccount"])
+			{
+				$UID = $results[0]['UID'];
+			}
+
+			if(!isset($UID))
+	    	{
+	    		$register = $this->initRegistration();
+	    		$regToken = $register["regToken"];
+	    	}
+
+			$this->synchroToGigya($UID,$regToken,$row->email,$setInputData,$id,$this->arr);
+		}
+
+		$this->hook_after_edit($id);
 
 		$this->return_url = ($this->return_url)?$this->return_url:Request::get('return_url');
 
@@ -1510,7 +1744,6 @@ class CBController extends Controller {
 			CRUDBooster::redirect(CRUDBooster::adminPath(),trans('crudbooster.denied_access'));
 		}
 
-
 		//insert log
 		CRUDBooster::insertLog(trans("crudbooster.log_delete",['name'=>$row->{$this->title_field},'module'=>CRUDBooster::getCurrentModule()->name]));
 
@@ -1532,7 +1765,40 @@ class CBController extends Controller {
 
 	public function getDetail($id)	{
 		$this->cbLoader();
-		$row        = DB::table($this->table)->where($this->primary_key,$id)->first();
+		$row  = DB::table($this->table)->where($this->primary_key,$id)->first();
+
+		if(isset($row->email) && $this->gigya_based)
+		{
+			$response = $this->searchViaEmail($row->email);
+
+			$results = $response['results'];
+			$profile = $results[0]['profile'];
+			$data    = $results[0]['data'];
+			$UID     = null;
+
+			if($results)
+			{
+				// $UID = $results[0]['UID'];
+				$profile = $this->arrayMappingtoSD($profile, $data);
+				foreach ($row as $key1 => $value1) {
+					foreach ($profile as $key2 => $value2) {
+						if($key2 == $key1){
+							$row->$key1 = $profile->$key2;
+						}
+					}
+				}
+			}
+			else
+			{
+				$initRegisterGigya = $this->initRegistration();
+				$regToken          = $initRegisterGigya['regToken'];
+				$rowArray 		   = (array) $row;
+				$setInputData 	   = $this->arrayMappingtoGigya($rowArray);
+				$data 			   = $this->setMainmergeGigyaCustomInformation($id);
+				$subscriptions     = $this->setGigyaSubscriptions($id);
+				$userRegisterGigya = $this->setAccountInfo($UID,$regToken,$setInputData,$data,$subscriptions);
+			}
+		}
 
 		if(!CRUDBooster::isRead() && $this->global_privilege==FALSE || $this->button_detail==FALSE) {
 			CRUDBooster::insertLog(trans("crudbooster.log_try_view",['name'=>$row->{$this->title_field},'module'=>CRUDBooster::getCurrentModule()->name]));
@@ -1559,7 +1825,6 @@ class CBController extends Controller {
 	    	return false;
 	    }
 	        
-
 	    $header = null;
 	    $data = array();
 	    if (($handle = fopen($filename, 'r')) !== false)
@@ -1625,6 +1890,8 @@ class CBController extends Controller {
 			//Log::error($data_import_column);
 
 			$table_columns = DB::getSchemaBuilder()->getColumnListing($this->table);
+			// Log::error($table_columns);
+			// Log::debug(CRUDBooster::myPrivilegeId());
 
 			$data['table_columns'] = $table_columns;
 			$data['data_import_column'] = $data_import_column;
@@ -1645,163 +1912,215 @@ class CBController extends Controller {
 
 	public function postDoImportChunk() {
 		$this->cbLoader();
-		$file_md5 = md5(Request::get('file'));
-		Cache::add('success_'.$file_md5, 0, 60);
-
-		if(Request::get('file') && Request::get('resume')==1) {
-			$total = Session::get('total_data_import');
-			$prog = intval(Cache::get('success_'.$file_md5)) / $total * 100;
-			$prog = round($prog,2);
-			if($prog >= 100) {
-				Cache::forget('success_'.$file_md5);
-			}
-			return response()->json(['progress'=> $prog, 'last_error'=>Cache::get('error_'.$file_md5) ]);
-		}
-
-		$select_column = Session::get('select_column');
-		$select_column = array_filter($select_column);
-		$table_columns = DB::getSchemaBuilder()->getColumnListing($this->table);
-
-
-		$file = base64_decode(Request::get('file'));
-		$file = trim(str_replace('uploads','app',$file),'/');
-		$file = storage_path($file);
-
-		$rows = $this->csvToArray($file);
-		$f = $this->import_consignment;
-		//set_time_limit ( 600 );
-		
-		//$rows = Excel::load($file,function($reader) {})->get();
-
-		$has_created_at = false;
-		if(CRUDBooster::isColumnExists($this->table,'created_at')) {
-			$has_created_at = true;
-		}
-
-		
-
-		$data_import_column = array();
-		foreach($rows as $value) {
-			
-			$a = array();
-			foreach($select_column as $sk => $s) {
-				$colname = $table_columns[$sk];
-				//Log::error($colname);
-
-				/*if(CRUDBooster::isForeignKey($colname)) {
-
-					//Skip if value is empty
-					if($value->$s == '') continue;
-
-					if(intval($value->$s)) {
-						$a[$colname] = $value->$s;
-					}else{
-						$relation_table = CRUDBooster::getTableForeignKey($colname);
-						$relation_moduls = DB::table('cms_moduls')->where('table_name',$relation_table)->first();
-
-						$relation_class = __NAMESPACE__ . '\\' . $relation_moduls->controller;
-						if(!class_exists($relation_class)) {
-							$relation_class = '\App\Http\Controllers\\'.$relation_moduls->controller;
-						}
-						$relation_class = new $relation_class;
-						$relation_class->cbLoader();
-
-						$title_field = $relation_class->title_field;
-
-						$relation_insert_data = array();
-						$relation_insert_data[$title_field] = $value->$s;
-
-						if(CRUDBooster::isColumnExists($relation_table,'created_at')) {
-							$relation_insert_data['created_at'] = date('Y-m-d H:i:s');
-						}
-
-						try{
-							$relation_exists = DB::table($relation_table)->where($title_field,$value->$s)->first();
-							if($relation_exists) {
-								$relation_primary_key = $relation_class->primary_key;
-								$relation_id = $relation_exists->$relation_primary_key;
-							}else{
-								$relation_id = DB::table($relation_table)->insertGetId($relation_insert_data);
-							}
-
-							$a[$colname] = $relation_id;
-						}catch(\Exception $e) {
-							exit($e);
-						}
-					} //END IS INT
-
-				}else{*/
-					$a[$colname] = $value[$s];
-				//}
-			}
-			/*if ($f != FALSE)
-				array_filter($linksArray, function($value) { return $value[''] !== ''; });*/
-			//Log::error($a);
-
-			$has_title_field = true;
-			foreach($a as $k=>$v) {
-				if($k == $this->title_field && $v == '') {
-					$has_title_field = false;
-					break;
+		if(CRUDBooster::myPrivilegeId() == 1){
+			$file_md5 = md5(Request::get('file'));
+			if(Request::get('file') && Request::get('resume')==1) {
+				$total = Session::get('total_data_import');
+				$prog = intval(Cache::get('success_'.$file_md5)) / $total * 100;
+				$prog = round($prog,2);
+				if($prog >= 100) {
+					Cache::forget('success_'.$file_md5);
 				}
+				return response()->json(['progress'=> $prog, 'last_error'=>Cache::get('error_'.$file_md5) ]);
 			}
-
-			if($has_title_field==false) continue;
-
-
-
-			try{
-				$f = $this->import_consignment;
-				if ($f == FALSE)
-				{
+			$select_column = Session::get('select_column');
+			$select_column = array_filter($select_column);
+			$table_columns = DB::getSchemaBuilder()->getColumnListing($this->table);
+			$file = base64_decode(Request::get('file'));
+			$file = trim(str_replace('uploads','app',$file),'/');
+			$file = storage_path($file);
+			$rows = Excel::load($file,function($reader) {
+			})->get();
+			$has_created_at = false;
+			if(Schema::hasColumn($this->table,'created_at')) {
+				$has_created_at = true;
+			}
+			$data_import_column = array();
+			foreach($rows as $value) {
+				$a = array();
+				foreach($select_column as $sk => $s) {
+					$colname = $table_columns[$sk];
+					if(CRUDBooster::isForeignKey($colname)) {
+						//Skip if value is empty
+						if($value->$s == '') continue;
+						if(intval($value->$s)) {
+							$a[$colname] = $value->$s;
+						}else{
+							$relation_table = CRUDBooster::getTableForeignKey($colname);
+							$relation_moduls = DB::table('cms_moduls')->where('table_name',$relation_table)->first();
+							$relation_class = __NAMESPACE__ . '\\' . $relation_moduls->controller;
+							if(!class_exists($relation_class)) {
+								$relation_class = '\App\Http\Controllers\\'.$relation_moduls->controller;
+							}
+							$relation_class = new $relation_class;
+							$relation_class->cbLoader();
+							$title_field = $relation_class->title_field;
+							$relation_insert_data = array();
+							$relation_insert_data[$title_field] = $value->$s;
+							if(CRUDBooster::isColumnExists($relation_table,'created_at')) {
+								$relation_insert_data['created_at'] = date('Y-m-d H:i:s');
+							}
+							try{
+								$relation_exists = DB::table($relation_table)->where($title_field,$value->$s)->first();
+								if($relation_exists) {
+									$relation_primary_key = $relation_class->primary_key;
+									$relation_id = $relation_exists->$relation_primary_key;
+								}else{
+									$relation_id = DB::table($relation_table)->insertGetId($relation_insert_data);
+								}
+								$a[$colname] = $relation_id;
+							}catch(\Exception $e) {
+								exit($e);
+							}
+						} //END IS INT
+					}else{
+						$a[$colname] = $value->$s;
+					}
+				}
+				$has_title_field = true;
+				foreach($a as $k=>$v) {
+					if($k == $this->title_field && $v == '') {
+						$has_title_field = false;
+						break;
+					}
+				}
+				if($has_title_field==false) continue;
+				try{
 					if($has_created_at) {
 						$a['created_at'] = date('Y-m-d H:i:s');
 					}
-					$v = $this->validationArray($a);
-					if (!$v->fails())
-						DB::table($this->table)->insert($a);
+					DB::table($this->table)->insert($a);
+					Cache::increment('success_'.$file_md5);
+				}catch(\Exception $e) {
+					$e = (string) $e;
+					Cache::put('error_'.$file_md5,$e,500);
+				}
+			}
+		} else {
+			$file_md5 = md5(Request::get('file'));
+			Log::debug($file_md5);
+			Cache::add('success_'.$file_md5, 0, 60);
+
+			if(Request::get('file') && Request::get('resume')==1) {
+				$total = Session::get('total_data_import');
+				$prog = intval(Cache::get('success_'.$file_md5)) / $total * 100;
+				$prog = round($prog,2);
+				if($prog >= 100) {
+					Cache::forget('success_'.$file_md5);
+				}
+				return response()->json(['progress'=> $prog, 'last_error'=>Cache::get('error_'.$file_md5) ]);
+			}
+
+			$select_column = Session::get('select_column');
+			$select_column = array_filter($select_column);
+			$table_columns = DB::getSchemaBuilder()->getColumnListing($this->table);
+
+
+			$file = base64_decode(Request::get('file'));
+			$file = trim(str_replace('uploads','app',$file),'/');
+			$file = storage_path($file);
+
+			$rows = $this->csvToArray($file);
+			// Log::error($rows);
+			$f = $this->import_consignment;
+			//set_time_limit ( 600 );
+			
+			//$rows = Excel::load($file,function($reader) {})->get();
+
+			$has_created_at = false;
+			if(CRUDBooster::isColumnExists($this->table,'created_at')) {
+				$has_created_at = true;
+			}
+
+			$data_import_column = array();
+			$uploadNotUpdated = [];
+			foreach($rows as $value) {
+				
+				$a = array();
+				foreach($select_column as $sk => $s) {
+					$colname = $table_columns[$sk];
+	
+						$a[$colname] = $value[$s];
+				}
+
+				$has_title_field = true;
+				foreach($a as $k=>$v) {
+					if($k == $this->title_field && $v == '') {
+						$has_title_field = false;
+						break;
+					}
+				}
+
+				if($has_title_field==false) continue;
+
+
+
+				try{
+					$f = $this->import_consignment;
+					if ($f == FALSE)
+					{
+						if($has_created_at) {
+							$a['created_at'] = date('Y-m-d H:i:s');
+						}
+						$v = $this->validationArray($a);
+						if (!$v->fails())
+							DB::table($this->table)->insert($a);
+						else
+						{
+							Log::error('Validation issue');
+							$errors = $v->errors();
+							foreach ($errors->all() as $message) {
+		    					Log::error($message);	
+							}
+						}
+					}
 					else
 					{
-						Log::error('Validation issue');
-						$errors = $v->errors();
-						foreach ($errors->all() as $message) {
-	    					Log::error($message);	
+						//Log::error("notinloop");
+						// Log::error($a);
+						if ( (isset($a['m_product'])) && (isset($a['m_date'])) && (isset($a['email'])) && (isset($a['mobileno'])) && (isset($a['childname'])) && (isset($a['childdob'])) ) {
+							if (($a['consigmentno'] != '')||($a['returnreason'] != '')||($a['batchno'] != ''))
+							{
+								$arr = array();
+								foreach ($a as $key => $value){
+									if (($key!=='consigmentno')&&($key!='batchno')&&($key!='created_at')&&($key!='returnreason')&&($key!='m_date'))
+										$arr[] = array($key,'=',$value);
+								}
+
+								$checkDB = DB::table($this->table)->where($arr);
+
+								$countCheckDB = $checkDB->update(
+									['consigmentno' => $a['consigmentno'],'batchno' => $a['batchno'],'returnreason'=>$a['returnreason']]
+								);
+								// Log::debug($testCheck);
+								if($countCheckDB == 0){
+									$uploadNotUpdated[] = $a;
+								}
+								$uploadStatus = 'Successful';
+								//Log::error(DB::getQueryLog());
+							}
+						} else {
+							$uploadStatus = "Fail to match record";
 						}
 					}
+					Cache::increment('success_'.$file_md5);
+				}catch(\Exception $e) {
+					$e = (string) $e;
+					$uploadStatus = 'Failed';
+					Log::error('Error'.$e);
+					Cache::put('error_'.$file_md5,$e,500);
 				}
-				else
-				{
-					//Log::error("notinloop");
-					//Log::error($a);
-					if (($a['consigmentno'] != '')||($a['returnreason'] != ''))
-					{
-						$arr = array();
-						foreach ($a as $key => $value)
-							if (($key!=='consigmentno')&&($key!='batchno')&&($key!='created_at')&&($key!='returnreason')&&($key!='m_date'))
-								$arr[] = array($key,'=',$value);
-
-						$checkDB = DB::table($this->table)->where($arr);
-
-						if (isset($a["m_date"]) || array_key_exists("m_date",$a))
-						{
-							//Log::error("in m_date");
-							$checkDB = $checkDB->whereRaw("m_date <= DATE_ADD(?, INTERVAL 2 MONTH)",$a["m_date"])->whereRaw("m_date >= DATE_SUB(?, INTERVAL 2 MONTH)",$a["m_date"]);
-							//Log::error($checkDB->toSql());
-						}
-						
-						
-						$checkDB->update(
-							['consigmentno' => $a['consigmentno'],'batchno' => $a['batchno'],'returnreason'=>$a['returnreason']]
-						);
-						//Log::error(DB::getQueryLog());
-					}
-				}
-				Cache::increment('success_'.$file_md5);
-			}catch(\Exception $e) {
-				$e = (string) $e;
-				Log::error('Error'.$e);
-				Cache::put('error_'.$file_md5,$e,500);
 			}
+
+			Log::debug($uploadNotUpdated);
+
+			DB::table('upload_logs')->insert([
+				[
+					'userid' => CRUDBooster::myId(),
+					'status' => $uploadStatus,
+					'created' => Carbon\Carbon::now()
+				]
+			]);
 		}
 		return response()->json(['status'=>true]);
 	}
