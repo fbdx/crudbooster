@@ -1246,32 +1246,6 @@ class CBController extends Controller {
 				
 		DB::table($this->table)->insert($this->arr);
 
-		if($this->gigya_based || $this->gigya_customer)
-		{
-			$UID      = NULL;
-			$regToken = NULL;
-
-			$response = $this->searchViaEmail($this->arr['email']);
-
-			$results = $response['results'];
-
-			if($results[0]["hasFullAccount"])
-			{
-				$UID = $results[0]['UID'];
-			}
-
-	    	if(!isset($UID))
-	    	{
-	    		$register = $this->initRegistration();
-	    		$regToken = $register["regToken"];
-	    	}
-
-	    	$rowArray = $this->arr;
-	    	$recordId = $this->arr[$this->primary_key];
-
-	    	$this->synchroToGigya($UID,$regToken,$rowArray['email'],$rowArray,$recordId,$this->arr);
-		}
-
 		//Looping Data Input Again After Insert
 		foreach($this->data_inputan as $ro) {
 
@@ -1412,6 +1386,32 @@ class CBController extends Controller {
 					}
 				}
 			}
+		}
+
+		if($this->gigya_based || $this->gigya_customer)
+		{
+			$UID      = NULL;
+			$regToken = NULL;
+
+			$response = $this->searchViaEmail($this->arr['email']);
+
+			$results = $response['results'];
+
+			if($results[0]["hasFullAccount"])
+			{
+				$UID = $results[0]['UID'];
+			}
+
+	    	if(!isset($UID))
+	    	{
+	    		$register = $this->initRegistration();
+	    		$regToken = $register["regToken"];
+	    	}
+
+	    	$rowArray = $this->arr;
+	    	$recordId = $this->arr[$this->primary_key];
+
+	    	$this->synchroToGigya($UID,$regToken,$rowArray['email'],$rowArray,$recordId,$this->arr);
 		}
 
 		$this->hook_after_add($this->arr[$this->primary_key]);
