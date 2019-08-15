@@ -24,7 +24,7 @@
              <strong><i class='{{CRUDBooster::getCurrentModule()->icon}}'></i> {!! $page_title or "Page Title" !!}</strong>
              <br><br>
               @if($command = 'edit' && $table == 'customer')
-                <a href="<?php echo CRUDBooster::adminPath('mainmerge').'?parent_table=customer&parent_columns=firstname,lastname,email,mobileno,address1,city&parent_id='.$id.'&return_url=http%3A%2F%2Fswswformlaravel.my%2Fadmin%2Fcustomer%3Fm%3D36&foreign_key=customer_id&label=Sample+Request';?>"><button type="button" class="btn btn-info">Sample Request</button></a>
+                <a href="<?php echo CRUDBooster::adminPath('mainmerge').'?parent_table=customer&parent_columns=firstname,lastname,email,mobileno,address1,city&parent_id='.$id.'&return_url='.config('crudbooster.WEBSITE_URL').'%2Fadmin%2Fcustomer%3Fm%3D36&foreign_key=customer_id&label=Sample+Request';?>"><button type="button" class="btn btn-info">Sample Request</button></a>
               @endif
            </div> 
 
