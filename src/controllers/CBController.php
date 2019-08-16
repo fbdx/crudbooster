@@ -249,6 +249,8 @@ class CBController extends Controller {
 			}
 		}
 
+		$columns_table = array_merge($columns_table);
+
 		foreach($columns_table as $index => $coltab) {
 			$join = @$coltab['join'];
 			$join_where = @$coltab['join_where'];
