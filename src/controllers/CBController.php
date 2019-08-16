@@ -220,7 +220,6 @@ class CBController extends Controller {
 		$tablePK = $data['table_pk'];
 		$table_columns = CB::getTableColumns($this->table);
 		$result = DB::table($this->table)->select(DB::raw($this->table.".".$this->primary_key));
-		// dd($result);
 		if(Request::get('parent_id')) {
 			$table_parent = $this->table;
 			$table_parent = CRUDBooster::parseSqlTable($table_parent)['table'];
@@ -240,9 +239,20 @@ class CBController extends Controller {
 		$join_table_temp  = array();
 		$table            = $this->table;
 		$columns_table    = $this->columns_table;
-		// dd($columns_table);
+
+		if(Request::get('parent_columns'))
+		{
+			$parentColumns = explode(",",Request::get('parent_columns'));
+			foreach($columns_table as $key => $column)
+			{
+				if(in_array($column['name'], $parentColumns))
+	            {
+	              unset($columns_table[$key]);
+	            }
+			}
+		}
+
 		foreach($columns_table as $index => $coltab) {
-			// dump($coltab);
 			$join = @$coltab['join'];
 			$join_where = @$coltab['join_where'];
 			$join_id = @$coltab['join_id'];
@@ -612,13 +622,11 @@ class CBController extends Controller {
 	      $html_contents[] = $html_content;
 		} //end foreach data[result]
 
-
  		$html_contents = ['html'=>$html_contents,'data'=>$data['result']];
 
 		$data['html_contents'] = $html_contents;
 		$data['limit'] = $result->count();
 		//echo $result->toSql()."<br>";
-		// dd($data);
 		return view("crudbooster::default.index",$data);
 	}
 
@@ -1248,7 +1256,6 @@ class CBController extends Controller {
 
 		//Looping Data Input Again After Insert
 
-		// dd($this->data_inputan);
 		foreach($this->data_inputan as $ro) {
 			
 			$name = $ro['name'];
@@ -1278,7 +1285,6 @@ class CBController extends Controller {
 				}
 			}
 
-
 			if($ro['type'] == 'select2') {
 				if($ro['relationship_table']) {
 					$datatable = explode(",",$ro['datatable'])[0];
@@ -1296,7 +1302,6 @@ class CBController extends Controller {
 								]);
 						}
 					}
-
 				}
 			}
 
@@ -1344,26 +1349,24 @@ class CBController extends Controller {
 						if($child_array[$i]['id'] == NULL){
 							
 							if($childtable == 'mainmerge') {
+								$customer_array[] = $matchRow;
+								$test = (array) $customer_array[$i];
+								foreach($child_array as $key => $value)
+								{
+									$newArray = array_merge($child_array[$key],$test);
+								}
+								
+								unset($newArray['id']);
 
-							$customer_array[] = $matchRow;
-							$test = (array) $customer_array[$i];
-							foreach($child_array as $key => $value)
-							{
-								$newArray = array_merge($child_array[$key],$test);
-							}
-							
-							unset($newArray['id']);
+								$lastId = CRUDBooster::newId($childtable);
+								$newArray['id'] = $lastId;
+								date_default_timezone_set("Asia/Kuala_Lumpur");
+								$date = date('Y-m-d H:i:s');
+								$newArray['m_date'] = $date;
 
-							$lastId = CRUDBooster::newId($childtable);
-							$newArray['id'] = $lastId;
-							date_default_timezone_set("Asia/Kuala_Lumpur");
-							$date = date('Y-m-d H:i:s');
-							$newArray['m_date'] = $date;
-
-							DB::table($childtable)->insert($newArray);
+								DB::table($childtable)->insert($newArray);
 							}
 							else {
-								// dd($child_array);
 								unset($child_array['id']);
 								$lastId = CRUDBooster::newId($childtable);
 								$child_array[$i]['id'] = $lastId;
@@ -1379,7 +1382,7 @@ class CBController extends Controller {
 							}
 
 						}
-						// dd($child_array);
+
 						$tempId[] = $child_array[$i]['id'];
 						unset($child_array[$i]['id']);
 
@@ -1528,7 +1531,6 @@ class CBController extends Controller {
 		    $this->arr['updated_at'] = date('Y-m-d H:i:s');
 		}
 
-
 		$this->hook_before_edit($this->arr,$id);		
 
 		//Looping Data Input Again After Insert
@@ -1564,8 +1566,6 @@ class CBController extends Controller {
 								]);
 						}
 					}
-					
-
 				}
 			}			
 
@@ -1594,7 +1594,6 @@ class CBController extends Controller {
 
 
 			if($ro['type']=='child') {
-
 				$tempId = array();
 				$name = str_slug($ro['label'],'');
 				$columns = $ro['columns'];
@@ -1620,12 +1619,9 @@ class CBController extends Controller {
 						}
 					}
 
-					// dd($newArray2,$colMatch,$row2);
-
 					for($i=0;$i<=$count_input_data;$i++) {
 						
 						$column_data = [];
-						// $column_data[$childtablePK] = $lastId;
 						$column_data[$fk] = $id;
 						foreach($columns as $col) {
 							$colname = $col['name'];
@@ -1659,7 +1655,6 @@ class CBController extends Controller {
 								DB::table($childtable)->insert($newArray);
 							}
 							else {
-								// dd($child_array);
 								unset($child_array['id']);
 								$lastId = CRUDBooster::newId($childtable);
 								if($ro['name']=='gigya_children')
@@ -1673,11 +1668,8 @@ class CBController extends Controller {
 								DB::table($childtable)->insert($child_array);
 							}
 						}
-						// dd($child_array);
 						$tempId[] = $child_array[$i]['id'];
 						unset($child_array[$i]['id']);
-
-						// dd($child_array);
 
 						DB::table($childtable) 
 						->where('id', $tempId[$i])
@@ -1700,7 +1692,7 @@ class CBController extends Controller {
 		
 		DB::table($this->table)->where($this->primary_key,$id)->update($this->arr);
 
-		$UID = NULL;
+		$UID     = NULL;
 		$regToken = NULL;
 
 		if($this->gigya_customer || $this->gigya_based)
