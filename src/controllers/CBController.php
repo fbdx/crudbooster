@@ -184,7 +184,6 @@ class CBController extends Controller {
 
 	public function getIndex() {
 		$this->cbLoader();
-
 		$module = CRUDBooster::getCurrentModule();
 
 		if(!CRUDBooster::isView() && $this->global_privilege==FALSE) {
@@ -226,9 +225,7 @@ class CBController extends Controller {
 			$result->where($table_parent.'.'.Request::get('foreign_key'),Request::get('parent_id'));
 		}
 
-
 		$this->hook_query_index($result);
-
 
 		if(in_array('deleted_at', $table_columns)) {
 			$result->where($this->table.'.deleted_at',NULL);
@@ -251,6 +248,8 @@ class CBController extends Controller {
 	            }
 			}
 		}
+
+		$columns_table = array_merge($columns_table);
 
 		foreach($columns_table as $index => $coltab) {
 			$join = @$coltab['join'];
@@ -539,7 +538,7 @@ class CBController extends Controller {
 				];
 			}
 		}
-		$
+
 		$mainpath      = CRUDBooster::mainpath();
 		$orig_mainpath = $this->data['mainpath'];
 		$title_field   = $this->title_field;
@@ -560,70 +559,68 @@ class CBController extends Controller {
 			}
 
 			foreach($columns_table as $col) {
-		          if($col['visible']===FALSE) continue;
+				if($col['visible']===FALSE) continue;
 
-		          $value = @$row->{$col['field']};
-		          $title = @$row->{$this->title_field};
-		          $label = $col['label'];
+				$value = @$row->{$col['field']};
+				$title = @$row->{$this->title_field};
+				$label = $col['label'];
 
-		          if(isset($col['image'])) {
-			            if($value=='') {
-			              $value = "<a  data-lightbox='roadtrip' rel='group_{{$table}}' title='$label: $title' href='http://placehold.it/50x50&text=NO+IMAGE'><img width='40px' height='40px' src='http://placehold.it/50x50&text=NO+IMAGE'/></a>";
-			            }else{
-							$pic = (strpos($value,'http://')!==FALSE)?$value:asset($value);
-				            $value = "<a data-lightbox='roadtrip'  rel='group_{{$table}}' title='$label: $title' href='".$pic."'><img width='40px' height='40px' src='".$pic."'/></a>";
-			            }
-		          }
+				if(isset($col['image'])) {
+				    if($value=='') {
+				      $value = "<a  data-lightbox='roadtrip' rel='group_{{$table}}' title='$label: $title' href='http://placehold.it/50x50&text=NO+IMAGE'><img width='40px' height='40px' src='http://placehold.it/50x50&text=NO+IMAGE'/></a>";
+				    }else{
+						$pic = (strpos($value,'http://')!==FALSE)?$value:asset($value);
+				        $value = "<a data-lightbox='roadtrip'  rel='group_{{$table}}' title='$label: $title' href='".$pic."'><img width='40px' height='40px' src='".$pic."'/></a>";
+				    }
+				}
 
-		          if(@$col['download']) {
-			            $url = (strpos($value,'http://')!==FALSE)?$value:asset($value).'?download=1';
-			            if($value) {
-			            	$value = "<a class='btn btn-xs btn-primary' href='$url' target='_blank' title='Download File'><i class='fa fa-download'></i> Download</a>";
-			            }else{
-			            	$value = " - ";
-			            }
-		          }
+				if(@$col['download']) {
+				    $url = (strpos($value,'http://')!==FALSE)?$value:asset($value).'?download=1';
+				    if($value) {
+				    	$value = "<a class='btn btn-xs btn-primary' href='$url' target='_blank' title='Download File'><i class='fa fa-download'></i> Download</a>";
+				    }else{
+				    	$value = " - ";
+				    }
+				}
 
-		            if($col['str_limit']) {
-		            	$value = trim(strip_tags($value));
-		            	$value = str_limit($value,$col['str_limit']);
-		            }
+	            if($col['str_limit']) {
+	            	$value = trim(strip_tags($value));
+	            	$value = str_limit($value,$col['str_limit']);
+	            }
 
-		            if($col['nl2br']) {
-		            	$value = nl2br($value);
-		            }
+	            if($col['nl2br']) {
+	            	$value = nl2br($value);
+	            }
 
-		            if($col['callback_php']) {
-		              foreach($row as $k=>$v) {
-		              		$col['callback_php'] = str_replace("[".$k."]",$v,$col['callback_php']);
-		              }
-		              @eval("\$value = ".$col['callback_php'].";");
-		            }
+	            if($col['callback_php']) {
+	              foreach($row as $k=>$v) {
+	              		$col['callback_php'] = str_replace("[".$k."]",$v,$col['callback_php']);
+	              }
+	              @eval("\$value = ".$col['callback_php'].";");
+	            }
 
-		            //New method for callback
-			        if(isset($col['callback'])) {
-			        	$value = call_user_func($col['callback'],$row);
-			        }
+	            //New method for callback
+		        if(isset($col['callback'])) {
+		        	$value = call_user_func($col['callback'],$row);
+		        }
 
-
-		            $datavalue = @unserialize($value);
-					if ($datavalue !== false) {
-						if($datavalue) {
-							$prevalue = [];
-							foreach($datavalue as $d) {
-								if($d['label']) {
-									$prevalue[] = $d['label'];
-								}
-						    }
-						    if(count($prevalue)) {
-						    	$value = implode(", ",$prevalue);
-						    }
-						}
+	            $datavalue = @unserialize($value);
+				if ($datavalue !== false) {
+					if($datavalue) {
+						$prevalue = [];
+						foreach($datavalue as $d) {
+							if($d['label']) {
+								$prevalue[] = $d['label'];
+							}
+					    }
+					    if(count($prevalue)) {
+					    	$value = implode(", ",$prevalue);
+					    }
 					}
+				}
 
-		          $html_content[] = $value;
+	          $html_content[] = $value;
 	        } //end foreach columns_table
-
 
 	      if($this->button_table_action):
 
@@ -631,7 +628,6 @@ class CBController extends Controller {
 	      		$html_content[] = "<div class='button_action' style='text-align:right'>".view('crudbooster::components.action',compact('addaction','row','button_action_style','parent_field'))->render()."</div>";
 
           endif;//button_table_action
-
 
           foreach($html_content as $i=>$v) {
           	$this->hook_row_index($i,$v);
