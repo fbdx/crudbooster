@@ -1390,8 +1390,8 @@ class CBController extends Controller {
 									$child_array[$i]['UID'] = $this->generateUid();
 									$child_array[$i]['applicationInternalIdentifier'] = $this->generateUid();
 									$child_array[$i]['interestCode'] = 'GG_CHILD_MILK_BRAND';
-									$child_array[$i]['answerDetails'] = $this->getChildAreaOfInterestCodeNameById($child_array[$i]['answerDetails']);
-									$child_array[$i]['feeding'] = $this->getChildFeedingCodeNameById($child_array[$i]['feeding']);
+									// $child_array[$i]['answerDetails'] = $this->getChildAreaOfInterestCodeNameById($child_array[$i]['answerDetails']);
+									// $child_array[$i]['feeding'] = $this->getChildFeedingCodeNameById($child_array[$i]['feeding']);
 								}
 								DB::table($childtable)->insert($child_array);
 							}
@@ -1677,8 +1677,8 @@ class CBController extends Controller {
 									$child_array[$i]['UID'] = $this->generateUid();
 									$child_array[$i]['applicationInternalIdentifier'] = $this->generateUid();
 									$child_array[$i]['interestCode'] = 'GG_CHILD_MILK_BRAND';
-									$child_array[$i]['answerDetails'] = $this->getChildAreaOfInterestCodeNameById($child_array[$i]['answerDetails']);
-									$child_array[$i]['feeding'] = $this->getChildFeedingCodeNameById($child_array[$i]['feeding']);
+									// $child_array[$i]['answerDetails'] = $this->getChildAreaOfInterestCodeNameById($child_array[$i]['answerDetails']);
+									// $child_array[$i]['feeding'] = $this->getChildFeedingCodeNameById($child_array[$i]['feeding']);
 								}
 								DB::table($childtable)->insert($child_array);
 							}
