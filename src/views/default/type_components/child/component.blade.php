@@ -368,19 +368,18 @@
 										$('#panel-form-{{$name}}').find("input[type=text],input[type=number],select,textarea").val('');
 									}
 
-									function deleteCustomerChildRow{{$name}}(t, id) {
+									function deleteChildRow{{$name}}(t, id, table) {
 
 										if(confirm("{{trans('crudbooster.delete_title_confirm')}}")) {
 
 											$.ajax({
 										        url: '{{CRUDBooster::adminPath("customer/delete-child")}}',
 										        type: 'POST',
-										        data: {id: id},
+										        data: {id: id, table:table},
 										        
 										        success: function(data, textStatus, jqXHR)
 										        {
 										        	console.log(data);
-										        	
 										        },
 										        error: function(jqXHR, textStatus, errorThrown)
 										        {
@@ -562,6 +561,7 @@
 						<tbody>
 
 							<?php
+								$childTable = $form['table'];
 								$columns_tbody = [];
 								$data_child = DB::table($form['table'])
 								->where($form['foreign_key'],$id);
@@ -648,7 +648,7 @@
 									@else --}}
 										<a href='#panel-form-{{$name}}' onclick='editRow{{$name}}(this)' class='btn btn-warning btn-xs'><i class='fa fa-pencil'></i></a>
 										{{-- @if(strpos(CRUDBooster::mainpath(), 'gigyacustomer') != true) --}}
-											<a href='javascript:void(0)' onclick='deleteCustomerChildRow{{$name}}(this, $(this).data("id"))' data-id={{$d->id}} class='btn btn-danger btn-xs'><i class='fa fa-trash'></i></a>
+											<a href='javascript:void(0)' onclick='deleteChildRow{{$name}}(this, $(this).data("id"),$(this).data("table"))' data-id={{$d->id}} data-table={{$childTable}} class='btn btn-danger btn-xs'><i class='fa fa-trash'></i></a>
 										{{-- @endif --}}
 									{{-- @endif --}}
 								</td>
