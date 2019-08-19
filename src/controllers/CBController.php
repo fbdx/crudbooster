@@ -1382,7 +1382,7 @@ class CBController extends Controller {
 								DB::table($childtable)->insert($newArray);
 							}
 							else {
-								unset($child_array['id']);
+								unset($child_array[$i]['id']);
 								$lastId = CRUDBooster::newId($childtable);
 								$child_array[$i]['id'] = $lastId;
 								if($ro['name']=='gigya_children')
@@ -1390,10 +1390,8 @@ class CBController extends Controller {
 									$child_array[$i]['UID'] = $this->generateUid();
 									$child_array[$i]['applicationInternalIdentifier'] = $this->generateUid();
 									$child_array[$i]['interestCode'] = 'GG_CHILD_MILK_BRAND';
-									// $child_array[$i]['answerDetails'] = $this->getChildAreaOfInterestCodeNameById($child_array[$i]['answerDetails']);
-									// $child_array[$i]['feeding'] = $this->getChildFeedingCodeNameById($child_array[$i]['feeding']);
 								}
-								DB::table($childtable)->insert($child_array);
+								DB::table($childtable)->insert($child_array[$i]);
 							}
 
 						}
@@ -1550,7 +1548,6 @@ class CBController extends Controller {
 
 		//Looping Data Input Again After Insert
 
-
 		foreach($this->data_inputan as $ro) {
 
 			$name = $ro['name'];
@@ -1643,6 +1640,8 @@ class CBController extends Controller {
 							$column_data[$colname] = Request::get($name.'-'.$colname)[$i];
 						}
 
+						// dd($column_data);
+
 						$child_array[] = $column_data;
 
 						if($child_array[$i]['id'] == NULL){
@@ -1670,17 +1669,17 @@ class CBController extends Controller {
 								DB::table($childtable)->insert($newArray);
 							}
 							else {
-								unset($child_array['id']);
+								unset($child_array[$i]['id']);
 								$lastId = CRUDBooster::newId($childtable);
 								if($ro['name']=='gigya_children')
 								{
 									$child_array[$i]['UID'] = $this->generateUid();
 									$child_array[$i]['applicationInternalIdentifier'] = $this->generateUid();
 									$child_array[$i]['interestCode'] = 'GG_CHILD_MILK_BRAND';
-									// $child_array[$i]['answerDetails'] = $this->getChildAreaOfInterestCodeNameById($child_array[$i]['answerDetails']);
-									// $child_array[$i]['feeding'] = $this->getChildFeedingCodeNameById($child_array[$i]['feeding']);
 								}
-								DB::table($childtable)->insert($child_array);
+
+
+								$success = DB::table($childtable)->insert($child_array[$i]);
 							}
 						}
 						$tempId[] = $child_array[$i]['id'];
