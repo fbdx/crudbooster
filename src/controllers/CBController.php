@@ -1393,7 +1393,6 @@ class CBController extends Controller {
 								}
 								DB::table($childtable)->insert($child_array[$i]);
 							}
-
 						}
 
 						$tempId[] = $child_array[$i]['id'];
@@ -1430,7 +1429,7 @@ class CBController extends Controller {
 	    	$rowArray = $this->arr;
 	    	$recordId = $this->arr[$this->primary_key];
 
-	    	$this->synchroToGigya($UID,$regToken,$rowArray['email'],$rowArray,$recordId,$this->arr);
+	    	$this->synchroToGigya($UID,$regToken,$rowArray['email'],$rowArray,$recordId,$this->arr,$this->table);
 		}
 
 		$this->hook_after_add($this->arr[$this->primary_key]);
@@ -1522,7 +1521,6 @@ class CBController extends Controller {
 		$table = $this->table;
 
 		return view('crudbooster::default.form',compact('id','row','page_menu','page_title','command','option_id','option_fields','table'));
-
 	}
 
 	public $countChild = 0;
@@ -1725,7 +1723,7 @@ class CBController extends Controller {
 	    		$regToken = $register["regToken"];
 	    	}
 
-			$this->synchroToGigya($UID,$regToken,$row->email,$setInputData,$id,$this->arr);
+			$this->synchroToGigya($UID,$regToken,$row->email,$setInputData,$id,$this->arr,$this->table);
 		}
 
 		$this->hook_after_edit($id);
