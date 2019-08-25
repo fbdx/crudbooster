@@ -23,235 +23,6 @@
 		  	<i class='fa fa-bars'></i> {{$form['label']}}
 		</div>
 		<div class="panel-body">
-
-			@if((strpos($current_path, 'admin/pregnant_moms_jan-to-nov-2018') !== false))
-				<div class="panel panel-default">
-					<div class="panel-heading">
-						<i class='fa fa-table'></i> Table Detail
-					</div>
-					<div class="panel-body no-padding table-responsive"  style="max-height: 400px;overflow: auto;">
-						<table id='table-{{$name}}' class='table table-striped table-bordered'>
-						<thead>
-							<tr>
-								@foreach($form['columns'] as $col)
-									<th>{{$col['label']}}</th>
-								@endforeach
-									{{-- <th width="90px">{{trans('crudbooster.action_label')}}</th> --}}
-							</tr>
-						</thead>
-
-						@if($form['name'] == 'mother')
-
-							<tbody>
-
-								<?php
-									$columns_tbody = [];
-									$data_child = DB::table($form['table'])
-									->where($form['foreign_key'],$id);
-									foreach($form['columns'] as $i=>$c) {
-										$data_child->addselect($form['table'].'.'.$c['name']);
-										if($c['type'] == 'datamodal') {
-											$datamodal_title = explode(',',$c['datamodal_columns'])[0];
-											$datamodal_table = $c['datamodal_table'];
-											$data_child->join($c['datamodal_table'],$c['datamodal_table'].'.id','=',$c['name']);
-											$data_child->addselect($c['datamodal_table'].'.'.$datamodal_title.' as '.$datamodal_table.'_'.$datamodal_title);
-										}elseif ($c['type'] == 'select') {
-											if($c['datatable']) {
-												$join_table = explode(',',$c['datatable'])[0];
-												$join_field = explode(',',$c['datatable'])[1];
-												$data_child->join($join_table,$join_table.'.id','=',$c['name']);
-												//$data_child->join($join_table,$join_table.'.name','=',$c['name']); // match by using name instead of id
-												$data_child->addselect($join_table.'.'.$join_field.' as '.$join_table.'_'.$join_field);
-											}
-										}
-									}
-
-									$data_child = $data_child->orderby($form['table'].'.id','desc')->get();
-									//dd($data_child);
-									foreach($data_child as $d):
-										$dbProdName = $d->m_product;
-										//dump($d->birthDateReliability);
-										if ($d->birthDateReliability == 0) {
-											$d->birthDateReliability = 'Child is Born';
-										}
-
-										if ($d->birthDateReliability == 4) {
-											$d->birthDateReliability = 'Pregnant';
-										}
-
-								?>
-								<tr>
-									@if($dbProdName == 'Mom_n_me')
-									@foreach($form['columns'] as $col)
-										<td class="{{$col['name']}}">
-										<?php
-											if($col['type'] == 'select') {
-												if($col['datatable']) {
-													$join_table = explode(',',$col['datatable'])[0];
-													$join_field = explode(',',$col['datatable'])[1];
-													echo "<span class='td-label'>";
-													echo $d->{$join_table.'_'.$join_field};
-													echo "</span>";
-													echo "<input type='hidden' name='".$name."-".$col['name']."[]' value='".$d->{$col['name']}."'/>";
-												}
-												if($col['dataenum']) {
-													echo "<span class='td-label'>";
-													echo $d->{$col['name']};
-													echo "</span>";
-													echo "<input type='hidden' name='".$name."-".$col['name']."[]' value='".$d->{$col['name']}."'/>";
-												}
-											}elseif ($col['type']=='datamodal') {
-												$datamodal_title = explode(',',$col['datamodal_columns'])[0];
-												$datamodal_table = $col['datamodal_table'];
-												echo "<span class='td-label'>";
-												echo $d->{$datamodal_table.'_'.$datamodal_title};
-												echo "</span>";
-												echo "<input type='hidden' name='".$name."-".$col['name']."[]' value='".$d->{$col['name']}."'/>";
-											}elseif ($col['type']=='upload') {
-												$filename = basename( $d->{$col['name']} );
-												if($col['upload_type']=='image') {
-													echo "<a href='".asset( $d->{$col['name']} )."' data-lightbox='roadtrip'><img data-label='$filename' src='".asset( $d->{$col['name']} )."' width='50px' height='50px'/></a>";
-													echo "<input type='hidden' name='".$name."-".$col['name']."[]' value='".$d->{ $col['name'] }."'/>";
-												}else{
-													echo "<a data-label='$filename' href='".asset( $d->{$col['name']} )."'>$filename</a>";
-													echo "<input type='hidden' name='".$name."-".$col['name']."[]' value='".$d->{ $col['name'] }."'/>";
-												}
-											}else{
-												echo "<span class='td-label'>";
-												echo $d->{$col['name']};
-												echo "</span>";
-												echo "<input type='hidden' name='".$name."-".$col['name']."[]' value='".$d->{$col['name']}."'/>";
-											}
-										?>
-										</td>
-									@endforeach
-
-									<td>
-										{{-- @if($table == 'customer')
-											<a href='/admin/mainmerge/edit/{{$mainmerge_id}}' onclick='editRow{{$name}}(this)' class='btn btn-warning btn-xs'><i class='fa fa-pencil'></i></a>
-										@else --}}
-											<a href='#panel-form-{{$name}}' onclick='editRow{{$name}}(this)' class='btn btn-warning btn-xs'><i class='fa fa-pencil'></i></a>
-											{{-- @if(strpos(CRUDBooster::mainpath(), 'gigyacustomer') != true) --}}
-											@if(CRUDBooster::myPrivilegeId() == 1)
-												<a href='javascript:void(0)' onclick='deleteRow{{$name}}(this)' class='btn btn-danger btn-xs'><i class='fa fa-trash'></i></a>
-											@endif
-											{{-- @endif --}}
-										{{-- @endif --}}
-									</td>
-									@endif
-								</tr>
-
-								<?php endforeach;?>
-
-								@if(count($data_child)==0)
-								<tr class="trNull">
-									<td colspan="{{count($form['columns'])+1}}" align="center">{{trans('crudbooster.table_data_not_found')}}</td>
-								</tr>
-								@endif
-							</tbody>
-						@else
-							<tbody>
-
-								<?php
-									$columns_tbody = [];
-									$data_child = DB::table($form['table'])
-									->where($form['foreign_key'],$id);
-									foreach($form['columns'] as $i=>$c) {
-										$data_child->addselect($form['table'].'.'.$c['name']);
-										if($c['type'] == 'datamodal') {
-											$datamodal_title = explode(',',$c['datamodal_columns'])[0];
-											$datamodal_table = $c['datamodal_table'];
-											$data_child->join($c['datamodal_table'],$c['datamodal_table'].'.id','=',$c['name']);
-											$data_child->addselect($c['datamodal_table'].'.'.$datamodal_title.' as '.$datamodal_table.'_'.$datamodal_title);
-										}elseif ($c['type'] == 'select') {
-											if($c['datatable']) {
-												$join_table = explode(',',$c['datatable'])[0];
-												$join_field = explode(',',$c['datatable'])[1];
-												$data_child->join($join_table,$join_table.'.id','=',$c['name']);
-												//$data_child->join($join_table,$join_table.'.name','=',$c['name']); // match by using name instead of id
-												$data_child->addselect($join_table.'.'.$join_field.' as '.$join_table.'_'.$join_field);
-											}
-										}
-									}
-
-									$data_child = $data_child->orderby($form['table'].'.id','desc')->get();
-									//dd($data_child);
-									foreach($data_child as $d):
-										$dbProdName = $d->m_product;
-										//dump($d->birthDateReliability);
-										if ($d->birthDateReliability == 0) {
-											$d->birthDateReliability = 'Child is Born';
-										}
-
-										if ($d->birthDateReliability == 4) {
-											$d->birthDateReliability = 'Pregnant';
-										}
-
-								?>
-								<tr>
-									@if($dbProdName !== 'Mom_n_me')
-										@foreach($form['columns'] as $col)
-
-											<td class="{{$col['name']}}">
-											<?php
-												if($col['type'] == 'select') {
-													if($col['datatable']) {
-														$join_table = explode(',',$col['datatable'])[0];
-														$join_field = explode(',',$col['datatable'])[1];
-														echo "<span class='td-label'>";
-														echo $d->{$join_table.'_'.$join_field};
-														echo "</span>";
-														echo "<input type='hidden' name='".$name."-".$col['name']."[]' value='".$d->{$col['name']}."'/>";
-													}
-													if($col['dataenum']) {
-														echo "<span class='td-label'>";
-														echo $d->{$col['name']};
-														echo "</span>";
-														echo "<input type='hidden' name='".$name."-".$col['name']."[]' value='".$d->{$col['name']}."'/>";
-													}
-												}elseif ($col['type']=='datamodal') {
-													$datamodal_title = explode(',',$col['datamodal_columns'])[0];
-													$datamodal_table = $col['datamodal_table'];
-													echo "<span class='td-label'>";
-													echo $d->{$datamodal_table.'_'.$datamodal_title};
-													echo "</span>";
-													echo "<input type='hidden' name='".$name."-".$col['name']."[]' value='".$d->{$col['name']}."'/>";
-												}elseif ($col['type']=='upload') {
-													$filename = basename( $d->{$col['name']} );
-													if($col['upload_type']=='image') {
-														echo "<a href='".asset( $d->{$col['name']} )."' data-lightbox='roadtrip'><img data-label='$filename' src='".asset( $d->{$col['name']} )."' width='50px' height='50px'/></a>";
-														echo "<input type='hidden' name='".$name."-".$col['name']."[]' value='".$d->{ $col['name'] }."'/>";
-													}else{
-														echo "<a data-label='$filename' href='".asset( $d->{$col['name']} )."'>$filename</a>";
-														echo "<input type='hidden' name='".$name."-".$col['name']."[]' value='".$d->{ $col['name'] }."'/>";
-													}
-												}else{
-													echo "<span class='td-label'>";
-													echo $d->{$col['name']};
-													echo "</span>";
-													echo "<input type='hidden' name='".$name."-".$col['name']."[]' value='".$d->{$col['name']}."'/>";
-												}
-											?>
-											</td>
-										@endforeach
-									@endif
-								</tr>
-
-								<?php endforeach;?>
-
-								@if((count($data_child)==0))
-								<tr class="trNull">
-									<td colspan="{{count($form['columns'])+1}}" align="center">{{trans('crudbooster.table_data_not_found')}}</td>
-								</tr>
-								@endif
-							</tbody>
-						@endif
-
-						</table>
-					</div>
-				</div>
-			@else
-
 				<div class='row'>
 					{{-- @if($table != 'customer') --}}
 					<div class='col-sm-12'>
@@ -260,333 +31,333 @@
 							<div class="panel-heading"><i class="fa fa-pencil-square-o"></i> Form</div>
 							<div class="panel-body child-form-area">
 								@foreach($form['columns'] as $col)
-								<?php
-									$name_column = $name.$col['name'];
-									$colLabel = str_slug($col['label']);
-								?>
-								<div class='form-group testtest' id="<?php echo $colLabel ?>">
-									@if($col['type']!='hidden')
-									{{-- {{dump($col)}} --}}
-									@if($col['name']=='birthDate')
-										<label class="control-label col-sm-2" id="birthDateLabel">{{$col['label']}}
-									@else
-										<label class="control-label col-sm-2">{{$col['label']}}
-									@endif
-									@if(!empty($col['required']))
-									<span class="text-danger" title="This field is required">*</span>
-									@endif
-									</label>
-									@endif
-									<div class="col-sm-8">
-										@if($col['type']=='text')
-										{{-- {{$name_column}} --}}
-										<input id='{{$name_column}}' type='text' {{ ($col['max'])?"maxlength='$col[max]'":"" }} name='child-{{$col["name"]}}' class='form-control {{$col['required']?"required":""}}'
-											{{($col['readonly']===true)?"readonly":""}}
-											/>
-										@elseif($col['type']=='radio')
-											<?php
-												if($col['dataenum']):
-	                                            $dataenum = $col['dataenum'];
-	                                            if(strpos($dataenum, ';') !== false) {
-	                                                $dataenum = explode(";", $dataenum);
-	                                            } else {
-	                                                $dataenum = [$dataenum];
-	                                            }
-	                                            array_walk($dataenum, 'trim');
-												foreach($dataenum as $e=>$enum):
-													$enum = explode('|',$enum);
-													if(count($enum)==2) {
-														$radio_value = $enum[0];
-														$radio_label = $enum[1];
-													}else{
-														$radio_value = $radio_label = $enum[0];
-													}
-											?>
-											<label class="radio-inline">
-											  <input type="radio" name="child-{{$col['name']}}" class='{{ ($e==0 && $col['required'])?"required":""}} {{$name_column}}'  value="{{$radio_value}}"> {{$radio_label}}
-											</label>
-											<?php endforeach;?>
-											<?php endif;?>
-
-										@elseif($col['type']=='datetime')
-										{{-- {{dd($col)}} --}}
-
-											<div class="input-group">
-
-												<span class="input-group-addon"><a href='javascript:void(0)' onclick='$("#{{$name_column}}").data("daterangepicker").toggle()'><i class='fa fa-calendar'></i></a></span>
-
-												<input type='text' title="{{$form['label']}}" readonly {{$required}} {{$readonly}} {!!$placeholder!!} {{$disabled}} class='form-control notfocus datetimepicker {{$col['required']?"required":""}} ' name="{{$name_column}}" id="{{$name_column}}" value='{{$value}}'/>
-
-											</div>
-
-
-										@elseif($col['type']=='datamodal')
-
-										<div id='{{$name_column}}' class="input-group">
-										  <input type="hidden" class="input-id">
-									      <input type="text" class="form-control input-label {{$col['required']?"required":""}}" readonly>
-									      <span class="input-group-btn">
-									        <button class="btn btn-primary" onclick="showModal{{$name_column}}()" type="button"><i class='fa fa-search'></i> Browse Data</button>
-									      </span>
-									    </div><!-- /input-group -->
-
-									    <script type="text/javascript">
-									    	var url_{{$name_column}} = "{{CRUDBooster::mainpath('modal-data')}}?table={{$col['datamodal_table']}}&columns=id,{{$col['datamodal_columns']}}&name_column={{$name_column}}&where={{urlencode($col['datamodal_where'])}}&select_to={{ urlencode($col['datamodal_select_to']) }}";
-									    	var url_is_setted_{{$name_column}} = false;
-									    	function showModal{{$name_column}}() {
-									    		if(url_is_setted_{{$name_column}} == false) {
-										    		url_is_setted_{{$name_column}} = true;
-										    		$('#iframe-modal-{{$name_column}}').attr('src',url_{{$name_column}});
-									    		}
-									    		$('#modal-datamodal-{{$name_column}}').modal('show');
-									    	}
-									    	function hideModal{{$name_column}}() {
-												$('#modal-datamodal-{{$name_column}}').modal('hide');
-											}
-
-									    	function selectAdditionalData{{$name_column}}(select_to_json) {
-												$.each(select_to_json,function(key,val) {
-													console.log('#'+key+ ' = '+val);
-													if(key == 'datamodal_id') {
-														$('#{{$name_column}} .input-id').val(val);
-													}
-													if(key == 'datamodal_label') {
-														$('#{{$name_column}} .input-label').val(val);
-													}
-													$('#{{$name}}'+key).val(val).trigger('change');
-												})
-												hideModal{{$name_column}}();
-											}
-									    </script>
-
-										<div id='modal-datamodal-{{$name_column}}' class="modal" tabindex="-1" role="dialog">
-										  <div class="modal-dialog {{ $col['datamodal_size']=='large'?'modal-lg':'' }} " role="document">
-										    <div class="modal-content">
-										      <div class="modal-header">
-										        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-										        <h4 class="modal-title"><i class='fa fa-search'></i> Browse Data {{$col['label']}}</h4>
-										      </div>
-										      <div class="modal-body">
-										        <iframe id='iframe-modal-{{$name_column}}' style="border:0;height: 430px;width: 100%" src=""></iframe>
-										      </div>
-
-										    </div><!-- /.modal-content -->
-										  </div><!-- /.modal-dialog -->
-										</div><!-- /.modal -->
-
-										@elseif($col['type']=='number')
-										<input id='{{$name_column}}' type='number' {{ ($col['min'])?"min='$col[min]'":"" }} {{ ($col['max'])?"max='$col[max]'":"" }} name='child-{{$col["name"]}}' class='form-control {{$col['required']?"required":""}}'
-											{{($col['readonly']===true)?"readonly":""}}
-											/>
-										@elseif($col['type']=='textarea')
-										<textarea id='{{$name_column}}' name='child-{{$col["name"]}}' class='form-control {{$col['required']?"required":""}}' {{($col['readonly']===true)?"readonly":""}} ></textarea>
-										@elseif($col['type']=='upload')
-										<div id='{{$name_column}}' class="input-group">
-										  <input type="hidden" class="input-id">
-									      <input type="text" class="form-control input-label {{$col['required']?"required":""}}" readonly>
-									      <span class="input-group-btn">
-									        <button class="btn btn-primary" id="btn-upload-{{$name_column}}" onclick="showFakeUpload{{$name_column}}()" type="button"><i class='fa fa-search'></i> Browse File</button>
-									      </span>
-									    </div><!-- /input-group -->
-
-									    <div id="loading-{{$name_column}}" class='text-info' style="display: none">
-									    	<i class='fa fa-spin fa-spinner'></i> Please wait loading...
-									    </div>
-
-									    <input type="file" id='fake-upload-{{$name_column}}' style="display: none">
-									    <script type="text/javascript">
-									    	var file;
-											var filename;
-											var is_uploading = false;
-
-									    	function showFakeUpload{{$name_column}}() {
-									    		if(is_uploading) {
-									    			return false;
-									    		}
-
-									    		$('#fake-upload-{{$name_column}}').click();
-									    	}
-
-											// Add events
-											$('#fake-upload-{{$name_column}}').on('change', prepareUpload{{$name_column}});
-
-											// Grab the files and set them to our variable
-											function prepareUpload{{$name_column}}(event)
-											{
-											  var max_size = {{ ($col['max'])?:2000 }};
-											  file = event.target.files[0];
-
-											  var filesize = Math.round(parseInt(file.size)/1024);
-
-											  if(filesize > max_size) {
-											  	sweetAlert('Oops','Your file size is too big !','warning');
-											  	return false;
-											  }
-
-											  filename = $('#fake-upload-{{$name_column}}').val().replace(/C:\\fakepath\\/i, '');
-											  var extension = filename.split('.').pop().toLowerCase();
-											  var img_extension = ['jpg','jpeg','png','gif','bmp'];
-											  var available_extension = "{{config('crudbooster.UPLOAD_TYPES')}}".split(",");
-											  var is_image_only = {{ ($col['upload_type'] == 'image')?"true":"false" }};
-
-											  if(is_image_only) {
-											  	  if($.inArray(extension, img_extension) == -1) {
-											  	  	sweetAlert('Warning','Your file extension is not allowed !','warning');
-													return false;
-											  	  }
-											  }else{
-												  if($.inArray(extension, available_extension) == -1) {
-													sweetAlert('Warning','Your file extension is not allowed !','warning');
-													return false;
-												  }
-											  }
-
-
-											  $('#{{$name_column}} .input-label').val(filename);
-
-											  $('#loading-{{$name_column}}').fadeIn();
-											  $('#btn-add-table-{{$name}}').addClass('disabled');
-											  $('#btn-upload-{{$name_column}}').addClass('disabled');
-											  is_uploading = true;
-
-											  //Upload File To Server
-											  uploadFiles{{$name_column}}(event);
-											}
-
-											function uploadFiles{{$name_column}}(event)
-											{
-											  	event.stopPropagation(); // Stop stuff happening
-											    event.preventDefault(); // Totally stop stuff happening
-
-											    // START A LOADING SPINNER HERE
-
-											    // Create a formdata object and add the files
-											    var data = new FormData();
-											    data.append('userfile',file);
-
-											    $.ajax({
-											        url: '{{CRUDBooster::mainpath("upload-file")}}',
-											        type: 'POST',
-											        data: data,
-											        cache: false,
-											        processData: false, // Don't process the files
-											        contentType: false, // Set content type to false as jQuery will tell the server its a query string request
-											        success: function(data, textStatus, jqXHR)
-											        {
-											        	console.log(data);
-											        	$('#btn-add-table-{{$name}}').removeClass('disabled');
-											            $('#loading-{{$name_column}}').hide();
-											            $('#btn-upload-{{$name_column}}').removeClass('disabled');
-											            is_uploading = false;
-
-											            var basename = data.split('/').reverse()[0];
-											            $('#{{$name_column}} .input-label').val(basename);
-
-											            $('#{{$name_column}} .input-id').val(data);
-											        },
-											        error: function(jqXHR, textStatus, errorThrown)
-											        {
-											        	$('#btn-add-table-{{$name}}').removeClass('disabled');
-											        	$('#btn-upload-{{$name_column}}').removeClass('disabled');
-											            is_uploading = false;
-											            // Handle errors here
-											            console.log('ERRORS: ' + textStatus);
-											            // STOP LOADING SPINNER
-											            $('#loading-{{$name_column}}').hide();
-											        }
-											    });
-											}
-
-									    </script>
-										@elseif($col['type']=='select')
-										{{-- ID Target Column: childrenbirthDateReliability --}}
-
-										{{-- {{$col['label']}} --}}
-											{{-- @if($form['table'] == 'gigya_child' && $col['name'] == 'birthDateReliability')
-												<select id='childrenbirthDateReliability' name='child-{{$col["name"]}}' class='form-control select2 {{$col['required']?"required":""}}'
-												{{($col['readonly']===true)?"readonly":""}} ">
-
-													<option value=''>{{trans('crudbooster.text_prefix_option')}} {{$col['label']}}</option>
-													<option value="childborn">Child is Born</option>
-													<option value="pregnant">Pregnante</option>
-
-												</select>
-											@else --}}
-												<select id='{{$name_column}}' name='child-{{$col["name"]}}' class='form-control select2 {{$col['required']?"required":""}}'
-												{{($col['readonly']===true)?"readonly":""}} ">
-
-													<option value=''>{{trans('crudbooster.text_prefix_option')}} {{$col['label']}}</option>
-													<?php
-														if($col['datatable']) {
-															$tableJoin = explode(',',$col['datatable'])[0];
-															$titleField = explode(',',$col['datatable'])[1];
-															$data = CRUDBooster::get($tableJoin,NULL,"$titleField ASC");
-															foreach($data as $d) {
-																echo "<option value='$d->id'>".$d->$titleField."</option>";
-																//dump($d);
-															}
-														}else{
-															$data = explode(';' , $col['dataenum']);
-
-															foreach($data as $d) {
-																$enum = explode('|',$d);
-																if(count($enum)==2) {
-																	$opt_value = $enum[0];
-																	$opt_label = $enum[1];
-																}else{
-																	$opt_value = $opt_label = $enum[0];
-																}
-																//dd($opt_label, $opt_value);
-																//$option_value[] = $opt_value;
-																echo "<option value='$opt_value'>$opt_label</option>";
-															}
-
-														}
-													?>
-												</select>
-												<div class="test2"></div>
-											{{-- @endif --}}
-
-										@elseif($col['type']=='hidden')
-											<input type="{{$col['type']}}" id="{{$name.$col["name"]}}" name="child-{{$name.$col["name"]}}" value="{{$col["value"]}}">
-										@elseif($col['type']=='hiddendate')
-											<input type="hidden" id="{{$name.$col["name"]}}" name="{{$name.$col["name"]}}" value="{{$col["value"]}}">
-										@endif
-
-										@if($col['help'])
-										<div class='help-block'>
-											{{$col['help']}}
-										</div>
-										@endif
-									</div>
-								</div>
-
-								@if($col['formula'])
 									<?php
-										$formula = $col['formula'];
-										$formula_function_name ='formula'.str_slug($name.$col['name'],'');
-										$script_onchange = "";
-										foreach($form['columns'] as $c) {
-											if(strpos($formula, "[".$c['name']."]")!==false) {
-												$script_onchange .= "
-												$('#$name$c[name]').change(function() {
-													$formula_function_name();
-												});
-												";
-											}
-											$formula = str_replace("[".$c['name']."]","\$('#".$name.$c['name']."').val()",$formula);
-										}
+										$name_column = $name.$col['name'];
+										$colLabel = str_slug($col['label']);
 									?>
-									<script type="text/javascript">
-										function {{ $formula_function_name }}() {
-											var v = {!! $formula !!};
-											$('#{{$name_column}}').val(v);
-										}
-										$(function() {
-											{!! $script_onchange !!}
-										})
-									</script>
-								@endif
+									<div class='form-group testtest' id="<?php echo $colLabel ?>">
+										@if($col['type']!='hidden')
+										{{-- {{dump($col)}} --}}
+										@if($col['name']=='birthDate')
+											<label class="control-label col-sm-2" id="birthDateLabel">{{$col['label']}}
+										@else
+											<label class="control-label col-sm-2">{{$col['label']}}
+										@endif
+										@if(!empty($col['required']))
+										<span class="text-danger" title="This field is required">*</span>
+										@endif
+										</label>
+										@endif
+										<div class="col-sm-8">
+											@if($col['type']=='text')
+											{{-- {{$name_column}} --}}
+											<input id='{{$name_column}}' type='text' {{ ($col['max'])?"maxlength='$col[max]'":"" }} name='child-{{$col["name"]}}' class='form-control {{$col['required']?"required":""}}'
+												{{($col['readonly']===true)?"readonly":""}}
+												/>
+											@elseif($col['type']=='radio')
+												<?php
+													if($col['dataenum']):
+		                                            $dataenum = $col['dataenum'];
+		                                            if(strpos($dataenum, ';') !== false) {
+		                                                $dataenum = explode(";", $dataenum);
+		                                            } else {
+		                                                $dataenum = [$dataenum];
+		                                            }
+		                                            array_walk($dataenum, 'trim');
+													foreach($dataenum as $e=>$enum):
+														$enum = explode('|',$enum);
+														if(count($enum)==2) {
+															$radio_value = $enum[0];
+															$radio_label = $enum[1];
+														}else{
+															$radio_value = $radio_label = $enum[0];
+														}
+												?>
+												<label class="radio-inline">
+												  <input type="radio" name="child-{{$col['name']}}" class='{{ ($e==0 && $col['required'])?"required":""}} {{$name_column}}'  value="{{$radio_value}}"> {{$radio_label}}
+												</label>
+												<?php endforeach;?>
+												<?php endif;?>
+
+											@elseif($col['type']=='datetime')
+											{{-- {{dd($col)}} --}}
+
+												<div class="input-group">
+
+													<span class="input-group-addon"><a href='javascript:void(0)' onclick='$("#{{$name_column}}").data("daterangepicker").toggle()'><i class='fa fa-calendar'></i></a></span>
+
+													<input type='text' title="{{$form['label']}}" readonly {{$required}} {{$readonly}} {!!$placeholder!!} {{$disabled}} class='form-control notfocus datetimepicker {{$col['required']?"required":""}} ' name="{{$name_column}}" id="{{$name_column}}" value='{{$value}}'/>
+
+												</div>
+
+
+											@elseif($col['type']=='datamodal')
+
+											<div id='{{$name_column}}' class="input-group">
+											  <input type="hidden" class="input-id">
+										      <input type="text" class="form-control input-label {{$col['required']?"required":""}}" readonly>
+										      <span class="input-group-btn">
+										        <button class="btn btn-primary" onclick="showModal{{$name_column}}()" type="button"><i class='fa fa-search'></i> Browse Data</button>
+										      </span>
+										    </div><!-- /input-group -->
+
+										    <script type="text/javascript">
+										    	var url_{{$name_column}} = "{{CRUDBooster::mainpath('modal-data')}}?table={{$col['datamodal_table']}}&columns=id,{{$col['datamodal_columns']}}&name_column={{$name_column}}&where={{urlencode($col['datamodal_where'])}}&select_to={{ urlencode($col['datamodal_select_to']) }}";
+										    	var url_is_setted_{{$name_column}} = false;
+										    	function showModal{{$name_column}}() {
+										    		if(url_is_setted_{{$name_column}} == false) {
+											    		url_is_setted_{{$name_column}} = true;
+											    		$('#iframe-modal-{{$name_column}}').attr('src',url_{{$name_column}});
+										    		}
+										    		$('#modal-datamodal-{{$name_column}}').modal('show');
+										    	}
+										    	function hideModal{{$name_column}}() {
+													$('#modal-datamodal-{{$name_column}}').modal('hide');
+												}
+
+										    	function selectAdditionalData{{$name_column}}(select_to_json) {
+													$.each(select_to_json,function(key,val) {
+														console.log('#'+key+ ' = '+val);
+														if(key == 'datamodal_id') {
+															$('#{{$name_column}} .input-id').val(val);
+														}
+														if(key == 'datamodal_label') {
+															$('#{{$name_column}} .input-label').val(val);
+														}
+														$('#{{$name}}'+key).val(val).trigger('change');
+													})
+													hideModal{{$name_column}}();
+												}
+										    </script>
+
+											<div id='modal-datamodal-{{$name_column}}' class="modal" tabindex="-1" role="dialog">
+											  <div class="modal-dialog {{ $col['datamodal_size']=='large'?'modal-lg':'' }} " role="document">
+											    <div class="modal-content">
+											      <div class="modal-header">
+											        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+											        <h4 class="modal-title"><i class='fa fa-search'></i> Browse Data {{$col['label']}}</h4>
+											      </div>
+											      <div class="modal-body">
+											        <iframe id='iframe-modal-{{$name_column}}' style="border:0;height: 430px;width: 100%" src=""></iframe>
+											      </div>
+
+											    </div><!-- /.modal-content -->
+											  </div><!-- /.modal-dialog -->
+											</div><!-- /.modal -->
+
+											@elseif($col['type']=='number')
+											<input id='{{$name_column}}' type='number' {{ ($col['min'])?"min='$col[min]'":"" }} {{ ($col['max'])?"max='$col[max]'":"" }} name='child-{{$col["name"]}}' class='form-control {{$col['required']?"required":""}}'
+												{{($col['readonly']===true)?"readonly":""}}
+												/>
+											@elseif($col['type']=='textarea')
+											<textarea id='{{$name_column}}' name='child-{{$col["name"]}}' class='form-control {{$col['required']?"required":""}}' {{($col['readonly']===true)?"readonly":""}} ></textarea>
+											@elseif($col['type']=='upload')
+											<div id='{{$name_column}}' class="input-group">
+											  <input type="hidden" class="input-id">
+										      <input type="text" class="form-control input-label {{$col['required']?"required":""}}" readonly>
+										      <span class="input-group-btn">
+										        <button class="btn btn-primary" id="btn-upload-{{$name_column}}" onclick="showFakeUpload{{$name_column}}()" type="button"><i class='fa fa-search'></i> Browse File</button>
+										      </span>
+										    </div><!-- /input-group -->
+
+										    <div id="loading-{{$name_column}}" class='text-info' style="display: none">
+										    	<i class='fa fa-spin fa-spinner'></i> Please wait loading...
+										    </div>
+
+										    <input type="file" id='fake-upload-{{$name_column}}' style="display: none">
+										    <script type="text/javascript">
+										    	var file;
+												var filename;
+												var is_uploading = false;
+
+										    	function showFakeUpload{{$name_column}}() {
+										    		if(is_uploading) {
+										    			return false;
+										    		}
+
+										    		$('#fake-upload-{{$name_column}}').click();
+										    	}
+
+												// Add events
+												$('#fake-upload-{{$name_column}}').on('change', prepareUpload{{$name_column}});
+
+												// Grab the files and set them to our variable
+												function prepareUpload{{$name_column}}(event)
+												{
+												  var max_size = {{ ($col['max'])?:2000 }};
+												  file = event.target.files[0];
+
+												  var filesize = Math.round(parseInt(file.size)/1024);
+
+												  if(filesize > max_size) {
+												  	sweetAlert('Oops','Your file size is too big !','warning');
+												  	return false;
+												  }
+
+												  filename = $('#fake-upload-{{$name_column}}').val().replace(/C:\\fakepath\\/i, '');
+												  var extension = filename.split('.').pop().toLowerCase();
+												  var img_extension = ['jpg','jpeg','png','gif','bmp'];
+												  var available_extension = "{{config('crudbooster.UPLOAD_TYPES')}}".split(",");
+												  var is_image_only = {{ ($col['upload_type'] == 'image')?"true":"false" }};
+
+												  if(is_image_only) {
+												  	  if($.inArray(extension, img_extension) == -1) {
+												  	  	sweetAlert('Warning','Your file extension is not allowed !','warning');
+														return false;
+												  	  }
+												  }else{
+													  if($.inArray(extension, available_extension) == -1) {
+														sweetAlert('Warning','Your file extension is not allowed !','warning');
+														return false;
+													  }
+												  }
+
+
+												  $('#{{$name_column}} .input-label').val(filename);
+
+												  $('#loading-{{$name_column}}').fadeIn();
+												  $('#btn-add-table-{{$name}}').addClass('disabled');
+												  $('#btn-upload-{{$name_column}}').addClass('disabled');
+												  is_uploading = true;
+
+												  //Upload File To Server
+												  uploadFiles{{$name_column}}(event);
+												}
+
+												function uploadFiles{{$name_column}}(event)
+												{
+												  	event.stopPropagation(); // Stop stuff happening
+												    event.preventDefault(); // Totally stop stuff happening
+
+												    // START A LOADING SPINNER HERE
+
+												    // Create a formdata object and add the files
+												    var data = new FormData();
+												    data.append('userfile',file);
+
+												    $.ajax({
+												        url: '{{CRUDBooster::mainpath("upload-file")}}',
+												        type: 'POST',
+												        data: data,
+												        cache: false,
+												        processData: false, // Don't process the files
+												        contentType: false, // Set content type to false as jQuery will tell the server its a query string request
+												        success: function(data, textStatus, jqXHR)
+												        {
+												        	console.log(data);
+												        	$('#btn-add-table-{{$name}}').removeClass('disabled');
+												            $('#loading-{{$name_column}}').hide();
+												            $('#btn-upload-{{$name_column}}').removeClass('disabled');
+												            is_uploading = false;
+
+												            var basename = data.split('/').reverse()[0];
+												            $('#{{$name_column}} .input-label').val(basename);
+
+												            $('#{{$name_column}} .input-id').val(data);
+												        },
+												        error: function(jqXHR, textStatus, errorThrown)
+												        {
+												        	$('#btn-add-table-{{$name}}').removeClass('disabled');
+												        	$('#btn-upload-{{$name_column}}').removeClass('disabled');
+												            is_uploading = false;
+												            // Handle errors here
+												            console.log('ERRORS: ' + textStatus);
+												            // STOP LOADING SPINNER
+												            $('#loading-{{$name_column}}').hide();
+												        }
+												    });
+												}
+
+										    </script>
+											@elseif($col['type']=='select')
+											{{-- ID Target Column: childrenbirthDateReliability --}}
+
+											{{-- {{$col['label']}} --}}
+												{{-- @if($form['table'] == 'gigya_child' && $col['name'] == 'birthDateReliability')
+													<select id='childrenbirthDateReliability' name='child-{{$col["name"]}}' class='form-control select2 {{$col['required']?"required":""}}'
+													{{($col['readonly']===true)?"readonly":""}} ">
+
+														<option value=''>{{trans('crudbooster.text_prefix_option')}} {{$col['label']}}</option>
+														<option value="childborn">Child is Born</option>
+														<option value="pregnant">Pregnante</option>
+
+													</select>
+												@else --}}
+													<select id='{{$name_column}}' name='child-{{$col["name"]}}' class='form-control select2 {{$col['required']?"required":""}}'
+													{{($col['readonly']===true)?"readonly":""}} ">
+
+														<option value=''>{{trans('crudbooster.text_prefix_option')}} {{$col['label']}}</option>
+														<?php
+															if($col['datatable']) {
+																$tableJoin = explode(',',$col['datatable'])[0];
+																$titleField = explode(',',$col['datatable'])[1];
+																$data = CRUDBooster::get($tableJoin,NULL,"$titleField ASC");
+																foreach($data as $d) {
+																	echo "<option value='$d->id'>".$d->$titleField."</option>";
+																	//dump($d);
+																}
+															}else{
+																$data = explode(';' , $col['dataenum']);
+
+																foreach($data as $d) {
+																	$enum = explode('|',$d);
+																	if(count($enum)==2) {
+																		$opt_value = $enum[0];
+																		$opt_label = $enum[1];
+																	}else{
+																		$opt_value = $opt_label = $enum[0];
+																	}
+																	//dd($opt_label, $opt_value);
+																	//$option_value[] = $opt_value;
+																	echo "<option value='$opt_value'>$opt_label</option>";
+																}
+
+															}
+														?>
+													</select>
+													<div class="test2"></div>
+												{{-- @endif --}}
+
+											@elseif($col['type']=='hidden')
+												<input type="{{$col['type']}}" id="{{$name.$col["name"]}}" name="child-{{$name.$col["name"]}}" value="{{$col["value"]}}">
+											@elseif($col['type']=='hiddendate')
+												<input type="hidden" id="{{$name.$col["name"]}}" name="{{$name.$col["name"]}}" value="{{$col["value"]}}">
+											@endif
+
+											@if($col['help'])
+											<div class='help-block'>
+												{{$col['help']}}
+											</div>
+											@endif
+										</div>
+									</div>
+
+									@if($col['formula'])
+										<?php
+											$formula = $col['formula'];
+											$formula_function_name ='formula'.str_slug($name.$col['name'],'');
+											$script_onchange = "";
+											foreach($form['columns'] as $c) {
+												if(strpos($formula, "[".$c['name']."]")!==false) {
+													$script_onchange .= "
+													$('#$name$c[name]').change(function() {
+														$formula_function_name();
+													});
+													";
+												}
+												$formula = str_replace("[".$c['name']."]","\$('#".$name.$c['name']."').val()",$formula);
+											}
+										?>
+										<script type="text/javascript">
+											function {{ $formula_function_name }}() {
+												var v = {!! $formula !!};
+												$('#{{$name_column}}').val(v);
+											}
+											$(function() {
+												{!! $script_onchange !!}
+											})
+										</script>
+									@endif
 
 								@endforeach
 
@@ -597,15 +368,45 @@
 										$('#panel-form-{{$name}}').find("input[type=text],input[type=number],select,textarea").val('');
 									}
 
-									function deleteRow{{$name}}(t) {
+									function deleteChildRow{{$name}}(t, id, table) {
 
 										if(confirm("{{trans('crudbooster.delete_title_confirm')}}")) {
+
+											$.ajax({
+										        url: '{{CRUDBooster::adminPath("customer/delete-child")}}',
+										        type: 'POST',
+										        data: {id: id, table:table},
+										        
+										        success: function(data, textStatus, jqXHR)
+										        {
+										        	console.log(data);
+										        },
+										        error: function(jqXHR, textStatus, errorThrown)
+										        {
+										        	
+										        }
+									    	});
+
 											$(t).parent().parent().remove();
 											if( $('#table-{{$name}} tbody tr').length == 0) {
 												var colspan = $('#table-{{$name}} thead tr th').length;
 												$('#table-{{$name}} tbody').html("<tr class='trNull'><td colspan='"+colspan+"' align='center'>{{trans('crudbooster.table_data_not_found')}}</td></tr>");
 											}
 										}
+										
+									}
+
+									function deleteRow{{$name}}(t) {
+
+										if(confirm("{{trans('crudbooster.delete_title_confirm')}}")) {
+
+											$(t).parent().parent().remove();
+											if( $('#table-{{$name}} tbody tr').length == 0) {
+												var colspan = $('#table-{{$name}} thead tr th').length;
+												$('#table-{{$name}} tbody').html("<tr class='trNull'><td colspan='"+colspan+"' align='center'>{{trans('crudbooster.table_data_not_found')}}</td></tr>");
+											}
+										}
+										
 									}
 									function editRow{{$name}}(t) {
 										var p = $(t).parent().parent(); //parentTR
@@ -760,6 +561,7 @@
 						<tbody>
 
 							<?php
+								$childTable = $form['table'];
 								$columns_tbody = [];
 								$data_child = DB::table($form['table'])
 								->where($form['foreign_key'],$id);
@@ -797,6 +599,7 @@
 							?>
 							<tr>
 								@foreach($form['columns'] as $col)
+
 									<td class="{{$col['name']}}">
 									<?php
 										if($col['type'] == 'select') {
@@ -845,7 +648,7 @@
 									@else --}}
 										<a href='#panel-form-{{$name}}' onclick='editRow{{$name}}(this)' class='btn btn-warning btn-xs'><i class='fa fa-pencil'></i></a>
 										{{-- @if(strpos(CRUDBooster::mainpath(), 'gigyacustomer') != true) --}}
-											<a href='javascript:void(0)' onclick='deleteRow{{$name}}(this)' class='btn btn-danger btn-xs'><i class='fa fa-trash'></i></a>
+											<a href='javascript:void(0)' onclick='deleteChildRow{{$name}}(this, $(this).data("id"),$(this).data("table"))' data-id={{$d->id}} data-table={{$childTable}} class='btn btn-danger btn-xs'><i class='fa fa-trash'></i></a>
 										{{-- @endif --}}
 									{{-- @endif --}}
 								</td>
@@ -862,9 +665,6 @@
 						</table>
 					</div>
 				</div>
-
-
-			@endif
 
 
 		</div>

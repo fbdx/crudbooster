@@ -1382,7 +1382,7 @@ class CBController extends Controller {
 								DB::table($childtable)->insert($newArray);
 							}
 							else {
-								unset($child_array['id']);
+								unset($child_array[$i]['id']);
 								$lastId = CRUDBooster::newId($childtable);
 								$child_array[$i]['id'] = $lastId;
 								if($ro['name']=='gigya_children')
@@ -1390,12 +1390,9 @@ class CBController extends Controller {
 									$child_array[$i]['UID'] = $this->generateUid();
 									$child_array[$i]['applicationInternalIdentifier'] = $this->generateUid();
 									$child_array[$i]['interestCode'] = 'GG_CHILD_MILK_BRAND';
-									$child_array[$i]['answerDetails'] = $this->getChildAreaOfInterestCodeNameById($child_array[$i]['answerDetails']);
-									$child_array[$i]['feeding'] = $this->getChildFeedingCodeNameById($child_array[$i]['feeding']);
 								}
-								DB::table($childtable)->insert($child_array);
+								DB::table($childtable)->insert($child_array[$i]);
 							}
-
 						}
 
 						$tempId[] = $child_array[$i]['id'];
@@ -1432,7 +1429,7 @@ class CBController extends Controller {
 	    	$rowArray = $this->arr;
 	    	$recordId = $this->arr[$this->primary_key];
 
-	    	$this->synchroToGigya($UID,$regToken,$rowArray['email'],$rowArray,$recordId,$this->arr);
+	    	$this->synchroToGigya($UID,$regToken,$rowArray['email'],$rowArray,$recordId,$this->arr,$this->table);
 		}
 
 		$this->hook_after_add($this->arr[$this->primary_key]);
@@ -1524,7 +1521,6 @@ class CBController extends Controller {
 		$table = $this->table;
 
 		return view('crudbooster::default.form',compact('id','row','page_menu','page_title','command','option_id','option_fields','table'));
-
 	}
 
 	public $countChild = 0;
@@ -1549,7 +1545,6 @@ class CBController extends Controller {
 		$this->hook_before_edit($this->arr,$id);
 
 		//Looping Data Input Again After Insert
-
 
 		foreach($this->data_inputan as $ro) {
 
@@ -1643,6 +1638,8 @@ class CBController extends Controller {
 							$column_data[$colname] = Request::get($name.'-'.$colname)[$i];
 						}
 
+						// dd($column_data);
+
 						$child_array[] = $column_data;
 
 						if($child_array[$i]['id'] == NULL){
@@ -1670,17 +1667,17 @@ class CBController extends Controller {
 								DB::table($childtable)->insert($newArray);
 							}
 							else {
-								unset($child_array['id']);
+								unset($child_array[$i]['id']);
 								$lastId = CRUDBooster::newId($childtable);
 								if($ro['name']=='gigya_children')
 								{
 									$child_array[$i]['UID'] = $this->generateUid();
 									$child_array[$i]['applicationInternalIdentifier'] = $this->generateUid();
 									$child_array[$i]['interestCode'] = 'GG_CHILD_MILK_BRAND';
-									$child_array[$i]['answerDetails'] = $this->getChildAreaOfInterestCodeNameById($child_array[$i]['answerDetails']);
-									$child_array[$i]['feeding'] = $this->getChildFeedingCodeNameById($child_array[$i]['feeding']);
 								}
-								DB::table($childtable)->insert($child_array);
+
+
+								$success = DB::table($childtable)->insert($child_array[$i]);
 							}
 						}
 						$tempId[] = $child_array[$i]['id'];
@@ -1726,7 +1723,7 @@ class CBController extends Controller {
 	    		$regToken = $register["regToken"];
 	    	}
 
-			$this->synchroToGigya($UID,$regToken,$row->email,$setInputData,$id,$this->arr);
+			$this->synchroToGigya($UID,$regToken,$row->email,$setInputData,$id,$this->arr,$this->table);
 		}
 
 		$this->hook_after_edit($id);
