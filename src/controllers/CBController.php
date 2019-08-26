@@ -388,8 +388,26 @@ class CBController extends Controller {
 		if(Request::get('filter_column')) {
 
 			$filter_column = Request::get('filter_column');
-			$result->where(function($w) use ($filter_column,$fc) {
+			$result->where(function($w) use ($columns_table,$filter_column,$fc) {
 				foreach($filter_column as $key=>$fc) {
+
+					if($key) {
+						$icheck = false;
+						foreach($columns_table as $c)
+						{
+							if ($c['field']==$key)
+							{
+								if (strpos($c['name'], " as ") !== false) {
+										$key = "(".substr($c['name'], 0, strpos($c['name'], " as ")).")";
+										$icheck = true;
+										//dd($key);
+										break;
+								}
+							}
+						}
+					}
+
+
 					// dd($fc);
 					$value = @$fc['value'];
 					$type  = @$fc['type'];
@@ -414,13 +432,21 @@ class CBController extends Controller {
 						case 'like':
 						case 'not like':
 							$value = '%'.$value.'%';
-							if($key && $type && $value) $w->where($key,$type,$value);
+							if (!$icheck)
+								if($key && $type && $value) $w->where($key,$type,$value);
+							else
+								if($key && $type && $value) $w->whereRaw($key." ".$type." ".$value);
 						break;
 						case 'in':
 						case 'not in':
 							if($value) {
-								$value = explode(',',$value);
-								if($key && $value) $w->whereIn($key,$value);
+								$value2 = explode(',',$value);
+								if (!$icheck)
+									if($key && $value2) $w->whereIn($key,$value2);
+								else
+								{
+									if($key && $value2) $w->whereRaw($key." IN (".$value.")");
+								}
 							}
 						break;
 					}
@@ -435,23 +461,26 @@ class CBController extends Controller {
 				$type_data = @$fc['type_data'];
 				$label_data = @$fc['label'];
 
+				if($key) {
+					$icheck = false;
+					foreach($columns_table as $c)
+					{
+						if ($c['field']==$key)
+						{
+							if (strpos($c['name'], " as ") !== false) {
+									$key = "(".substr($c['name'], 0, strpos($c['name'], " as ")).")";
+									$icheck = true;
+									break;
+							}
+						}
+					}
+				}
 
 
 				if($sorting!='') {
 					if($key) {
 
-						$icheck = false;
-						foreach($columns_table as $c)
-						{
-							if ($c['field']==$key)
-							{
-								if (strpos($c['name'], " as ") !== false) {
-								    $key = "(".substr($c['name'], 0, strpos($c['name'], " as ")).")";
-										$icheck = true;
-										break;
-								}
-							}
-						}
+
 						if (!$icheck)
 							$result->orderby($key,$sorting);
 						else {
