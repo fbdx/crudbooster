@@ -388,8 +388,26 @@ class CBController extends Controller {
 		if(Request::get('filter_column')) {
 
 			$filter_column = Request::get('filter_column');
-			$result->where(function($w) use ($filter_column,$fc) {
+			$result->where(function($w) use ($columns_table,$filter_column,$fc) {
 				foreach($filter_column as $key=>$fc) {
+
+					if($key) {
+						$icheck = false;
+						foreach($columns_table as $c)
+						{
+							if ($c['field']==$key)
+							{
+								if (strpos($c['name'], " as ") !== false) {
+										$key = "(".substr($c['name'], 0, strpos($c['name'], " as ")).")";
+										$icheck = true;
+										//dd($key);
+										break;
+								}
+							}
+						}
+					}
+
+
 					// dd($fc);
 					$value = @$fc['value'];
 					$type  = @$fc['type'];
@@ -414,13 +432,21 @@ class CBController extends Controller {
 						case 'like':
 						case 'not like':
 							$value = '%'.$value.'%';
-							if($key && $type && $value) $w->where($key,$type,$value);
+							if (!$icheck)
+								if($key && $type && $value) $w->where($key,$type,$value);
+							else
+								if($key && $type && $value) $w->whereRaw($key." ".$type." ".$value);
 						break;
 						case 'in':
 						case 'not in':
 							if($value) {
-								$value = explode(',',$value);
-								if($key && $value) $w->whereIn($key,$value);
+								$value2 = explode(',',$value);
+								if (!$icheck)
+									if($key && $value2) $w->whereIn($key,$value2);
+								else
+								{
+									if($key && $value2) $w->whereRaw($key." IN (".$value.")");
+								}
 							}
 						break;
 					}
@@ -435,23 +461,26 @@ class CBController extends Controller {
 				$type_data = @$fc['type_data'];
 				$label_data = @$fc['label'];
 
+				if($key) {
+					$icheck = false;
+					foreach($columns_table as $c)
+					{
+						if ($c['field']==$key)
+						{
+							if (strpos($c['name'], " as ") !== false) {
+									$key = "(".substr($c['name'], 0, strpos($c['name'], " as ")).")";
+									$icheck = true;
+									break;
+							}
+						}
+					}
+				}
 
 
 				if($sorting!='') {
 					if($key) {
 
-						$icheck = false;
-						foreach($columns_table as $c)
-						{
-							if ($c['field']==$key)
-							{
-								if (strpos($c['name'], " as ") !== false) {
-								    $key = "(".substr($c['name'], 0, strpos($c['name'], " as ")).")";
-										$icheck = true;
-										break;
-								}
-							}
-						}
+
 						if (!$icheck)
 							$result->orderby($key,$sorting);
 						else {
@@ -2024,7 +2053,6 @@ class CBController extends Controller {
 			$select_column = array_filter($select_column);
 			$table_columns = DB::getSchemaBuilder()->getColumnListing($this->table);
 
-
 			$file = base64_decode(Request::get('file'));
 			$file = trim(str_replace('uploads','app',$file),'/');
 			$file = storage_path($file);
@@ -2062,8 +2090,6 @@ class CBController extends Controller {
 
 				if($has_title_field==false) continue;
 
-
-
 				try{
 					$f = $this->import_consignment;
 					if ($f == FALSE)
@@ -2071,22 +2097,25 @@ class CBController extends Controller {
 						if($has_created_at) {
 							$a['created_at'] = date('Y-m-d H:i:s');
 						}
-						$v = $this->validationArray($a);
-						if (!$v->fails())
+						// $v = $this->validationArray($a);
+
+						// if (!$v->fails())
 							DB::table($this->table)->insert($a);
-						else
-						{
-							Log::error('Validation issue');
-							$errors = $v->errors();
-							foreach ($errors->all() as $message) {
-		    					Log::error($message);
-							}
-						}
+						// else
+						// {
+						// 	Log::error('Validation issue');
+						// 	$errors = $v->errors();
+						// 	foreach ($errors->all() as $message) {
+		    // 					Log::error($message);
+						// 	}
+						// }
 					}
 					else
 					{
 						//Log::error("notinloop");
 						// Log::error($a);
+						$a['order_number'] = $value['order_number'];
+
 						if ( (isset($a['m_product'])) && (isset($a['m_date'])) && (isset($a['email'])) && (isset($a['mobileno'])) && (isset($a['childname'])) && (isset($a['childdob'])) ) {
 							if (($a['consigmentno'] != '')||($a['returnreason'] != '')||($a['batchno'] != ''))
 							{
@@ -2096,12 +2125,20 @@ class CBController extends Controller {
 										$arr[] = array($key,'=',$value);
 								}
 
-								$checkDB = DB::table($this->table)->where($arr);
+								$recordID = (int) substr($a['order_number'],3);
 
-								$countCheckDB = $checkDB->update(
-									['consigmentno' => $a['consigmentno'],'batchno' => $a['batchno'],'returnreason'=>$a['returnreason']]
-								);
-								// Log::debug($testCheck);
+								$record = DB::table($this->table)->where("id", $recordID);
+
+								if($record)
+								{
+									$countCheckDB = $record->update(['consigmentno' => $a['consigmentno'],'batchno' => $a['batchno'],'returnreason'=>$a['returnreason']]);
+								}
+
+								// $checkDB = DB::table($this->table)->where($arr);
+
+								// $countCheckDB = $checkDB->update(
+								// 	['consigmentno' => $a['consigmentno'],'batchno' => $a['batchno'],'returnreason'=>$a['returnreason']]
+								// );
 								if($countCheckDB == 0){
 									$uploadNotUpdated[] = $a;
 								}
