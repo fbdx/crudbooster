@@ -59,7 +59,7 @@ class CBController extends Controller {
 
 	public $button_filter       = TRUE;
 	public $button_export       = TRUE;
-	public $button_import       = TRUE;
+	public $button_import       = FALSE;
 	public $button_show         = TRUE;
 	public $button_addmore      = TRUE;
 	public $button_table_action = TRUE;
@@ -1704,7 +1704,6 @@ class CBController extends Controller {
 									$child_array[$i]['applicationInternalIdentifier'] = $this->generateUid();
 									$child_array[$i]['interestCode'] = 'GG_CHILD_MILK_BRAND';
 								}
-
 
 								$success = DB::table($childtable)->insert($child_array[$i]);
 							}
