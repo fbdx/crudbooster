@@ -2038,15 +2038,15 @@ class CBController extends Controller {
 			Log::debug($file_md5);
 			Cache::add('success_'.$file_md5, 0, 60);
 
-			if(Request::get('file') && Request::get('resume')==1) {
-				$total = Session::get('total_data_import');
-				$prog = intval(Cache::get('success_'.$file_md5)) / $total * 100;
-				$prog = round($prog,2);
-				if($prog >= 100) {
-					Cache::forget('success_'.$file_md5);
-				}
-				return response()->json(['progress'=> $prog, 'last_error'=>Cache::get('error_'.$file_md5) ]);
-			}
+			// if(Request::get('file') && Request::get('resume')==1) {
+			// 	$total = Session::get('total_data_import');
+			// 	$prog = intval(Cache::get('success_'.$file_md5)) / $total * 100;
+			// 	$prog = round($prog,2);
+			// 	if($prog >= 100) {
+			// 		Cache::forget('success_'.$file_md5);
+			// 	}
+			// 	return response()->json(['progress'=> $prog, 'last_error'=>Cache::get('error_'.$file_md5) ]);
+			// }
 
 			$select_column = Session::get('select_column');
 			$select_column = array_filter($select_column);
@@ -2057,11 +2057,7 @@ class CBController extends Controller {
 			$file = storage_path($file);
 
 			$rows = $this->csvToArray($file);
-			// Log::error($rows);
 			$f = $this->import_consignment;
-			//set_time_limit ( 600 );
-
-			//$rows = Excel::load($file,function($reader) {})->get();
 
 			$has_created_at = false;
 			if(CRUDBooster::isColumnExists($this->table,'created_at')) {
@@ -2096,33 +2092,22 @@ class CBController extends Controller {
 						if($has_created_at) {
 							$a['created_at'] = date('Y-m-d H:i:s');
 						}
-						// $v = $this->validationArray($a);
 
-						// if (!$v->fails())
-							DB::table($this->table)->insert($a);
-						// else
-						// {
-						// 	Log::error('Validation issue');
-						// 	$errors = $v->errors();
-						// 	foreach ($errors->all() as $message) {
-		    // 					Log::error($message);
-						// 	}
-						// }
+						DB::table($this->table)->insert($a);
 					}
 					else
 					{
-						//Log::error("notinloop");
-						// Log::error($a);
-						$a['order_number'] = $value['order_number'];
-
 						if ( (isset($a['m_product'])) && (isset($a['m_date'])) && (isset($a['email'])) && (isset($a['mobileno'])) && (isset($a['childname'])) && (isset($a['childdob'])) ) {
-							if (($a['consigmentno'] != '')||($a['returnreason'] != '')||($a['batchno'] != ''))
+							if (($a['consigmentno'] != '')||($a['returnreason'] != '')||($a['batchno'] != '')||$a['delivery_status'] != '')
 							{
-								$arr = array();
-								foreach ($a as $key => $value){
-									if (($key!=='consigmentno')&&($key!='batchno')&&($key!='created_at')&&($key!='returnreason')&&($key!='m_date'))
-										$arr[] = array($key,'=',$value);
-								}
+								$a['order_number']    = $value['order_number'];
+								$a['delivery_status'] = $value['delivery_status'];
+								
+								// $arr = array();
+								// foreach ($a as $key => $value){
+								// 	if (($key!=='consigmentno')&&($key!='batchno')&&($key!='created_at')&&($key!='returnreason')&&($key!='m_date'))
+								// 		$arr[] = array($key,'=',$value);
+								// }
 
 								$recordID = (int) substr($a['order_number'],3);
 
@@ -2130,7 +2115,7 @@ class CBController extends Controller {
 
 								if($record)
 								{
-									$countCheckDB = $record->update(['consigmentno' => $a['consigmentno'],'batchno' => $a['batchno'],'returnreason'=>$a['returnreason']]);
+									$countCheckDB = $record->update(['consigmentno' => $a['consigmentno'],'batchno' => $a['batchno'],'returnreason'=> $a['returnreason'], 'delivery_status' => $a['delivery_status']]);
 								}
 
 								// $checkDB = DB::table($this->table)->where($arr);
