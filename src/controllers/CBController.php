@@ -1416,7 +1416,6 @@ class CBController extends Controller {
 								$child_array[$i]['id'] = $lastId;
 								if($ro['name']=='gigya_children')
 								{
-									$child_array[$i]['UID'] = $this->generateUid();
 									$child_array[$i]['applicationInternalIdentifier'] = $this->generateUid();
 									$child_array[$i]['interestCode'] = 'GG_CHILD_MILK_BRAND';
 								}
@@ -1700,7 +1699,6 @@ class CBController extends Controller {
 								$lastId = CRUDBooster::newId($childtable);
 								if($ro['name']=='gigya_children')
 								{
-									$child_array[$i]['UID'] = $this->generateUid();
 									$child_array[$i]['applicationInternalIdentifier'] = $this->generateUid();
 									$child_array[$i]['interestCode'] = 'GG_CHILD_MILK_BRAND';
 								}
