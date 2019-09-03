@@ -47,9 +47,18 @@
             <tr class='active'>
               <td colspan="2"><strong><i class='fa fa-bars'></i> {{ ucwords(urldecode(g('label'))) }}</strong></td>
             </tr>
-            @foreach(explode(',',urldecode(g('parent_columns'))) as $c)
+            @foreach(explode(',',urldecode(g('custom_parent_alias'))) as $c)
+            <?php 
+              switch($c)
+              {
+                case "First Name"    : $value = $parent_table->firstname; break;
+                case "Last Name"     : $value = $parent_table->lastname; break;
+                case "Email"         : $value = $parent_table->email; break;
+                case "Mobile Number" : $value = $parent_table->mobileno; break;
+              }
+            ?>
             <tr>
-              <td width="25%"><strong>{{ ucwords(str_replace('_',' ',$c)) }}</strong></td><td>: {{ $parent_table->$c }}</td>
+              <td width="25%"><strong>{{ ucwords(str_replace('_',' ',$c)) }}</strong></td><td>: {{ $value }}</td>
             </tr>
             @endforeach            
           </tbody>
