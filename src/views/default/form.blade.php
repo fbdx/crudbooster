@@ -25,7 +25,7 @@
              <br><br>
               @if($command != 'add')
                 @foreach ($sub_module as $sm)
-                    <a href="<?php echo CRUDBooster::adminPath($sm['path']).'?parent_table='.$table.'&parent_columns='.$sm['parent_columns'].'&parent_id='.$id.'&return_url='.CRUDBooster::adminPath().'%2F'.$table.'%3Fm%3D36&foreign_key='.$sm['foreign_key'].'&label=Sample+Request';?>"><button type="button" class="btn btn-info">Sample Request</button></a>
+                    <a href="<?php echo CRUDBooster::adminPath($sm['path']).'?parent_table='.$table.'&parent_columns='.$sm['parent_columns'].'&parent_id='.$id.'&return_url='.CRUDBooster::adminPath().'%2F'.$table.'%3Fm%3D36&foreign_key='.$sm['foreign_key'].'&label=Customer+Information';?>"><button type="button" class="btn btn-info">Customer Information</button></a>
                 @endforeach
               @endif
            </div>
