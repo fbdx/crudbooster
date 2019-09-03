@@ -23,7 +23,7 @@
            <div class="panel-heading">
              <strong><i class='{{CRUDBooster::getCurrentModule()->icon}}'></i> {!! $page_title or "Page Title" !!}</strong>
              <br><br>
-              @if($command == 'edit')
+              @if($command != 'add')
                 @foreach ($sub_module as $sm)
                     <a href="<?php echo CRUDBooster::adminPath($sm['path']).'?parent_table='.$table.'&parent_columns='.$sm['parent_columns'].'&parent_id='.$id.'&return_url='.CRUDBooster::adminPath().'%2F'.$table.'%3Fm%3D36&foreign_key='.$sm['foreign_key'].'&label=Sample+Request';?>"><button type="button" class="btn btn-info">Sample Request</button></a>
                 @endforeach
