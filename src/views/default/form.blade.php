@@ -95,12 +95,28 @@
         <script type="text/javascript">
           $(document).ready(function () {
             $('#form-group-optin_subscriptions').hide();
-              $('#optin').change(function() {
-                if($('#optin').val()=='Yes')
-                {
-                  $('#form-group-optin_subscriptions').show();
-                }
-              });
+            $('#family-allergy-history-description').hide();
+            $('#optin').change(function() {
+              if($('#optin').val()=='Yes')
+              {
+                $('#form-group-optin_subscriptions').show();
+              }
+              else
+              {
+                $('#form-group-optin_subscriptions').hide();
+              }
+            });
+
+            $('#childrenfamily_allergy_history').change(function(){
+              if($('#childrenfamily_allergy_history').val()=='Yes')
+              {
+                $('#family-allergy-history-description').show();
+              }
+              else
+              {
+                $('#family-allergy-history-description').hide();
+              }
+            });
           });
         </script>
 
