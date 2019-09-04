@@ -2,7 +2,6 @@
 @section('content')
 
         <div >
-
           @if (session('status'))
               <div class="alert alert-danger">
                   <p style="text-align: center;">
@@ -25,7 +24,7 @@
              <br><br>
               @if($command != 'add')
                 @foreach ($sub_module as $sm)
-                    <a href="<?php echo CRUDBooster::adminPath($sm['path']).'?parent_table='.$table.'&parent_columns='.$sm['parent_columns'].'&custom_parent_alias='.$sm['custom_parent_alias'].'&parent_id='.$id.'&return_url='.CRUDBooster::adminPath().'%2F'.$table.'%3Fm%3D36&foreign_key='.$sm['foreign_key'].'&label=Sample+Request';?>"><button type="button" class="btn btn-info">Sample Request</button></a>
+                    <a href="<?php echo CRUDBooster::adminPath($sm['path']).'?parent_table='.$table.'&parent_columns='.$sm['parent_columns'].'&custom_parent_alias='.$sm['custom_parent_alias'].'&parent_id='.$id.'&return_url='.CRUDBooster::adminPath('customer/edit').'/'.$id.'%3Fm%3D36&foreign_key='.$sm['foreign_key'].'&label=Sample+Request'.'&remark=true';?>"><button type="button" class="btn btn-info">Sample Request</button></a>
                 @endforeach
               @endif
            </div>

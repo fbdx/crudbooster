@@ -36,7 +36,19 @@
 
 
     @if(g('return_url'))
-    <p><a href='{{g("return_url")}}'><i class='fa fa-chevron-circle-{{ trans('crudbooster.left') }}'></i> &nbsp; {{trans('crudbooster.form_back_to_list',['module'=>ucwords(str_replace('_',' ',g('parent_table')))])}}</a></p>
+    <?php 
+      if(g('remark'))
+      {
+        $titleReturn = 'Back To Customer Profile';
+      }
+      else
+      {
+        $titleReturn = trans('crudbooster.form_back_to_list',['module'=>ucwords(str_replace('_',' ',g('parent_table')))]);
+      }
+    ?>
+      <p>
+        <a href='{{g("return_url")}}'><i class='fa fa-chevron-circle-{{ trans('crudbooster.left') }}'></i> &nbsp; {{$titleReturn}}</a>
+      </p>
     @endif
 
     @if($parent_table)
