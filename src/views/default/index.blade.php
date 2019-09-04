@@ -37,7 +37,7 @@
 
     @if(g('return_url'))
     <?php 
-      if(g('remark'))
+      if(g('customer'))
       {
         $titleReturn = 'Back To Customer Profile';
       }
