@@ -113,11 +113,11 @@
                         <input type="hidden" name="_token" value="{{ csrf_token() }}">             
                         <div class="box-body table-responsive no-padding">
                               <div class='callout callout-info' style="font-size: 16px;">
-                                @if(CRUDBooster::myPrivilegeId()==2)
+                                @if(CRUDBooster::myPrivilegeId()==2 || CRUDBooster::myPrivilegeId()==6)
                                  * This feature is only for updating consignment numbers <br>
                                  * Please match ALL column dropdowns with their respective headers. Otherwise, the import will fail <br>
                                 @else
-                                  * Just ignoring the column where you are not sure the data is suit with the column or not.<br/>
+                                  * Just ignore the column where you are not sure the data is suit with the column or not.<br/>
                                   * Warning !, Unfortunately at this time, the system can't import column that contains image or photo url.
                                 @endif
                               </div>
