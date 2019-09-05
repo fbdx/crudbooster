@@ -2069,8 +2069,7 @@ class CBController extends Controller {
 				$a = array();
 				foreach($select_column as $sk => $s) {
 					$colname = $table_columns[$sk];
-
-						$a[$colname] = $value[$s];
+					$a[$colname] = $value[$s];
 				}
 
 				$has_title_field = true;
@@ -2095,37 +2094,26 @@ class CBController extends Controller {
 					}
 					else
 					{
-						if ( (isset($a['m_product'])) && (isset($a['m_date'])) && (isset($a['email'])) && (isset($a['mobileno'])) && (isset($a['childname'])) && (isset($a['childdob'])) ) {
+						if ((isset($a['m_product'])) && (isset($a['m_date'])) && (isset($a['email'])) && (isset($a['mobileno'])) && (isset($a['childname'])) && (isset($a['childdob'])) ) 
+						{
 							if (($a['consigmentno'] != '')||($a['returnreason'] != '')||($a['batchno'] != '')||$a['delivery_status'] != '')
 							{
 								$a['order_number']    = $value['order_number'];
 								$a['delivery_status'] = $value['delivery_status'];
-								
-								// $arr = array();
-								// foreach ($a as $key => $value){
-								// 	if (($key!=='consigmentno')&&($key!='batchno')&&($key!='created_at')&&($key!='returnreason')&&($key!='m_date'))
-								// 		$arr[] = array($key,'=',$value);
-								// }
 
 								$recordID = (int) substr($a['order_number'],3);
-
-								$record = DB::table($this->table)->where("id", $recordID);
+								$record   = DB::table($this->table)->where("id", $recordID);
 
 								if($record)
 								{
 									$countCheckDB = $record->update(['consigmentno' => $a['consigmentno'],'batchno' => $a['batchno'],'returnreason'=> $a['returnreason'], 'delivery_status' => $a['delivery_status']]);
 								}
 
-								// $checkDB = DB::table($this->table)->where($arr);
-
-								// $countCheckDB = $checkDB->update(
-								// 	['consigmentno' => $a['consigmentno'],'batchno' => $a['batchno'],'returnreason'=>$a['returnreason']]
-								// );
 								if($countCheckDB == 0){
 									$uploadNotUpdated[] = $a;
 								}
+
 								$uploadStatus = 'Successful';
-								//Log::error(DB::getQueryLog());
 							}
 						} else {
 							$uploadStatus = "Fail to match record";
