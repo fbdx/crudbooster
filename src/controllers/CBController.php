@@ -95,6 +95,7 @@ class CBController extends Controller {
 	public $import_consignment	  = FALSE;
 	public $gigya_based			  = FALSE;
 	public $gigya_customer        = FALSE;
+	public $import_mobile_number  = FALSE;
 
 	public function __construct()
 	{
@@ -2012,19 +2013,40 @@ class CBController extends Controller {
 						$a[$colname] = $value->$s;
 					}
 				}
+
 				$has_title_field = true;
+				
 				foreach($a as $k=>$v) {
 					if($k == $this->title_field && $v == '') {
 						$has_title_field = false;
 						break;
 					}
 				}
+
 				if($has_title_field==false) continue;
+
+				if($has_created_at) {
+					$a['created_at'] = date('Y-m-d H:i:s');
+				}
+
 				try{
-					if($has_created_at) {
-						$a['created_at'] = date('Y-m-d H:i:s');
+					if($this->import_mobile_number)
+					{
+						if(isset($a['mobileno']) && isset($a['email']))
+						{
+							$email    = $a['email'];
+							$record   = DB::table($this->table)->where("email", $email);
+
+							if($record)
+							{
+								$update = $record->update(['mobileno' => $a['mobileno']]);
+							}
+						}
 					}
-					DB::table($this->table)->insert($a);
+					else
+					{
+						DB::table($this->table)->insert($a);
+					}
 					Cache::increment('success_'.$file_md5);
 				}catch(\Exception $e) {
 					$e = (string) $e;
