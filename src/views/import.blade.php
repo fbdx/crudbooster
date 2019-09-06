@@ -148,7 +148,7 @@
                                                 @elseif($column == "m_date")
                                                   <th data-no-column='{{$k}}'>Date Request{!! $help !!}</th>
                                                 @elseif($column == "email")
-                                                  <th data-no-column='{{$k}}'>Email {!! $help !!}</th>
+                                                  <th data-no-column='{{$k}}'>Email{!! $help !!}</th>
                                                 @elseif($column == "mobileno")
                                                   <th data-no-column='{{$k}}'>Mobile Number{!! $help !!}</th>
                                                 @elseif($column == "childname")
@@ -164,7 +164,7 @@
                                                 @elseif($column == "m_date")
                                                   <th data-no-column='{{$k}}'>Date Request{!! $help !!}</th>
                                                 @elseif($column == "email")
-                                                  <th data-no-column='{{$k}}'>Email {!! $help !!}</th>
+                                                  <th data-no-column='{{$k}}'>Email{!! $help !!}</th>
                                                 @elseif($column == "mobileno")
                                                   <th data-no-column='{{$k}}'>Mobile Number{!! $help !!}</th>
                                                 @elseif($column == "childname")
@@ -286,7 +286,7 @@
                         <div class="box-body">
 
                             <div class='callout callout-success' style="font-size: 16px;">
-                                  @if(CRUDBooster::myPrivilegeId()==2)
+                                  @if(CRUDBooster::myPrivilegeId()==2 || CRUDBooster::myPrivilegeId()==6)
                                     <h4>Welcome to the Consignment No. Bulk Update Tool</h4>
                                     Please read the instructions below before using this tool: <br/>
                                     * File format should be : <b>csv</b><br/>
@@ -296,12 +296,12 @@
                                     * Make sure the date/time format follows the correct format as shown in the template <br>
                                     * Please only include customers who are already inside the 'Offline' tab in Smart Data for this process
                                   @else
-                                  <h4>Welcome to Data Importer Tool</h4>
-                                  Before doing upload a file, its better to read this bellow instructions : <br/>
-                                  * File format should be : xls or xlsx or csv<br/>
-                                  * If you have a big file data, we can't guarantee. So, please split those files into some parts of file (at least max 5 MB).<br/>
-                                  * This tool is generate data automatically so, be carefull about your table xls structure. Please make sure correctly the table structure.<br/>
-                                  * Table structure : Line 1 is heading column , and next is the data.  (For example, you can export any module you wish to XLS format)                                                                
+                                    <h4>Welcome to Data Importer Tool</h4>
+                                    Before doing upload a file, its better to read this bellow instructions : <br/>
+                                    * File format should be : xls or xlsx or csv<br/>
+                                    * If you have a big file data, we can't guarantee. So, please split those files into some parts of file (at least max 5 MB).<br/>
+                                    * This tool is generate data automatically so, be carefull about your table xls structure. Please make sure correctly the table structure.<br/>
+                                    * Table structure : Line 1 is heading column , and next is the data.  (For example, you can export any module you wish to XLS format)                                                                
                                   @endif
                               </div>
 
