@@ -272,7 +272,7 @@ class CBController extends Controller {
 				continue;
 			}
 
-			if(strpos($field,'.')!==FALSE) {
+			else if(strpos($field,'.')!==FALSE) {
 				$result->addselect($field);
 			}else{
 				$result->addselect($table.'.'.$field);
@@ -341,7 +341,7 @@ class CBController extends Controller {
 
 			}else{
 
-				$result->addselect($table.'.'.$field);
+				//$result->addselect($table.'.'.$field);
 				$columns_table[$index]['type_data']	 = CRUDBooster::getFieldType($table,$field);
 				$columns_table[$index]['field']      = $field;
 				$columns_table[$index]['field_raw']  = $field;
@@ -2015,7 +2015,7 @@ class CBController extends Controller {
 				}
 
 				$has_title_field = true;
-				
+
 				foreach($a as $k=>$v) {
 					if($k == $this->title_field && $v == '') {
 						$has_title_field = false;
@@ -2116,7 +2116,7 @@ class CBController extends Controller {
 					}
 					else
 					{
-						if ((isset($a['m_product'])) && (isset($a['m_date'])) && (isset($a['email'])) && (isset($a['mobileno'])) && (isset($a['childname'])) && (isset($a['childdob'])) ) 
+						if ((isset($a['m_product'])) && (isset($a['m_date'])) && (isset($a['email'])) && (isset($a['mobileno'])) && (isset($a['childname'])) && (isset($a['childdob'])) )
 						{
 							if (($a['consigmentno'] != '')||($a['returnreason'] != '')||($a['batchno'] != '')||$a['delivery_status'] != '')
 							{
