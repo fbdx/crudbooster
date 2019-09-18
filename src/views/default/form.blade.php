@@ -93,8 +93,10 @@
 
         <script type="text/javascript">
           $(document).ready(function () {
+
             $('#form-group-optin_subscriptions').hide();
             $('#family-allergy-history-description').hide();
+
             $('#optin').change(function() {
               if($('#optin').val()=='Yes')
               {
@@ -116,7 +118,29 @@
                 $('#family-allergy-history-description').hide();
               }
             });
+
+            var today = new Date();
+
+            $('#childrenbirthDate').change(function(){
+
+              var age = _calculateAge($(this).val());
+              $('#childrenage').val(age);
+            });
+            
           });
+
+          function _calculateAge(birthDate) { 
+            // var today     = new Date();
+            var birthDate = new Date(birthDate);
+
+            var diff_ms = Date.now() - birthDate.getTime();
+            var age_dt   = new Date(diff_ms);
+
+            return Math.abs(age_dt.getUTCFullYear() - 1970);
+
+            // var age   = today.getFullYear() - birthDate.getFullYear();
+            // var month = today.getMonth() - birthDate.getMonth();
+          }
         </script>
 
 @endsection
