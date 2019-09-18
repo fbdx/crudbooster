@@ -18,7 +18,7 @@
 		$('#panel-body-{{$name}}').hide();
 
 	    $('#title-form-{{$name}}').click(function(){
-	      $('#panel-body-{{$name}}').slideToggle();
+	      $('#panel-body-{{$name}}').slideToggle("slow","swing");
 	    });
 	});
 </script>
