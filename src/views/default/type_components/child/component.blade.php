@@ -17,7 +17,7 @@
 	$(document).ready(function () {
 		$('#panel-body-{{$name}}').hide();
 
-	    $('#panel-form-{{$name}}').click(function(){
+	    $('#title-form-{{$name}}').click(function(){
 	      $('#panel-body-{{$name}}').slideToggle();
 	    });
 	});
@@ -28,7 +28,7 @@
 
 	<div id='panel-form-{{$name}}' class="panel panel-default">
 		<div class="panel-heading">
-		  	<i class='fa fa-bars'></i> {{$form['label']}}
+		  	<div id='title-form-{{$name}}'><i class='fa fa-bars'></i> {{$form['label']}}</div>
 		</div>
 		<div class="panel-body" id='panel-body-{{$name}}'>
 				<div class='row'>
