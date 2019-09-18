@@ -13,6 +13,14 @@
 	$(function() {
 		$('#form-group-{{$name}} .select2').select2();
 	})
+
+	$(document).ready(function () {
+		$('#panel-body-{{$name}}').hide();
+
+	    $('#panel-form-{{$name}}').click(function(){
+	      $('#panel-body-{{$name}}').slideToggle();
+	    });
+	});
 </script>
 <div class='form-group {{$header_group_class}}' id='form-group-{{$name}}'>
 	@if($form['columns'])
@@ -22,7 +30,7 @@
 		<div class="panel-heading">
 		  	<i class='fa fa-bars'></i> {{$form['label']}}
 		</div>
-		<div class="panel-body">
+		<div class="panel-body" id='panel-body-{{$name}}'>
 				<div class='row'>
 					{{-- @if($table != 'customer') --}}
 					<div class='col-sm-12'>

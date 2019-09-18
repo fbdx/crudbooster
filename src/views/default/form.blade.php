@@ -122,11 +122,10 @@
             var today = new Date();
 
             $('#childrenbirthDate').change(function(){
-
               var age = _calculateAge($(this).val());
               $('#childrenage').val(age);
             });
-            
+
           });
 
           function _calculateAge(birthDate) { 
@@ -137,9 +136,6 @@
             var age_dt   = new Date(diff_ms);
 
             return Math.abs(age_dt.getUTCFullYear() - 1970);
-
-            // var age   = today.getFullYear() - birthDate.getFullYear();
-            // var month = today.getMonth() - birthDate.getMonth();
           }
         </script>
 
