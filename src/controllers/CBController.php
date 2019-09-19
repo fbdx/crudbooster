@@ -30,6 +30,8 @@ use Carbon;
 use App\Traits\GigyaApi;
 use App\Traits\SetSmartDataInfoToGigya;
 use Config;
+use GuzzleHttp\Exception\GuzzleException;
+use GuzzleHttp\Client;
 
 class CBController extends Controller {
 
@@ -1513,6 +1515,51 @@ class CBController extends Controller {
 
 	public function getEdit($id){
 		$this->cbLoader();
+
+		if($this->gigya_customer)
+		{
+			$record = DB::table($this->table)->where($this->primary_key,$id)->first();
+
+			$client = new Client(); 
+			$response = $client->get('https://www.mcliqonapps.net:83/wndc_final_dev/docroot/user/loyalty/'.$record->email, [   
+				// 'form_params' => ['email_address' => 'lgoldenjut@yahoo.com'],
+				'headers' => [
+			        'x-api-token' => 'WVqcLsu6l9ixSvSAhLPXAxh5nunZa0MVaKU6JP6QVfJDTT7eHMKy595pAMVRCHKQ99dJo6ewca7jncaA',
+			    ]
+			]);
+
+			$contents = json_decode($response->getBody()->getContents(), true);
+
+			// dd($contents);
+
+			if($contents['status'] == '200')
+			{
+				$data = $contents['data'];
+
+				if($data['loyalty'])
+				{
+					$loyaltyPoints = $data['loyalty'];
+				}
+
+				$dataMapped = [];
+
+				foreach($loyaltyPoints as $key => $value)
+				{
+					switch($key)
+					{
+						case 'currentPoint': $dataMapped['past_three_months_points'] = $value; break;
+						case 'totalPoint'  : $dataMapped['total_lifetime_points']    = $value; break;
+						case 'expiryDate'  : $dataMapped['membership_expiry_date']   = $value; break;
+						case 'tier'        : $dataMapped['membership_status']        = $value; break;
+						default            : break;
+					}
+				}
+
+				DB::table($this->table)
+				->where('email', $row->email)
+				->update($dataMapped);
+			}
+		}
 
 		$row = DB::table($this->table)->where($this->primary_key,$id)->first();
 
