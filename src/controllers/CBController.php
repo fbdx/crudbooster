@@ -1516,49 +1516,67 @@ class CBController extends Controller {
 	public function getEdit($id){
 		$this->cbLoader();
 
-		// if($this->gigya_customer)
-		// {
-		// 	$record = DB::table($this->table)->where($this->primary_key,$id)->first();
+		if($this->gigya_customer)
+		{
+			$customer = Customer::find($id);
 
-		// 	$client = new Client(); 
-		// 	$response = $client->get('https://www.mcliqonapps.net:83/wndc_final_dev/docroot/user/loyalty/'.$record->email, [ 
-		// 		'headers' => [
-		// 	        'x-api-token' => 'WVqcLsu6l9ixSvSAhLPXAxh5nunZa0MVaKU6JP6QVfJDTT7eHMKy595pAMVRCHKQ99dJo6ewca7jncaA',
-		// 	    ]
-		// 	]);
+			try{
+				$client = new Client(); 
+				$response = $client->get('https://www.mcliqonapps.net:83/wndc_final_dev/docroot/user/loyalty/'.$customer->email, [ 
+					'headers' => [
+				        'x-api-token' => 'WVqcLsu6l9ixSvSAhLPXAxh5nunZa0MVaKU6JP6QVfJDTT7eHMKy595pAMVRCHKQ99dJo6ewca7jncaA',
+				    ]
+				]);
 
-		// 	$contents = json_decode($response->getBody()->getContents(), true);
+				$contents = json_decode($response->getBody()->getContents(), true);
 
-		// 	// dd($contents);
+				if($contents['status'] == '200')
+				{
+					$data = $contents['data'];
 
-		// 	if($contents['status'] == '200')
-		// 	{
-		// 		$data = $contents['data'];
+					if($data['loyalty'])
+					{
+						$loyaltyPoints = $data['loyalty'];
+					}
 
-		// 		if($data['loyalty'])
-		// 		{
-		// 			$loyaltyPoints = $data['loyalty'];
-		// 		}
+					if($data['bagtag'])
+					{
+						$personalisedBagTag = $data['bagtag'];
+					}
 
-		// 		$dataMapped = [];
+					$dataMapped = [];
+					$subSample  = [];
 
-		// 		foreach($loyaltyPoints as $key => $value)
-		// 		{
-		// 			switch($key)
-		// 			{
-		// 				case 'currentPoint': $dataMapped['past_three_months_points'] = $value; break;
-		// 				case 'totalPoint'  : $dataMapped['total_lifetime_points']    = $value; break;
-		// 				case 'expiryDate'  : $dataMapped['membership_expiry_date']   = $value; break;
-		// 				case 'tier'        : $dataMapped['membership_status']        = $value; break;
-		// 				default            : break;
-		// 			}
-		// 		}
+					foreach($loyaltyPoints as $key => $value)
+					{
+						switch($key)
+						{
+							case 'currentPoint': $dataMapped['past_three_months_points'] = $value; break;
+							case 'totalPoint'  : $dataMapped['total_lifetime_points']    = $value; break;
+							case 'expiryDate'  : $dataMapped['membership_expiry_date']   = $value; break;
+							case 'tier'        : $dataMapped['membership_status']        = $value; break;
+							default            : break;
+						}
+					}
 
-		// 		DB::table($this->table)
-		// 		->where('email', $record->email)
-		// 		->update($dataMapped);
-		// 	}
-		// }
+					DB::table($this->table)
+					->where('email', $customer->email)
+					->update($dataMapped);
+
+					$subSample['personalised_tag_name'] = $personalisedBagTag;
+
+					if(isset($customer->mainMerge))
+					{
+						$customer->mainMerge->update($subSample);
+					}
+				}
+			} 
+			catch (\Exception $e)
+            {
+                Log::info($e->getMessage());
+            }
+
+		}
 
 		$row = DB::table($this->table)->where($this->primary_key,$id)->first();
 
@@ -1847,48 +1865,6 @@ class CBController extends Controller {
 
 	public function getDetail($id)	{
 		$this->cbLoader();
-
-		// if($this->gigya_customer)
-		// {
-		// 	$record = DB::table($this->table)->where($this->primary_key,$id)->first();
-
-		// 	$client = new Client(); 
-		// 	$response = $client->get('https://www.mcliqonapps.net:83/wndc_final_dev/docroot/user/loyalty/'.$record->email, [
-		// 		'headers' => [
-		// 	        'x-api-token' => 'WVqcLsu6l9ixSvSAhLPXAxh5nunZa0MVaKU6JP6QVfJDTT7eHMKy595pAMVRCHKQ99dJo6ewca7jncaA',
-		// 	    ]
-		// 	]);
-
-		// 	$contents = json_decode($response->getBody()->getContents(), true);
-
-		// 	if($contents['status'] == '200')
-		// 	{
-		// 		$data = $contents['data'];
-
-		// 		if($data['loyalty'])
-		// 		{
-		// 			$loyaltyPoints = $data['loyalty'];
-		// 		}
-
-		// 		$dataMapped = [];
-
-		// 		foreach($loyaltyPoints as $key => $value)
-		// 		{
-		// 			switch($key)
-		// 			{
-		// 				case 'currentPoint': $dataMapped['past_three_months_points'] = $value; break;
-		// 				case 'totalPoint'  : $dataMapped['total_lifetime_points']    = $value; break;
-		// 				case 'expiryDate'  : $dataMapped['membership_expiry_date']   = $value; break;
-		// 				case 'tier'        : $dataMapped['membership_status']        = $value; break;
-		// 				default            : break;
-		// 			}
-		// 		}
-
-		// 		DB::table($this->table)
-		// 		->where('email', $row->email)
-		// 		->update($dataMapped);
-		// 	}
-		// }
 
 		$row  = DB::table($this->table)->where($this->primary_key,$id)->first();
 
