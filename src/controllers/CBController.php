@@ -1421,6 +1421,13 @@ class CBController extends Controller {
 								{
 									$child_array[$i]['applicationInternalIdentifier'] = $this->generateUid();
 									$child_array[$i]['interestCode'] = 'GG_CHILD_MILK_BRAND';
+									
+									switch($child_array[$i]['sex'])
+									{
+										case 'Male'   : $child_array[$i]['sex'] = 1; break;
+										case 'Female' : $child_array[$i]['sex'] = 2 ; break;
+										default       : break;
+									}
 								}
 								DB::table($childtable)->insert($child_array[$i]);
 							}
@@ -1766,6 +1773,12 @@ class CBController extends Controller {
 								{
 									$child_array[$i]['applicationInternalIdentifier'] = $this->generateUid();
 									$child_array[$i]['interestCode'] = 'GG_CHILD_MILK_BRAND';
+									switch($child_array[$i]['sex'])
+									{
+										case 'Male'   : $child_array[$i]['sex'] = 1; break;
+										case 'Female' : $child_array[$i]['sex'] = 2 ; break;
+										default       : break;
+									}
 								}
 
 								$success = DB::table($childtable)->insert($child_array[$i]);
