@@ -129,11 +129,9 @@
           });
 
           function _calculateAge(birthDate) { 
-            // var today     = new Date();
             var birthDate = new Date(birthDate);
-
-            var diff_ms = Date.now() - birthDate.getTime();
-            var age_dt   = new Date(diff_ms);
+            var diff_ms   = Date.now() - birthDate.getTime();
+            var age_dt    = new Date(diff_ms);
 
             return Math.abs(age_dt.getUTCFullYear() - 1970);
           }
