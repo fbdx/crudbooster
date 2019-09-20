@@ -1424,7 +1424,7 @@ class CBController extends Controller {
 									
 									switch($child_array[$i]['sex'])
 									{
-										case 'Male'   : $child_array[$i]['sex'] = 1; break;
+										case 'Male'   : $child_array[$i]['sex'] = 1 ; break;
 										case 'Female' : $child_array[$i]['sex'] = 2 ; break;
 										default       : break;
 									}
@@ -1775,7 +1775,7 @@ class CBController extends Controller {
 									$child_array[$i]['interestCode'] = 'GG_CHILD_MILK_BRAND';
 									switch($child_array[$i]['sex'])
 									{
-										case 'Male'   : $child_array[$i]['sex'] = 1; break;
+										case 'Male'   : $child_array[$i]['sex'] = 1 ; break;
 										case 'Female' : $child_array[$i]['sex'] = 2 ; break;
 										default       : break;
 									}
