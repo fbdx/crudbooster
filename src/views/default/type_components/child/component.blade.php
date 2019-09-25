@@ -10,9 +10,9 @@
 	}
 ?>
 <script type="text/javascript">
-	$(function() {
-		$('#form-group-{{$name}} .select2').select2();
-	})
+	// $(function() {
+	// 	$('#form-group-{{$name}} .select2').select2();
+	// })
 
 	$(document).ready(function () {
 		$('#panel-body-{{$name}}').hide();
@@ -278,54 +278,35 @@
 
 										    </script>
 											@elseif($col['type']=='select')
-											{{-- ID Target Column: childrenbirthDateReliability --}}
+												<select id='{{$name_column}}' name='child-{{$col["name"]}}' class='form-control select2 {{$col['required']?"required":""}}'
+												{{($col['readonly']===true)?"readonly":""}} ">
 
-											{{-- {{$col['label']}} --}}
-												{{-- @if($form['table'] == 'gigya_child' && $col['name'] == 'birthDateReliability')
-													<select id='childrenbirthDateReliability' name='child-{{$col["name"]}}' class='form-control select2 {{$col['required']?"required":""}}'
-													{{($col['readonly']===true)?"readonly":""}} ">
-
-														<option value=''>{{trans('crudbooster.text_prefix_option')}} {{$col['label']}}</option>
-														<option value="childborn">Child is Born</option>
-														<option value="pregnant">Pregnante</option>
-
-													</select>
-												@else --}}
-													<select id='{{$name_column}}' name='child-{{$col["name"]}}' class='form-control select2 {{$col['required']?"required":""}}'
-													{{($col['readonly']===true)?"readonly":""}} ">
-
-														<option value=''>{{trans('crudbooster.text_prefix_option')}} {{$col['label']}}</option>
-														<?php
-															if($col['datatable']) {
-																$tableJoin = explode(',',$col['datatable'])[0];
-																$titleField = explode(',',$col['datatable'])[1];
-																$data = CRUDBooster::get($tableJoin,NULL,"$titleField ASC");
-																foreach($data as $d) {
-																	echo "<option value='$d->id'>".$d->$titleField."</option>";
-																	//dump($d);
-																}
-															}else{
-																$data = explode(';' , $col['dataenum']);
-
-																foreach($data as $d) {
-																	$enum = explode('|',$d);
-																	if(count($enum)==2) {
-																		$opt_value = $enum[0];
-																		$opt_label = $enum[1];
-																	}else{
-																		$opt_value = $opt_label = $enum[0];
-																	}
-																	//dd($opt_label, $opt_value);
-																	//$option_value[] = $opt_value;
-																	echo "<option value='$opt_value'>$opt_label</option>";
-																}
-
+													<option value=''>{{trans('crudbooster.text_prefix_option')}} {{$col['label']}}</option>
+													<?php
+														if($col['datatable']) {
+															$tableJoin = explode(',',$col['datatable'])[0];
+															$titleField = explode(',',$col['datatable'])[1];
+															$data = CRUDBooster::get($tableJoin,NULL,"$titleField ASC");
+															foreach($data as $d) {
+																echo "<option value='$d->id'>".$d->$titleField."</option>";
 															}
-														?>
-													</select>
-													<div class="test2"></div>
-												{{-- @endif --}}
+														}else{
+															$data = explode(';' , $col['dataenum']);
 
+															foreach($data as $d) {
+																$enum = explode('|',$d);
+																if(count($enum)==2) {
+																	$opt_value = $enum[0];
+																	$opt_label = $enum[1];
+																}else{
+																	$opt_value = $opt_label = $enum[0];
+																}
+																echo "<option value='$opt_value'>$opt_label</option>";
+															}
+														}
+													?>
+												</select>
+												<div class="test2"></div>
 											@elseif($col['type']=='hidden')
 												<input type="{{$col['type']}}" id="{{$name.$col["name"]}}" name="child-{{$name.$col["name"]}}" value="{{$col["value"]}}">
 											@elseif($col['type']=='hiddendate')
@@ -373,7 +354,16 @@
 									var currentRow = null;
 
 									function resetForm{{$name}}() {
-										$('#panel-form-{{$name}}').find("input[type=text],input[type=number],select,textarea").val('');
+										$('#panel-form-{{$name}}').find("input[type=text],input[type=number],textarea").val('');
+
+										$('#panel-form-{{$name}}').find("select").each(function(){
+											$(this).find('option').each(function(){
+												$(this).prop('selected',false);
+											});
+
+											$(this).prop('selectedIndex',0);
+										});
+
 									}
 
 									function deleteChildRow{{$name}}(t, id, table) {
@@ -384,7 +374,6 @@
 										        url: '{{CRUDBooster::adminPath("customer/delete-child")}}',
 										        type: 'POST',
 										        data: {id: id, table:table},
-										        
 										        success: function(data, textStatus, jqXHR)
 										        {
 										        	console.log(data);
