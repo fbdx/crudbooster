@@ -1299,7 +1299,21 @@ class CBController extends Controller {
 			unset($this->arr['subsource_id']);
 		}
 
-		DB::table($this->table)->insert($this->arr);
+		if($this->gigya_customer)
+		{
+			$recordId = DB::table($this->table)->insertGetId($this->arr);
+			
+			if($this->arr['countryCode'] = 'SG')
+			{
+				$subsampleRecords = ['m_product' => 'First Welcome Gift', 'm_date'=>date("Y-m-d h:i:s"), 'country'=>'SG', 'customer_id'=>$recordId];
+
+                DB::table('mainmerge')->insert($subsampleRecords);
+			}
+		}
+		else
+		{
+			DB::table($this->table)->insert($this->arr);
+		}
 
 		//Looping Data Input Again After Insert
 
