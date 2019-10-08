@@ -1822,7 +1822,7 @@ class CBController extends Controller {
 
 		DB::table($this->table)->where($this->primary_key,$id)->update($this->arr);
 
-		$UID     = NULL;
+		$UID      = NULL;
 		$regToken = NULL;
 
 		if($this->gigya_customer || $this->gigya_based)
@@ -1848,8 +1848,40 @@ class CBController extends Controller {
 
 		$this->return_url = ($this->return_url)?$this->return_url:Request::get('return_url');
 
-		//insert log
-		CRUDBooster::insertLog(trans("crudbooster.log_update",['name'=>$this->arr[$this->title_field],'module'=>CRUDBooster::getCurrentModule()->name]));
+		if($this->gigya_customer)
+		{
+			$oldRecord = (array) $row;
+			$newRecord = $this->arr;
+
+			$arrayDiff = array_diff_assoc($newRecord, $oldRecord);
+			$fields    = array_keys($arrayDiff);
+
+			$description = NULL;
+			$oldValues   = [];
+
+			foreach($fields as $key => $field)
+			{
+				$oldValues[$field] = $oldRecord[$field];
+			}
+
+			foreach($arrayDiff as $field => $value)
+			{
+				if($oldValues[$field] == '')
+				{
+					$oldValues[$field] = 'Empty';
+				}
+
+				$description .= 'Update data '.$field.' from '.$oldValues[$field].' to '.$value.' at '.CRUDBooster::getCurrentModule()->name.' .'."<br>";
+			}
+
+			CRUDBooster::insertLog($description);
+		}
+		else
+		{
+			//insert log
+			CRUDBooster::insertLog(trans("crudbooster.log_update",['name'=>$this->arr[$this->title_field],'module'=>CRUDBooster::getCurrentModule()->name]));
+		}
+
 
 		if($this->return_url) {
 			CRUDBooster::redirect($this->return_url,trans("crudbooster.alert_update_data_success"),'success');
