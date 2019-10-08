@@ -1856,7 +1856,7 @@ class CBController extends Controller {
 			$arrayDiff = array_diff_assoc($newRecord, $oldRecord);
 			$fields    = array_keys($arrayDiff);
 
-			$description = NULL;
+			$description = '<ul>';
 			$oldValues   = [];
 
 			foreach($fields as $key => $field)
@@ -1871,8 +1871,10 @@ class CBController extends Controller {
 					$oldValues[$field] = 'Empty';
 				}
 
-				$description .= 'Update data '.$field.' from '.$oldValues[$field].' to '.$value.' at '.CRUDBooster::getCurrentModule()->name.' .'."<br>";
+				$description .= '<li>Update data '.$field.' from '.$oldValues[$field].' to '.$value.' at '.CRUDBooster::getCurrentModule()->name.' .'."<br></li>";
 			}
+
+			$description .= '</ul>';
 
 			CRUDBooster::insertLog($description);
 		}
