@@ -1752,9 +1752,17 @@ class CBController extends Controller {
 							$column_data[$colname] = Request::get($name.'-'.$colname)[$i];
 						}
 
-						// dd($column_data);
-
 						$child_array[] = $column_data;
+
+						if($ro['name']=='gigya_children')
+						{
+							switch($child_array[$i]['sex'])
+							{
+								case 'Male'   : $child_array[$i]['sex'] = 1 ; break;
+								case 'Female' : $child_array[$i]['sex'] = 2 ; break;
+								default       : break;
+							}
+						}
 
 						if($child_array[$i]['id'] == NULL){
 
@@ -1765,13 +1773,11 @@ class CBController extends Controller {
 								{
 									$newArray = array_merge($child_array[$key],$test);
 								}
-								// dd($newArray);
 								unset($newArray['id']);
 								$newArray['mobileno'] = $newArray['phones'];
 								$newArray['postcode'] = $newArray['zip'];
 								$remove_array = ['phones','zip','careline_max_datecreated','careline_callstatus','careline_currentstatus','careline_telecomaction','mainmerge_max_mdate'];
 								$newArray = array_diff_key($newArray, array_flip($remove_array));
-								// dd($newArray);
 								$lastId = CRUDBooster::newId($childtable);
 								$newArray['id'] = $lastId;
 								date_default_timezone_set("Asia/Kuala_Lumpur");
@@ -1787,12 +1793,6 @@ class CBController extends Controller {
 								{
 									$child_array[$i]['applicationInternalIdentifier'] = $this->generateUid();
 									$child_array[$i]['interestCode'] = 'GG_CHILD_MILK_BRAND';
-									switch($child_array[$i]['sex'])
-									{
-										case 'Male'   : $child_array[$i]['sex'] = 1 ; break;
-										case 'Female' : $child_array[$i]['sex'] = 2 ; break;
-										default       : break;
-									}
 								}
 
 								$success = DB::table($childtable)->insert($child_array[$i]);
@@ -1848,35 +1848,40 @@ class CBController extends Controller {
 
 		$this->return_url = ($this->return_url)?$this->return_url:Request::get('return_url');
 
+		// insert customized cms_log
 		if($this->gigya_customer)
 		{
 			$oldRecord = (array) $row;
 			$newRecord = $this->arr;
+			$email     = $newRecord['email'];
 
 			$arrayDiff = array_diff_assoc($newRecord, $oldRecord);
-			$fields    = array_keys($arrayDiff);
 
-			$description = '<ul>';
-			$oldValues   = [];
-
-			foreach($fields as $key => $field)
+			if(isset($arrayDiff))
 			{
-				$oldValues[$field] = $oldRecord[$field];
-			}
+				$fields      = array_keys($arrayDiff);
+				$description = '<ul>';
+				$oldValues   = [];
 
-			foreach($arrayDiff as $field => $value)
-			{
-				if($oldValues[$field] == '')
+				foreach($fields as $key => $field)
 				{
-					$oldValues[$field] = 'Empty';
+					$oldValues[$field] = $oldRecord[$field];
 				}
 
-				$description .= '<li>Update data '.$field.' from '.$oldValues[$field].' to '.$value.' at '.CRUDBooster::getCurrentModule()->name.' .'."<br></li>";
+				foreach($arrayDiff as $field => $value)
+				{
+					if($oldValues[$field] == '')
+					{
+						$oldValues[$field] = 'Empty';
+					}
+
+					$description .= '<li>Update data '.$field.' from '.$oldValues[$field].' to '.$value.' for '.$email.' at '.CRUDBooster::getCurrentModule()->name.' .'."<br></li>";
+				}
+
+				$description .= '</ul>';
+
+				CRUDBooster::insertLog($description);
 			}
-
-			$description .= '</ul>';
-
-			CRUDBooster::insertLog($description);
 		}
 		else
 		{
