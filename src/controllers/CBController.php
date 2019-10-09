@@ -1855,27 +1855,22 @@ class CBController extends Controller {
 			$newRecord = $this->arr;
 			$email     = $newRecord['email'];
 
+			// Compare the keys and values of two arrays, and return the differences:
 			$arrayDiff = array_diff_assoc($newRecord, $oldRecord);
 
 			if(isset($arrayDiff))
 			{
 				$fields      = array_keys($arrayDiff);
 				$description = '<ul>';
-				$oldValues   = [];
-
-				foreach($fields as $key => $field)
-				{
-					$oldValues[$field] = $oldRecord[$field];
-				}
 
 				foreach($arrayDiff as $field => $value)
 				{
-					if($oldValues[$field] == '')
+					if($oldRecord[$field] == '')
 					{
-						$oldValues[$field] = 'Empty';
+						$oldRecord[$field] = 'Empty';
 					}
 
-					$description .= '<li>Update data '.$field.' from '.$oldValues[$field].' to '.$value.' for '.$email.' at '.CRUDBooster::getCurrentModule()->name.' .'."<br></li>";
+					$description .= '<li>Update data '.$field.' from '.$oldRecord[$field].' to '.$value.' for '.$email.' at '.CRUDBooster::getCurrentModule()->name.' .'."<br></li>";
 				}
 
 				$description .= '</ul>';
