@@ -1305,7 +1305,7 @@ class CBController extends Controller {
 			
 			if($this->arr['countryCode'] = 'SG')
 			{
-				$subsampleRecords = ['m_product' => 'First Welcome Gift', 'm_date'=>date("Y-m-d h:i:s"), 'country'=>'SG', 'customer_id'=>$recordId];
+				$subsampleRecords = ['m_product' => 'First Welcome Gift', 'stock_keeping_unit' => '300001', 'm_date'=>date("Y-m-d h:i:s"), 'country'=>'SG', 'customer_id'=>$recordId];
 
                 DB::table('mainmerge')->insert($subsampleRecords);
 			}
