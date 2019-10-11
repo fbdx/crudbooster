@@ -120,10 +120,6 @@
                     <li class="{{ (Request::is(config('crudbooster.ADMIN_PATH').'/logs*')) ? 'active' : '' }}"><a href='{{Route("LogsControllerGetIndex")}}?m=0'><i class='fa fa-flag'></i> {{ trans('crudbooster.Log_User_Access') }}</a></li>
                 @endif
 
-                @if(CRUDBooster::isSuperadmin() || CRUDBooster::myPrivilegeId() == 6 || CRUDBooster::myPrivilegeId() == 7)
-                    <li class="{{ (Request::is(config('crudbooster.ADMIN_PATH').'/logs*')) ? 'active' : '' }}"><a href='{{Route("LogsControllerGetIndex")}}?m=0'><i class='fa fa-flag'></i> {{ trans('crudbooster.Log_User_Access') }}</a></li>
-                @endif
-
             </ul><!-- /.sidebar-menu -->
 
         </div>
