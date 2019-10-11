@@ -1543,7 +1543,7 @@ class CBController extends Controller {
 
 			try{
 				$client = new Client(); 
-				$response = $client->get('https://www.mcliqonapps.net:83/wndc_final_dev/docroot/user/loyalty/'.$customer->email, [ 
+				$response = $client->get('https://drupal-wnpc-sg-sta.wndc.net/user/loyalty/'.$customer->email, [ 
 					'headers' => [
 				        'x-api-token' => 'WVqcLsu6l9ixSvSAhLPXAxh5nunZa0MVaKU6JP6QVfJDTT7eHMKy595pAMVRCHKQ99dJo6ewca7jncaA',
 				    ]
