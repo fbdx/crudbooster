@@ -1848,6 +1848,7 @@ class CBController extends Controller {
 
 		$this->return_url = ($this->return_url)?$this->return_url:Request::get('return_url');
 
+
 		// insert customized cms_log
 		if($this->gigya_customer)
 		{
@@ -1857,6 +1858,7 @@ class CBController extends Controller {
 
 			// Compare the keys and values of two arrays, and return the differences:
 			$arrayDiff = array_diff_assoc($newRecord, $oldRecord);
+			$label     = NULL;
 
 			if(isset($arrayDiff))
 			{
@@ -1870,7 +1872,15 @@ class CBController extends Controller {
 						$oldRecord[$field] = 'Empty';
 					}
 
-					$description .= '<li>Update data '.$field.' from '.$oldRecord[$field].' to '.$value.' for '.$email.' at '.CRUDBooster::getCurrentModule()->name.' .'."<br></li>";
+					foreach($this->data_inputan as $key => $form)
+					{
+						if($field == $form['name'])
+						{
+							$label = $form['label'];
+						}
+					}
+
+					$description .= '<li>Update data '.$label.' from '.$oldRecord[$field].' to '.$value.' for '.$email.' at '.CRUDBooster::getCurrentModule()->name.' .'."<br></li>";
 				}
 
 				$description .= '</ul>';
