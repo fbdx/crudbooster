@@ -1848,17 +1848,22 @@ class CBController extends Controller {
 
 		$this->return_url = ($this->return_url)?$this->return_url:Request::get('return_url');
 
-
+		// dd($this->data_inputan);
 		// insert customized cms_log
 		if($this->gigya_customer)
 		{
 			$oldRecord = (array) $row;
+			$oldAssignedUser = DB::table('cms_users')->where('id', $oldRecord['userid'])->first();
+			if($oldAssignedUser)
+			{
+				$oldRecord['userid'] = $oldAssignedUser->name;
+			}
+
 			$newRecord = $this->arr;
 			$email     = $newRecord['email'];
 
 			// Compare the keys and values of two arrays, and return the differences:
 			$arrayDiff = array_diff_assoc($newRecord, $oldRecord);
-			$label     = NULL;
 
 			if(isset($arrayDiff))
 			{
@@ -1867,19 +1872,38 @@ class CBController extends Controller {
 
 				foreach($arrayDiff as $field => $value)
 				{
+					$label = NULL;
+
 					if($oldRecord[$field] == '')
 					{
 						$oldRecord[$field] = 'Empty';
 					}
 
-					foreach($this->data_inputan as $key => $form)
+					foreach($this->data_inputan as $key => $row)
 					{
-						if($field == $form['name'])
+						if($field == $row['name'])
 						{
-							$label = $form['label'];
+							$label = $row['label'];
+
+							if ($field == 'userid')
+							{
+								$assignedUser = DB::table('cms_users')->where('id', $value)->first();
+								if($assignedUser)
+								{
+									$value = $assignedUser->name;
+								}
+								else
+								{
+									$value = 'Empty';
+								}
+							}
+						}
+						else if($field == 'updated_at')
+						{
+							$label = 'Updated At';
 						}
 					}
-
+					
 					$description .= '<li>Update data '.$label.' from '.$oldRecord[$field].' to '.$value.' for '.$email.' at '.CRUDBooster::getCurrentModule()->name.' .'."<br></li>";
 				}
 
