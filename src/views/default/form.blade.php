@@ -1,5 +1,22 @@
 @extends('crudbooster::admin_template')
 @section('content')
+      <style>
+        .customize {
+          float:left;
+          width:50%;
+        }
+        
+        .clear {
+          clear:both;
+        }
+
+        @media only screen and (max-width: 768px){
+          .customize  {
+              width:100%;
+          }
+        }
+
+      </style>
 
         <div >
           @if (session('status'))
@@ -43,7 +60,6 @@
                   <input type="hidden" name="hide_form" value='{!! serialize($hide_form) !!}'>
                 @endif
                         <div class="box-body" id="parent-form-area">
-
                           @if($command == 'detail')
                              @include("crudbooster::default.form_detail")
                           @else

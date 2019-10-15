@@ -1264,8 +1264,9 @@ class CBController extends Controller {
 		$option_id		 = $this->option_id;
 		$option_fields	 = $this->option_fields;
 		$validator		 = $this->validation(NULL,true);
+		$gigya_customer  = $this->gigya_customer;
 
-		return view('crudbooster::default.form',compact('page_title','page_menu','command','option_id','validator','option_fields'));
+		return view('crudbooster::default.form',compact('page_title','page_menu','command','option_id','validator','option_fields', 'gigya_customer'));
 	}
 
 	public function postAddSave() {
@@ -1632,9 +1633,10 @@ class CBController extends Controller {
 		Session::put('current_row_id',$id);
 		$option_id		 = $this->option_id;
 		$option_fields	 = $this->option_fields;
-		$table = $this->table;
+		$table           = $this->table;
+		$gigya_customer  = $this->gigya_customer;
 
-		return view('crudbooster::default.form',compact('id','row','page_menu','page_title','command','option_id','option_fields','table'));
+		return view('crudbooster::default.form',compact('id','row','page_menu','page_title','command','option_id','option_fields','table', 'gigya_customer'));
 	}
 
 	public $countChild = 0;
@@ -1848,7 +1850,6 @@ class CBController extends Controller {
 
 		$this->return_url = ($this->return_url)?$this->return_url:Request::get('return_url');
 
-		// dd($this->data_inputan);
 		// insert customized cms_log
 		if($this->gigya_customer)
 		{
