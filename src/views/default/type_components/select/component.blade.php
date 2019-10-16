@@ -36,7 +36,7 @@
 	</script>
 	@endif
 	@if($gigya_customer)
-	<div class="customize">
+	<div class='customize form-group {{$header_group_class}} {{ ($errors->first($name))?"has-error":"" }}' id='form-group-{{$name}}' style="{{@$form['style']}}">
 	<label style="text-align:left" class='control-label col-sm-4'>{{$form['label']}} {!!($required)?"<span class='text-danger' title='This field is required'>*</span>":"" !!}</label>	
 	@else
 	<div class='form-group {{$header_group_class}} {{ ($errors->first($name))?"has-error":"" }}' id='form-group-{{$name}}' style="{{@$form['style']}}">
