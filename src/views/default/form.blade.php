@@ -114,19 +114,19 @@
         <script type="text/javascript">
           $(document).ready(function () {
 
-            $('#form-group-optin_subscriptions').hide();
+            // $('#form-group-optin_subscriptions').hide();
             $('#family-allergy-history-description').hide();
 
-            $('#optin').change(function() {
-              if($('#optin').val()=='Yes')
-              {
-                $('#form-group-optin_subscriptions').show();
-              }
-              else
-              {
-                $('#form-group-optin_subscriptions').hide();
-              }
-            });
+            // $('#optin').change(function() {
+            //   if($('#optin').val()=='Yes')
+            //   {
+            //     $('#form-group-optin_subscriptions').show();
+            //   }
+            //   else
+            //   {
+            //     $('#form-group-optin_subscriptions').hide();
+            //   }
+            // });
 
             $('#childrenfamily_allergy_history').change(function(){
               if($('#childrenfamily_allergy_history').val()=='Yes')

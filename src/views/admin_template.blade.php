@@ -111,7 +111,7 @@
             </a>
             @endif
 
-            @if(CRUDBooster::isSuperadmin())
+            @if(CRUDBooster::isSuperadmin() || CRUDBooster::myPrivilegeId() == 6)
               @if($module->name == 'Database' || $module->name == 'customer')
                 <button type="button" id="gigya_refresh" class="btn btn-success">Gigya Refresh</button>
               @endif
