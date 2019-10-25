@@ -1459,31 +1459,31 @@ class CBController extends Controller {
 			}
 		}
 
-		if($this->gigya_based || $this->gigya_customer)
-		{
-			$UID      = NULL;
-			$regToken = NULL;
+		// if($this->gigya_based || $this->gigya_customer)
+		// {
+		// 	$UID      = NULL;
+		// 	$regToken = NULL;
 
-			$response = $this->searchViaEmail($this->arr['email']);
+		// 	$response = $this->searchViaEmail($this->arr['email']);
 
-			$results = $response['results'];
+		// 	$results = $response['results'];
 
-			if($results[0]["hasFullAccount"])
-			{
-				$UID = $results[0]['UID'];
-			}
+		// 	if($results[0]["hasFullAccount"])
+		// 	{
+		// 		$UID = $results[0]['UID'];
+		// 	}
 
-	    	if(!isset($UID))
-	    	{
-	    		$register = $this->initRegistration();
-	    		$regToken = $register["regToken"];
-	    	}
+	 //    	if(!isset($UID))
+	 //    	{
+	 //    		$register = $this->initRegistration();
+	 //    		$regToken = $register["regToken"];
+	 //    	}
 
-	    	$rowArray = $this->arr;
-	    	$recordId = $this->arr[$this->primary_key];
+	 //    	$rowArray = $this->arr;
+	 //    	$recordId = $this->arr[$this->primary_key];
 
-	    	// $this->synchroToGigya($UID,$regToken,$rowArray['email'],$rowArray,$recordId,$this->arr,$this->table);
-		}
+	 //    	$this->synchroToGigya($UID,$regToken,$rowArray['email'],$rowArray,$recordId,$this->arr,$this->table);
+		// }
 
 		$this->hook_after_add($this->arr[$this->primary_key]);
 
@@ -1824,27 +1824,27 @@ class CBController extends Controller {
 
 		DB::table($this->table)->where($this->primary_key,$id)->update($this->arr);
 
-		$UID      = NULL;
-		$regToken = NULL;
+		// $UID      = NULL;
+		// $regToken = NULL;
 
-		if($this->gigya_customer || $this->gigya_based)
-		{
-			$response = $this->searchViaEmail($row->email);
-			$results = $response['results'];
+		// if($this->gigya_customer || $this->gigya_based)
+		// {
+		// 	$response = $this->searchViaEmail($row->email);
+		// 	$results = $response['results'];
 
-			if($results[0]["hasFullAccount"])
-			{
-				$UID = $results[0]['UID'];
-			}
+		// 	if($results[0]["hasFullAccount"])
+		// 	{
+		// 		$UID = $results[0]['UID'];
+		// 	}
 
-			if(!isset($UID))
-	    	{
-	    		$register = $this->initRegistration();
-	    		$regToken = $register["regToken"];
-	    	}
+		// 	if(!isset($UID))
+	 //    	{
+	 //    		$register = $this->initRegistration();
+	 //    		$regToken = $register["regToken"];
+	 //    	}
 
-			// $this->synchroToGigya($UID,$regToken,$row->email,$setInputData,$id,$this->arr,$this->table);
-		}
+		// 	$this->synchroToGigya($UID,$regToken,$row->email,$setInputData,$id,$this->arr,$this->table);
+		// }
 
 		$this->hook_after_edit($id);
 
