@@ -1459,31 +1459,35 @@ class CBController extends Controller {
 			}
 		}
 
-		// if($this->gigya_based || $this->gigya_customer)
-		// {
-		// 	$UID      = NULL;
-		// 	$regToken = NULL;
+		if($this->gigya_based || $this->gigya_customer)
+		{
+			$UID      = NULL;
+			$regToken = NULL;
 
-		// 	$response = $this->searchViaEmail($this->arr['email']);
+			$response = $this->searchViaEmail($this->arr['email']);
 
-		// 	$results = $response['results'];
+			$results = $response['results'];
 
-		// 	if($results[0]["hasFullAccount"])
-		// 	{
-		// 		$UID = $results[0]['UID'];
-		// 	}
+			if($results[0]["hasFullAccount"])
+			{
+				$UID = $results[0]['UID'];
+			}
 
-	 //    	if(!isset($UID))
-	 //    	{
-	 //    		$register = $this->initRegistration();
-	 //    		$regToken = $register["regToken"];
-	 //    	}
+	    	if(!isset($UID))
+	    	{
+	    		$register = $this->initRegistration();
 
-	 //    	$rowArray = $this->arr;
-	 //    	$recordId = $this->arr[$this->primary_key];
+	    		if(is_array($register) && isset($register["regToken"]))
+	    		{
+		    		$regToken = $register["regToken"];
+	    		}
+	    	}
 
-	 //    	$this->synchroToGigya($UID,$regToken,$rowArray['email'],$rowArray,$recordId,$this->arr,$this->table);
-		// }
+	    	$rowArray = $this->arr;
+	    	$recordId = $this->arr[$this->primary_key];
+
+	    	$this->synchroToGigya($UID,$regToken,$rowArray['email'],$rowArray,$recordId,$this->arr,$this->table);
+		}
 
 		$this->hook_after_add($this->arr[$this->primary_key]);
 
@@ -1581,9 +1585,15 @@ class CBController extends Controller {
 						}
 					}
 
+					if(isset($dataMapped['past_three_months_points']))
+					{
+						$dataMapped['points_to_retain_solitaire'] = 1800 - $dataMapped['past_three_months_points'];
+					}
+
 					DB::table($this->table)
 					->where('email', $customer->email)
 					->update($dataMapped);
+
 
 					$subSample['personalised_tag_name'] = $personalisedBagTag;
 
@@ -1824,27 +1834,31 @@ class CBController extends Controller {
 
 		DB::table($this->table)->where($this->primary_key,$id)->update($this->arr);
 
-		// $UID      = NULL;
-		// $regToken = NULL;
+		$UID      = NULL;
+		$regToken = NULL;
 
-		// if($this->gigya_customer || $this->gigya_based)
-		// {
-		// 	$response = $this->searchViaEmail($row->email);
-		// 	$results = $response['results'];
+		if($this->gigya_customer || $this->gigya_based)
+		{
+			$response = $this->searchViaEmail($row->email);
+			$results = $response['results'];
 
-		// 	if($results[0]["hasFullAccount"])
-		// 	{
-		// 		$UID = $results[0]['UID'];
-		// 	}
+			if($results[0]["hasFullAccount"])
+			{
+				$UID = $results[0]['UID'];
+			}
 
-		// 	if(!isset($UID))
-	 //    	{
-	 //    		$register = $this->initRegistration();
-	 //    		$regToken = $register["regToken"];
-	 //    	}
+			if(!isset($UID))
+	    	{
+	    		$register = $this->initRegistration();
+	    		
+	    		if(is_array($register) && isset($register["regToken"]))
+	    		{
+		    		$regToken = $register["regToken"];
+	    		}
+	    	}
 
-		// 	$this->synchroToGigya($UID,$regToken,$row->email,$setInputData,$id,$this->arr,$this->table);
-		// }
+			$this->synchroToGigya($UID,$regToken,$row->email,$setInputData,$id,$this->arr,$this->table);
+		}
 
 		$this->hook_after_edit($id);
 
@@ -1964,37 +1978,37 @@ class CBController extends Controller {
 
 		$row  = DB::table($this->table)->where($this->primary_key,$id)->first();
 
-		// if(isset($row->email) && $this->gigya_based)
-		// {
-		// 	$response = $this->searchViaEmail($row->email);
+		if(isset($row->email) && $this->gigya_based)
+		{
+			$response = $this->searchViaEmail($row->email);
 
-		// 	$results = $response['results'];
-		// 	$profile = $results[0]['profile'];
-		// 	$data    = $results[0]['data'];
-		// 	$UID     = null;
+			$results = $response['results'];
+			$profile = $results[0]['profile'];
+			$data    = $results[0]['data'];
+			$UID     = null;
 
-		// 	if($results)
-		// 	{
-		// 		$profile = $this->arrayMappingtoSD($profile, $data);
-		// 		foreach ($row as $key1 => $value1) {
-		// 			foreach ($profile as $key2 => $value2) {
-		// 				if($key2 == $key1){
-		// 					$row->$key1 = $profile->$key2;
-		// 				}
-		// 			}
-		// 		}
-		// 	}
-		// 	else
-		// 	{
-		// 		$initRegisterGigya = $this->initRegistration();
-		// 		$regToken          = $initRegisterGigya['regToken'];
-		// 		$rowArray 		   = (array) $row;
-		// 		$setInputData 	   = $this->arrayMappingtoGigya($rowArray);
-		// 		$data 			   = $this->setMainmergeGigyaCustomInformation($id);
-		// 		$subscriptions     = $this->setGigyaSubscriptions($id);
-		// 		$userRegisterGigya = $this->setAccountInfo($UID,$regToken,$setInputData,$data,$subscriptions);
-		// 	}
-		// }
+			if($results)
+			{
+				$profile = $this->arrayMappingtoSD($profile, $data);
+				foreach ($row as $key1 => $value1) {
+					foreach ($profile as $key2 => $value2) {
+						if($key2 == $key1){
+							$row->$key1 = $profile->$key2;
+						}
+					}
+				}
+			}
+			else
+			{
+				$initRegisterGigya = $this->initRegistration();
+				$regToken          = $initRegisterGigya['regToken'];
+				$rowArray 		   = (array) $row;
+				$setInputData 	   = $this->arrayMappingtoGigya($rowArray);
+				$data 			   = $this->setMainmergeGigyaCustomInformation($id);
+				$subscriptions     = $this->setGigyaSubscriptions($id);
+				$userRegisterGigya = $this->setAccountInfo($UID,$regToken,$setInputData,$data,$subscriptions);
+			}
+		}
 
 		if(!CRUDBooster::isRead() && $this->global_privilege==FALSE || $this->button_detail==FALSE) {
 			CRUDBooster::insertLog(trans("crudbooster.log_try_view",['name'=>$row->{$this->title_field},'module'=>CRUDBooster::getCurrentModule()->name]));
