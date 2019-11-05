@@ -1590,15 +1590,21 @@ class CBController extends Controller {
 						$dataMapped['points_to_retain_solitaire'] = 1800 - $dataMapped['past_three_months_points'];
 					}
 
+					if(isset($loyaltyPoints['user_first_time_solitaire']))
+					{
+						if($loyaltyPoints['user_first_time_solitaire'] == FALSE)
+						{
+							$dataMapped['membership_status'] = 'Returning Solitaire';
+						}
+					}
+
 					DB::table($this->table)
 					->where('email', $customer->email)
 					->update($dataMapped);
 
-
-					$subSample['personalised_tag_name'] = $personalisedBagTag;
-
 					if(isset($customer->mainMerge))
 					{
+						$subSample['personalised_tag_name'] = $personalisedBagTag;
 						$customer->mainMerge->update($subSample);
 					}
 				}
