@@ -9,6 +9,7 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
 use Socialite;
 use CRUDBooster;
+use Carbon\Carbon;
 
 use Illuminate\Support\Facades\Schema;
 
@@ -73,26 +74,26 @@ class AdminController extends CBController {
 
 	public function getLogin()
 	{
-		$whitelistIP = ['211.25.211.2','121.123.162.90','210.19.137.50','121.122.44.126','210.19.32.54','210.19.164.146','96.9.161.226','211.25.211.154', '211.25.211.2', '103.118.20.198','14.140.116.135','14.140.116.145','14.140.116.156','59.144.18.118', '103.118.21.114','211.24.79.202','192.168.10.1', '111.223.97.240','111.223.97.242','2001:d08:d8:4148:24f8:4a3b:5549:e41d', '121.122.106.200', '121.122.86.227', '103.118.21.118'];	
+		// $whitelistIP = ['211.25.211.2','121.123.162.90','210.19.137.50','121.122.44.126','210.19.32.54','210.19.164.146','96.9.161.226','211.25.211.154', '211.25.211.2', '103.118.20.198','14.140.116.135','14.140.116.145','14.140.116.156','59.144.18.118', '103.118.21.114','127.0.0.1','211.24.79.202','192.168.10.1'];	
 
- 		if (!empty($_SERVER['HTTP_CLIENT_IP']))   //check ip from share internet
-	    {
-	      $ip=$_SERVER['HTTP_CLIENT_IP'];
-	    }
-	    elseif (!empty($_SERVER['HTTP_X_FORWARDED_FOR']))   //to check ip is pass from proxy
-	    {
-	      $ip=$_SERVER['HTTP_X_FORWARDED_FOR'];
-	    }
-	    else
-	    {
-	      $ip=$_SERVER['REMOTE_ADDR'];
-	    }
+ 	// 	if (!empty($_SERVER['HTTP_CLIENT_IP']))   //check ip from share internet
+	 //    {
+	 //      $ip=$_SERVER['HTTP_CLIENT_IP'];
+	 //    }
+	 //    elseif (!empty($_SERVER['HTTP_X_FORWARDED_FOR']))   //to check ip is pass from proxy
+	 //    {
+	 //      $ip=$_SERVER['HTTP_X_FORWARDED_FOR'];
+	 //    }
+	 //    else
+	 //    {
+	 //      $ip=$_SERVER['REMOTE_ADDR'];
+	 //    }
 
- 		if(array_search($ip, $whitelistIP) === false){
-			return redirect()->route('AdminControllerGetHome');
-		} else {
+ 	// 	if(array_search($ip, $whitelistIP) === false){
+		// 	return redirect()->route('AdminControllerGetHome');
+		// } else {
 			return view('crudbooster::login');
-		}
+		// }
 	}
 
 	public function redirectToProvider()
@@ -140,6 +141,11 @@ class AdminController extends CBController {
 		$password 	= Request::input("password");
 		$user 		= DB::table(config('crudbooster.USER_TABLE'))->where("email",$email)->first();
 
+		if($user->status == 'Locked')
+		{
+			return redirect()->route('getLogin')->with('message', 'This account has been locked. Please contact the admin to unlock it.');
+		}
+
 		if(\Hash::check($password,$user->password)) {
 
 			$success = $this->saveIntoSessionAndRedirect($user);
@@ -150,6 +156,17 @@ class AdminController extends CBController {
 			}
 
 		}else{
+
+			$loginAttempts = $user->failed_login_attempts;
+			$loginCount    = $loginAttempts + 1;
+
+			DB::table(config('crudbooster.USER_TABLE'))->where("email",$email)->update(['failed_login_attempts' => $loginCount]);
+
+			if($loginCount >= 3)
+			{
+				DB::table(config('crudbooster.USER_TABLE'))->where("email",$email)->update(['status' => 'Locked']);
+			}
+
 			return redirect()->route('getLogin')->with('message', trans('crudbooster.alert_password_wrong'));
 		}
 	}
@@ -225,6 +242,19 @@ class AdminController extends CBController {
 		CRUDBooster::insertLog(trans("crudbooster.log_forgot",['email'=>g('email'),'ip'=>Request::server('REMOTE_ADDR')]));
 
 		return redirect()->route('getLogin')->with('message', trans("crudbooster.message_forgot_password"));
+	}
+
+	public function getChangePassword($userId) {
+
+		$user = DB::table(config('crudbooster.USER_TABLE'))->where("id",$userId)->first();
+
+		$data['userId']= $user->id;
+
+		return view('crudbooster::change', $data);
+	}
+
+	public function postChangePassword($userId) {
+		return redirect()->route('getLogin')->with('message','Password changed successfully. You can now login!');
 	}
 
 	public function getLogout() {
