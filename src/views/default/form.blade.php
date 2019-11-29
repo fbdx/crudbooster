@@ -114,19 +114,27 @@
         <script type="text/javascript">
           $(document).ready(function () {
 
-            // $('#form-group-optin_subscriptions').hide();
             $('#family-allergy-history-description').hide();
 
-            // $('#optin').change(function() {
-            //   if($('#optin').val()=='Yes')
-            //   {
-            //     $('#form-group-optin_subscriptions').show();
-            //   }
-            //   else
-            //   {
-            //     $('#form-group-optin_subscriptions').hide();
-            //   }
-            // });
+            $('#postcode').change(function(){
+              var postcode  = $('#postcode').val();
+              $.ajax({
+                    url:"{{ CRUDBooster::adminPath('customer/postcode-mapping') }}",
+                    method: 'GET',
+                    data: {
+                      postcode : postcode,
+                    },
+                    success:function(data, status, xhr)
+                    {
+                      $('#addressLine1').val(data.street_name);
+                      $('#addressLine2').val(data.building_name);
+                      $('#addressLine3').val(data.building_number);
+                    },
+                    error: function (jqXhr, textStatus, errorMessage) {
+                        alert(errorMessage);
+                    }
+                  });
+            });
 
             $('#childrenfamily_allergy_history').change(function(){
               if($('#childrenfamily_allergy_history').val()=='Yes')
