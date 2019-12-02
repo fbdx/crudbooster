@@ -42,6 +42,8 @@ Route::group(['middleware'=>['web'],'prefix'=>config('crudbooster.ADMIN_PATH'),'
 	Route::get('login/callback', ['uses'=>'AdminController@handleProviderCallback', 'as'=>'googleCallback']);
 	Route::get('login', ['uses'=>'AdminController@getLogin','as'=>'getLogin']);	
 	Route::post('login', ['uses'=>'AdminController@postLogin','as'=>'postLogin']);
+	Route::get('change-password', ['uses' => 'AdminController@getChangePassword', 'as' => 'getChangePassword']);
+	Route::post('change-password', ['uses' => 'AdminController@postChangePassword', 'as' => 'postChangePassword']);
 
 });
 

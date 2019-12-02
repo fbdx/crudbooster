@@ -67,8 +67,8 @@ class AdminController extends CBController {
 	      $ip=$_SERVER['REMOTE_ADDR'];
 	    }
 
-	    // dump($ip);
-
+	    dump($ip);
+	    
 		return view('crudbooster::main');
 	}
 
@@ -147,6 +147,19 @@ class AdminController extends CBController {
 		}
 
 		if(\Hash::check($password,$user->password)) {
+
+			if(isset($user->password_updated_at))
+			{
+				$now              = Carbon::now();
+				$passwordExpiryAt = Carbon::parse($user->password_updated_at)->addDays($user->password_expiry_days);
+				// $passwordExpiryAt = date("Y-m-d", strtotime('- 10 days'));
+
+				if($passwordExpiryAt < $now)
+				{
+				    Session::flush();
+			        return redirect()->route('getChangePassword', [$user->id])->with('message','Your Password has expired. Please change it.');
+			    }
+			}
 
 			$success = $this->saveIntoSessionAndRedirect($user);
 
@@ -244,18 +257,60 @@ class AdminController extends CBController {
 		return redirect()->route('getLogin')->with('message', trans("crudbooster.message_forgot_password"));
 	}
 
-	// public function getChangePassword($userId) {
+	public function getChangePassword() {
 
-	// 	$user = DB::table(config('crudbooster.USER_TABLE'))->where("id",$userId)->first();
+		$user = DB::table(config('crudbooster.USER_TABLE'))->where("id",$id)->first();
 
-	// 	$data['userId']= $user->id;
+		$data['user'] = (array) $user;
 
-	// 	return view('crudbooster::change', $data);
-	// }
+		return view('crudbooster::change', $data);
+	}
 
-	// public function postChangePassword($userId) {
-	// 	return redirect()->route('getLogin')->with('message','Password changed successfully. You can now login!');
-	// }
+	public function postChangePassword(\Illuminate\Http\Request $request) {
+
+		$input = $request->all();
+		$email = $input['email'];
+		$user  = DB::table(config('crudbooster.USER_TABLE'))->where("email",$email)->first();
+
+		if(\Hash::check($input['current-password'],$user->password))
+		{
+			if($input['new-password'] != $input['confirm-new-password'] )
+			{
+				return redirect()->back()->with("message", 'The confirm new password does not match.');
+			}
+
+			$validator = Validator::make($input, [
+			    'email'                => 'required|email|exists:'.config('crudbooster.USER_TABLE'),
+			    'current-password'     => 'required',
+			    'new-password'         => ['required', 'min:16', 'regex:/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*(_|[^\w])).+$/'],
+			    'confirm-new-password' => 'required',
+			]);
+
+			if ($validator->fails())
+			{
+				$message     = $validator->messages();
+				$message_all = $message->all();
+				
+				return redirect()->back()->with("errors",$message)->with(['message'=>trans('crudbooster.alert_validation_error',['error'=>implode(', ',$message_all)]),'message_type'=>'warning'])->withInput();
+			}
+
+			$data['password'] = \Hash::make($input['new-password']);
+			$data['password_updated_at'] = date('Y-m-d H:i:s');
+
+			unset($input["_token"]);
+			unset($input["new-password"]);
+			unset($input["confirm-new-password"]);
+
+			DB::table(config('crudbooster.USER_TABLE'))->where("email",$email)->update($data);
+
+			return redirect()->route('getLogin')->with('message','Password changed successfully. You can now login!');
+		}
+		else
+		{
+			return redirect()->back()->with("message", 'The current password for the input email is wrong, please try again');
+		}
+
+	}
 
 	public function getLogout() {
 
