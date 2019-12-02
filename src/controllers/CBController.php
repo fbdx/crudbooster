@@ -529,7 +529,7 @@ class CBController extends Controller {
 						$result->orderby($orderby_table.'.'.$k,$v);
 					}
 				}else{
-					$this->orderby = explode(";",$this->orderby);
+					/*$this->orderby = explode(";",$this->orderby);
 					foreach($this->orderby as $o) {
 						$o = explode(",",$o);
 						$k = $o[0];
@@ -540,7 +540,7 @@ class CBController extends Controller {
 							$orderby_table = $table;
 						}
 						$result->orderby($orderby_table.'.'.$k,$v);
-					}
+					}*/
 				}
 
 				$data['result'] = $result->paginate($limit);
@@ -1303,7 +1303,7 @@ class CBController extends Controller {
 		if($this->gigya_customer)
 		{
 			$recordId = DB::table($this->table)->insertGetId($this->arr);
-			
+
 			if($this->arr['countryCode'] = 'SG')
 			{
 				$subsampleRecords = ['m_product' => 'First Welcome Gift', 'stock_keeping_unit' => '300001', 'm_date'=>date("Y-m-d h:i:s"), 'country'=>'SG', 'customer_id'=>$recordId];
@@ -1436,7 +1436,7 @@ class CBController extends Controller {
 								{
 									$child_array[$i]['applicationInternalIdentifier'] = $this->generateUid();
 									$child_array[$i]['interestCode'] = 'GG_CHILD_MILK_BRAND';
-									
+
 									switch($child_array[$i]['sex'])
 									{
 										case 'Male'   : $child_array[$i]['sex'] = 1 ; break;
@@ -1547,8 +1547,8 @@ class CBController extends Controller {
 			$customer = Customer::find($id);
 
 			try{
-				$client = new Client(); 
-				$response = $client->get('https://www.clubillume.com.sg/user/loyalty/'.$customer->email, [ 
+				$client = new Client();
+				$response = $client->get('https://www.clubillume.com.sg/user/loyalty/'.$customer->email, [
 					'headers' => [
 				        'x-api-token' => 'WVqcLsu6l9ixSvSAhLPXAxh5nunZa0MVaKU6JP6QVfJDTT7eHMKy595pAMVRCHKQ99dJo6ewca7jncaA',
 				    ]
@@ -1608,7 +1608,7 @@ class CBController extends Controller {
 						$customer->mainMerge->update($subSample);
 					}
 				}
-			} 
+			}
 			catch (\Exception $e)
             {
                 Log::info($e->getMessage());
@@ -1856,7 +1856,7 @@ class CBController extends Controller {
 			if(!isset($UID))
 	    	{
 	    		$register = $this->initRegistration();
-	    		
+
 	    		if(is_array($register) && isset($register["regToken"]))
 	    		{
 		    		$regToken = $register["regToken"];
@@ -1924,7 +1924,7 @@ class CBController extends Controller {
 							$label = 'Updated At';
 						}
 					}
-					
+
 					$description .= '<li>Update data '.$label.' from '.$oldRecord[$field].' to '.$value.' for '.$email.' at '.CRUDBooster::getCurrentModule()->name.' .'."<br></li>";
 				}
 
