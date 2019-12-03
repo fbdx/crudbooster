@@ -529,18 +529,18 @@ class CBController extends Controller {
 						$result->orderby($orderby_table.'.'.$k,$v);
 					}
 				}else{
-					// $this->orderby = explode(";",$this->orderby);
-					// foreach($this->orderby as $o) {
-					// 	$o = explode(",",$o);
-					// 	$k = $o[0];
-					// 	$v = $o[1];
-					// 	if(strpos($k, '.')!==FALSE) {
-					// 		$orderby_table = explode(".",$k)[0];
-					// 	}else{
-					// 		$orderby_table = $table;
-					// 	}
-					// 	$result->orderby($orderby_table.'.'.$k,$v);
-					// }
+					$this->orderby = explode(";",$this->orderby);
+					foreach($this->orderby as $o) {
+						$o = explode(",",$o);
+						$k = $o[0];
+						$v = $o[1];
+						if(strpos($k, '.')!==FALSE) {
+							$orderby_table = explode(".",$k)[0];
+						}else{
+							$orderby_table = $table;
+						}
+						$result->orderby($orderby_table.'.'.$k,$v);
+					}
 				}
 
 				$data['result'] = $result->paginate($limit);
