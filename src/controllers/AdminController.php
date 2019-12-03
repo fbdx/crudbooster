@@ -7,6 +7,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
+use App\PasswordHistory;
 use Socialite;
 use CRUDBooster;
 use Carbon\Carbon;
@@ -157,7 +158,7 @@ class AdminController extends CBController {
 				if($passwordExpiryAt < $now)
 				{
 				    Session::flush();
-			        return redirect()->route('getChangePassword', [$user->id])->with('message','Your Password has expired. Please change it.');
+			        return redirect()->route('getChangePassword')->with('message','Your Password has expired. Please change it.');
 			    }
 			}
 
@@ -274,11 +275,6 @@ class AdminController extends CBController {
 
 		if(\Hash::check($input['current-password'],$user->password))
 		{
-			if($input['new-password'] != $input['confirm-new-password'] )
-			{
-				return redirect()->back()->with("message", 'The confirm new password does not match.');
-			}
-
 			$validator = Validator::make($input, [
 			    'email'                => 'required|email|exists:'.config('crudbooster.USER_TABLE'),
 			    'current-password'     => 'required',
@@ -294,6 +290,26 @@ class AdminController extends CBController {
 				return redirect()->back()->with("errors",$message)->with(['message'=>trans('crudbooster.alert_validation_error',['error'=>implode(', ',$message_all)]),'message_type'=>'warning'])->withInput();
 			}
 
+			if(\Hash::check($input['new-password'],$user->password))
+			{
+				return redirect()->back()->with("message", 'New Password cannot be same as your current password. Please choose a different password.');
+			}
+
+			if($input['new-password'] != $input['confirm-new-password'] )
+			{
+				return redirect()->back()->with("message", 'The confirm new password does not match.');
+			}
+
+			$passwordHistories = DB::table('password_histories')->where("user_id",$user->id)->get();
+
+		    foreach($passwordHistories as $passwordHistory)
+		    {
+		        if (\Hash::check($input['new-password'], $passwordHistory->password)) 
+		        {
+		            return redirect()->back()->with("message","Your new password can not be same as any of your recent passwords. Please choose a new password.");
+		        }
+		    }
+
 			$data['password'] = \Hash::make($input['new-password']);
 			$data['password_updated_at'] = date('Y-m-d H:i:s');
 
@@ -303,11 +319,16 @@ class AdminController extends CBController {
 
 			DB::table(config('crudbooster.USER_TABLE'))->where("email",$email)->update($data);
 
+			$passwordHistory = PasswordHistory::create([
+	            'user_id' => $user->id,
+	            'password' => $data['password']
+	        ]);
+
 			return redirect()->route('getLogin')->with('message','Password changed successfully. You can now login!');
 		}
 		else
 		{
-			return redirect()->back()->with("message", 'The current password for the input email is wrong, please try again');
+			return redirect()->back()->with("message", 'Your current password does not matches with the password you provided. Please try again.');
 		}
 
 	}
