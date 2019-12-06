@@ -1685,6 +1685,14 @@ class CBController extends Controller {
 			{
 				$this->arr['password_updated_at'] = date('Y-m-d H:i:s');
 			}
+
+			if(isset($this->arr['status']))
+			{
+				if($this->arr['status'] == 'Active')
+				{
+					$this->arr['failed_login_attempts'] = 0;
+				}
+			}
 		}
 
 		$this->hook_before_edit($this->arr,$id);
