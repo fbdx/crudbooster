@@ -53,7 +53,7 @@
            <div class="panel-body" style="padding:20px 0px 0px 0px">
                 <?php
                   $action = (@$row)?CRUDBooster::mainpath("edit-save/$row->id"):CRUDBooster::mainpath("add-save");
-                  $return_url = ($return_url)?:g('return_url');
+                  $return_url = ($return_url)?:g['return_url'];
                 ?>
                 <form class='form-horizontal' method='post' id="form" enctype="multipart/form-data" action='{{$action}}'>
                 <input type="hidden" name="_token" value="{{ csrf_token() }}">
@@ -156,7 +156,7 @@
 
           });
 
-          function _calculateAge(birthDate) { 
+          function _calculateAge(birthDate) {
             var birthDate = new Date(birthDate);
             var diff_ms   = Date.now() - birthDate.getTime();
             var age_dt    = new Date(diff_ms);
