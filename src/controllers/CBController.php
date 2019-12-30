@@ -97,13 +97,14 @@ class CBController extends Controller {
 	public $import_consignment	  = FALSE;
 	public $gigya_based			  = FALSE;
 	public $gigya_customer        = FALSE;
+	public $thailand_customer     = FALSE;
 	public $import_mobile_number  = FALSE;
 
 	public function __construct()
 	{
-		$this->gigya_api_key  = config('gigyaaccess.GIGYAAPIKEY');
+		$this->gigya_api_key    = config('gigyaaccess.GIGYAAPIKEY');
 		$this->gigya_secret_key = config('gigyaaccess.GIGYASECRETKEY');
-		$this->gigya_user_key = config('gigyaaccess.GIGYAUSERKEY');
+		$this->gigya_user_key   = config('gigyaaccess.GIGYAUSERKEY');
 	}
 
 	public function cbLoader() {
@@ -1449,6 +1450,10 @@ class CBController extends Controller {
 										default       : break;
 									}
 								}
+								if($ro['name']=='gigya_customer_pets')
+								{
+									$child_array[$i]['applicationInternalIdentifier'] = $this->generateUid();
+								}
 								DB::table($childtable)->insert($child_array[$i]);
 							}
 						}
@@ -1464,7 +1469,7 @@ class CBController extends Controller {
 			}
 		}
 
-		if($this->gigya_based || $this->gigya_customer)
+		if($this->gigya_based || $this->gigya_customer || $this->thailand_customer)
 		{
 			$UID      = NULL;
 			$regToken = NULL;
@@ -1833,6 +1838,10 @@ class CBController extends Controller {
 									$child_array[$i]['applicationInternalIdentifier'] = $this->generateUid();
 									$child_array[$i]['interestCode'] = 'GG_CHILD_MILK_BRAND';
 								}
+								if($ro['name']=='gigya_customer_pets')
+								{
+									$child_array[$i]['applicationInternalIdentifier'] = $this->generateUid();
+								}
 
 								$success = DB::table($childtable)->insert($child_array[$i]);
 							}
@@ -1864,7 +1873,7 @@ class CBController extends Controller {
 		$UID      = NULL;
 		$regToken = NULL;
 
-		if($this->gigya_customer || $this->gigya_based)
+		if($this->gigya_customer || $this->gigya_based || $this->thailand_customer)
 		{
 			$response = $this->searchViaEmail($row->email);
 			$results = $response['results'];

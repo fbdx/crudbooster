@@ -131,7 +131,7 @@
                       $('#addressLine3').val(data.building_number);
                     },
                     error: function (jqXhr, textStatus, errorMessage) {
-                        alert(errorMessage);
+                        // alert(errorMessage);
                     }
                   });
             });
