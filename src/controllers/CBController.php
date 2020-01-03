@@ -2027,7 +2027,7 @@ class CBController extends Controller {
 			$data    = $results[0]['data'];
 			$UID     = null;
 
-			if($results)
+			if(isset($results))
 			{
 				$profile = $this->arrayMappingtoSD($profile, $data);
 				foreach ($row as $key1 => $value1) {
@@ -2037,16 +2037,6 @@ class CBController extends Controller {
 						}
 					}
 				}
-			}
-			else
-			{
-				$initRegisterGigya = $this->initRegistration();
-				$regToken          = $initRegisterGigya['regToken'];
-				$rowArray 		   = (array) $row;
-				$setInputData 	   = $this->arrayMappingtoGigya($rowArray);
-				$data 			   = $this->setMainmergeGigyaCustomInformation($id);
-				$subscriptions     = $this->setGigyaSubscriptions($id);
-				$userRegisterGigya = $this->setAccountInfo($UID,$regToken,$setInputData,$data,$subscriptions);
 			}
 		}
 
