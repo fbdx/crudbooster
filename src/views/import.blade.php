@@ -157,6 +157,38 @@
                                                   <th data-no-column='{{$k}}'>Child DOB{!! $help !!}</th>
                                                 @endif
                                               @endif
+                                            @elseif(CRUDBooster::myPrivilegeId()==2)
+                                              @if( $column == 'm_product' || $column == 'firstname' || $column == 'lastname' || $column =='lastname' || $column == 'email' || $column == 'address1' || $column == 'address2' || $column == 'postcode' || $column == 'city' || $column =='state' || $column == 'mobileno' || $column == 'childname' || $column == 'childdob' || $column == 'maternalmilkbrand' || $column == 'm_source')
+                                                @if($column == "m_product")
+                                                  <th data-no-column='{{$k}}'>Product Name{!! $help !!}</th> 
+                                                @elseif($column == "firstname")
+                                                  <th data-no-column='{{$k}}'>First Name{!! $help !!}</th>
+                                                @elseif($column == "lastname")
+                                                  <th data-no-column='{{$k}}'>Last Name{!! $help !!}</th>
+                                                @elseif($column == "email")
+                                                  <th data-no-column='{{$k}}'>Email{!! $help !!}</th>
+                                                @elseif($column == "address1")
+                                                  <th data-no-column='{{$k}}'>Address 1{!! $help !!}</th>
+                                                @elseif($column == "address2")
+                                                  <th data-no-column='{{$k}}'>Address 2{!! $help !!}</th>
+                                                @elseif($column == "postcode")
+                                                  <th data-no-column='{{$k}}'>Postcode{!! $help !!}</th>
+                                                @elseif($column == "city")
+                                                  <th data-no-column='{{$k}}'>City{!! $help !!}</th>
+                                                @elseif($column == "state")
+                                                  <th data-no-column='{{$k}}'>State{!! $help !!}</th>
+                                                @elseif($column == "mobileno")
+                                                  <th data-no-column='{{$k}}'>Mobile Number{!! $help !!}</th>
+                                                @elseif($column == "childname")
+                                                  <th data-no-column='{{$k}}'>Child Name{!! $help !!}</th>
+                                                @elseif($column == "childdob")
+                                                  <th data-no-column='{{$k}}'>Child DOB{!! $help !!}</th>
+                                                @elseif($column == "maternalmilkbrand")
+                                                  <th data-no-column='{{$k}}'>Maternal Milk Brand{!! $help !!}</th>
+                                                @elseif($column == "m_source")
+                                                  <th data-no-column='{{$k}}'>Source{!! $help !!}</th>
+                                                @endif
+                                              @endif
                                             @else
                                               @if( $column == 'email' || $column == 'mobileno' || $column == 'm_product' || $column == 'childdob' || $column == 'childname' || $column == 'm_date' || $column == 'consigmentno') 
                                                 @if($column == "m_product")
@@ -185,16 +217,27 @@
                                             <?php if($column == 'id' || $column == 'created_at' || $column == 'updated_at' || $column == 'deleted_at') continue;?>
 
                                             @if(CRUDBooster::myPrivilegeId()==1)
-                                            @if( $column == 'firstname' || $column == 'email' || $column == 'mobileno' || $column == 'm_product' || $column == 'childdob' || $column == 'childname' || $column == 'm_date') 
-                                              <td data-no-column='{{$k}}'>
-                                                  <select style='width:120px' class='form-control select_column' name='select_column[{{$k}}]'>
-                                                      <option value=''>** Set Column for {{$column}}</option>
-                                                      @foreach($data_import_column as $import_column)
-                                                      <option value='{{$import_column}}'>{{$import_column}}</option>
-                                                      @endforeach
-                                                  </select>
-                                              </td>
-                                            @endif
+                                              @if( $column == 'firstname' || $column == 'email' || $column == 'mobileno' || $column == 'm_product' || $column == 'childdob' || $column == 'childname' || $column == 'm_date') 
+                                                <td data-no-column='{{$k}}'>
+                                                    <select style='width:120px' class='form-control select_column' name='select_column[{{$k}}]'>
+                                                        <option value=''>** Set Column for {{$column}}</option>
+                                                        @foreach($data_import_column as $import_column)
+                                                        <option value='{{$import_column}}'>{{$import_column}}</option>
+                                                        @endforeach
+                                                    </select>
+                                                </td>
+                                              @endif
+                                            @elseif(CRUDBooster::myPrivilegeId()==2)
+                                             @if( $column == 'm_product' || $column == 'firstname' || $column == 'lastname' || $column =='lastname' || $column == 'email' || $column == 'address1' || $column == 'address2' || $column == 'postcode' || $column == 'city' || $column =='state' || $column == 'mobileno' || $column == 'childname' || $column == 'childdob' || $column == 'maternalmilkbrand' || $column == 'm_source')
+                                                <td data-no-column='{{$k}}'>
+                                                    <select style='width:120px' class='form-control select_column' name='select_column[{{$k}}]'>
+                                                        <option value=''>** Set Column for {{$column}}</option>
+                                                        @foreach($data_import_column as $import_column)
+                                                        <option value='{{$import_column}}'>{{$import_column}}</option>
+                                                        @endforeach
+                                                    </select>
+                                                </td>
+                                              @endif
                                             @else
                                               @if( $column == 'email' || $column == 'mobileno' || $column == 'm_product' || $column == 'childdob' || $column == 'childname' || $column == 'm_date' || $column == 'consigmentno') 
                                                 <td data-no-column='{{$k}}'>
