@@ -99,6 +99,7 @@ class CBController extends Controller {
 	public $gigya_customer        = FALSE;
 	public $thailand_customer     = FALSE;
 	public $import_mobile_number  = FALSE;
+	public $import_offline	      = FALSE;
 
 	public function __construct()
 	{
@@ -2290,6 +2291,9 @@ class CBController extends Controller {
 
 			$data_import_column = array();
 			$uploadNotUpdated = [];
+
+			// return response()->json(['select_column'=>$select_column, 'table_columns' => $table_columns]);
+
 			foreach($rows as $value) {
 
 				$a = array();
@@ -2314,6 +2318,22 @@ class CBController extends Controller {
 					{
 						if($has_created_at) {
 							$a['created_at'] = date('Y-m-d H:i:s');
+						}
+
+						if(!isset($a['m_date']))
+						{
+							$a['m_date'] = date("Y-m-d H:i:s");
+						}
+
+						if($this->import_offline)
+						{
+							if(isset($a['childdob']))
+							{
+								$dateString = str_replace('/', '-', $a['childdob']); 
+								$a['childdob'] = date("Y-m-d", strtotime($dateString));
+							}
+
+							// return response()->json(['rows'=>$a, 'import_offline'=>$this->import_offline]);
 						}
 
 						DB::table($this->table)->insert($a);
