@@ -196,7 +196,25 @@
               $('.btn-export-data').click(function() {
                 $('#export-data').modal('show');
               })
+// @start NEW CSV
+              $('#export_data_v2').click(function() {
+                $('#export-data_v2').modal('show');
+                $('#loading-spinner-v2').show();
 
+                $.ajax({
+                  type: "GET",
+                  url: "{{route('backend.export.get-form')}}",
+                  success: function(data){
+                    if(data.status == 'success')
+                    {
+                      $("#html-response").html(data.html);
+                      $("#submit-button").show();
+                    }else if(data.status == 'fail')
+                    {$("#html-response").html(data.html);}
+                  }
+                });
+              })
+// @ends NEW CSV
               var toggle_advanced_report_boolean = 1;
               $(".toggle_advanced_report").click(function() {
                 
@@ -582,7 +600,7 @@
                     <h4 class="modal-title"><i class='fa fa-download'></i> {{trans("crudbooster.export_dialog_title")}}</h4>
                   </div>
                   
-                  <form method='post' target="_blank" action='{{ CRUDBooster::mainpath("export-data?t=".time()) }}'> 
+                  <form method='post' id="export-form" target="_blank" action='{{ CRUDBooster::mainpath("export-data?t=".time()) }}'> 
                   <input type="hidden" name="_token" value="{{ csrf_token() }}">
                   {!! CRUDBooster::getUrlParameters() !!}
                     <div class="modal-body">                    
@@ -604,6 +622,9 @@
                         <label>{{trans("crudbooster.export_dialog_columns")}}</label><br/>
                         @foreach($columns as $col)
                           <div class='checkbox inline'><label><input type='checkbox' checked name='columns[]' value='{{$col["name"]}}'>{{$col["label"]}}</label></div>
+                          @if($col['export'] !== false)
+                              <input type='hidden' name='table_columns[{{$col["label"]}}]' value='{{$col["field_with"]}}'>
+                          @endif
                         @endforeach
                       </div>
 
@@ -659,5 +680,7 @@
                 <!-- /.modal-content -->
               </div>
             </div>
+
+@include('backend.leads.partials.export-data-v2')
 
             @endif
