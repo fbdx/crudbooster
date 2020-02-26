@@ -8,47 +8,47 @@
     <meta name='robots' content='noindex,nofollow'/>
     <link rel="shortcut icon" href="{{ CRUDBooster::getSetting('favicon')?asset(CRUDBooster::getSetting('favicon')):asset('vendor/crudbooster/assets/logo_crudbooster.png') }}">
     <meta content='width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no' name='viewport'>
-    
+
         <!-- Bootstrap 3.3.2 -->
     <link href="{{ asset("vendor/crudbooster/assets/adminlte/bootstrap/css/bootstrap.min.css") }}" rel="stylesheet" type="text/css" />
     <!-- Font Awesome Icons -->
     <link href="{{asset("vendor/crudbooster/assets/adminlte/font-awesome/css")}}/font-awesome.min.css" rel="stylesheet" type="text/css" />
     <!-- Ionicons -->
     <link href="http://code.ionicframework.com/ionicons/2.0.0/css/ionicons.min.css" rel="stylesheet" type="text/css" />
-            
+
     <!--[if lt IE 9]>
-    <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script> 
+    <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
     <script src="https://oss.maxcdn.com/libs/respond.js/1.3.0/respond.min.js"></script>
     <![endif]-->
-    
+
     <!-- REQUIRED JS SCRIPTS -->
 
     <!-- jQuery 2.1.3 -->
     <script src="{{ asset ('vendor/crudbooster/assets/adminlte/plugins/jQuery/jQuery-2.1.4.min.js') }}"></script>
-    
+
     <!-- Bootstrap 3.3.2 JS -->
     <script src="{{ asset ('vendor/crudbooster/assets/adminlte/bootstrap/js/bootstrap.min.js') }}" type="text/javascript"></script>
     <!-- AdminLTE App -->
     <script src="{{ asset ('vendor/crudbooster/assets/adminlte/dist/js/app.js') }}" type="text/javascript"></script>
-    
-    
+
+
     <!-- Theme style -->
-    <link href="{{ asset("vendor/crudbooster/assets/adminlte/dist/css/AdminLTE.min.css")}}" rel="stylesheet" type="text/css" />    
-    <link href="{{ asset("vendor/crudbooster/assets/adminlte/dist/css/skins/_all-skins.min.css")}}" rel="stylesheet" type="text/css" />      
+    <link href="{{ asset("vendor/crudbooster/assets/adminlte/dist/css/AdminLTE.min.css")}}" rel="stylesheet" type="text/css" />
+    <link href="{{ asset("vendor/crudbooster/assets/adminlte/dist/css/skins/_all-skins.min.css")}}" rel="stylesheet" type="text/css" />
 
     <!--SWEET ALERT-->
-    <script src="{{asset('vendor/crudbooster/assets/sweetalert/dist/sweetalert.min.js')}}"></script> 
+    <script src="{{asset('vendor/crudbooster/assets/sweetalert/dist/sweetalert.min.js')}}"></script>
     <link rel="stylesheet" type="text/css" href="{{asset('vendor/crudbooster/assets/sweetalert/dist/sweetalert.css')}}">
 
-    
+
 </head>
 <body class="<?php echo (Session::get('theme_color'))?:'skin-blue'?> old-transition layout-top-nav fixed">
-<div id='app' class="wrapper">    
+<div id='app' class="wrapper">
 
     <header class="main-header">
     <nav class="navbar navbar-static-top">
       <div class="container">
-        <div class="navbar-header">          
+        <div class="navbar-header">
           <a href="{{url(config('crudbooster.ADMIN_PATH'))}}" title='{{CRUDBooster::getSetting('appname')}}' class="navbar-brand">{{CRUDBooster::getSetting('appname')}}</a>
           <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar-collapse">
             <i class="fa fa-bars"></i>
@@ -57,7 +57,7 @@
 
         <!-- Collect the nav links, forms, and other content for toggling -->
         <div class="collapse navbar-collapse pull-left" id="navbar-collapse">
-          <ul class="nav navbar-nav">            
+          <ul class="nav navbar-nav">
             <li><a class='btn-save-statistic' href="#" title='Auto Save Status'><i class='fa fa-save'></i> Auto Save Ready</a></li>
           </ul>
         </div>
@@ -77,8 +77,8 @@
   </header>
 
     <!-- Content Wrapper. Contains page content -->
-    <div class="content-wrapper">		
-		 
+    <div class="content-wrapper">
+
 
         <!-- Main content -->
         <section id='content_section' class="content">
@@ -166,6 +166,26 @@
                 </a>
             </div>
         </li>
+
+<!-- NEW NEW-->
+        <li class='connectedSortable' title='Drag To Main Area'>
+            <div id='btn-stcked-bar-chartarea' class='button-widget-area'>
+                <a href="#" data-component='stackedbarchart' class='btn-add-widget add-stacked-bar-chart'>
+                <img src='{{asset("vendor/crudbooster/assets/statistic_builder/stacked-column-bar-chart.png")}}'/>
+                <div class='title'>Stacked Bar Chart</div>
+                </a>
+            </div>
+        </li>
+
+        <li class='connectedSortable' title='Drag To Main Area'>
+            <div id='btn-customtable' class='button-widget-area'>
+                <a href="#" data-component='customtable' class='btn-add-widget add-customtable'>
+                <img src='{{asset("vendor/crudbooster/assets/statistic_builder/customtable.png")}}'/>
+                <div class='title'>Customized Table</div>
+                </a>
+            </div>
+        </li>
+<!-- NEW NEW -->
       </ul>
     </aside>
     <!-- The sidebar's background -->
@@ -175,7 +195,7 @@
     <!-- Footer -->
     <footer class="main-footer">
         <!-- To the right -->
-        <div class="pull-right hidden-xs"> 
+        <div class="pull-right hidden-xs">
             Powered By {{CRUDBooster::getSetting('appname')}}
         </div>
         <!-- Default to the left -->
