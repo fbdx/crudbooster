@@ -275,5 +275,5 @@
       loader_notification();
       setInterval(function() {
           loader_notification();
-      },100);
+      },3000);
     });	
