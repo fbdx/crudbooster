@@ -123,6 +123,7 @@ $privilegeID = CRUDBooster::myPrivilegeId();?>
             @if(CRUDBooster::isSuperadmin() || CRUDBooster::myPrivilegeId() == 6)
               @if($module->name == 'Database' || $module->name == 'customer')
                 <button type="button" id="gigya_refresh" class="btn btn-success">Gigya Refresh</button>
+                <button type="button" id="sd_refresh" class="btn btn-success">SD Refresh</button>
               @endif
             @endif
 
@@ -132,6 +133,21 @@ $privilegeID = CRUDBooster::myPrivilegeId();?>
                   $('#gigya_refresh').prop('disabled', true);
                   $.ajax({
                     url:"{{ CRUDBooster::adminPath('mainmerge/gigya-refresh') }}",
+                    method: 'GET',
+                    success:function(data, status, xhr)
+                    {
+                      alert(status);
+                    },
+                    error: function (jqXhr, textStatus, errorMessage) {
+                        alert(errorMessage);
+                    }
+                  });
+                });
+
+                $('#sd_refresh').click(function(){
+                  $('#sd_refresh').prop('disabled', true);
+                  $.ajax({
+                    url:"{{ CRUDBooster::adminPath('mainmerge/sd-refresh') }}",
                     method: 'GET',
                     success:function(data, status, xhr)
                     {
