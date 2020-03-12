@@ -75,29 +75,14 @@ class AdminController extends CBController {
 
 	public function getLogin()
 	{
-		$whitelistIP = ['211.25.211.2','121.123.162.90','210.19.137.50','121.122.44.126','210.19.32.54','210.19.164.146','96.9.161.226','211.25.211.154', '211.25.211.2', '103.118.20.198','14.140.116.135','14.140.116.145','14.140.116.156','59.144.18.118', '103.118.21.114','211.24.79.202','192.168.10.1', '111.223.97.240','111.223.97.242','2001:d08:d8:4148:24f8:4a3b:5549:e41d', '121.122.106.200', '121.122.86.227', '103.118.21.118','10.0.2.2', '121.122.71.16', '121.122.86.66','127.0.0.1', '103.118.20.58', '103.118.21.106', '121.122.106.85', '115.135.52.191', '219.74.70.52', '121.123.92.52', '103.118.20.42', '103.118.20.46'];
+		$whitelistIPs = DB::table('whitelist_ips')->select('ip_address')->get();
 
+		$whitelistIPList= [];
 
-		$ilumaIPs = ['111.223.97.241',
-					'111.223.97.242',
-					'111.223.97.243',
-					'111.223.97.244',
-					'111.223.97.245',
-					'111.223.97.246',
-					'111.223.97.247',
-					'111.223.97.248',
-					'111.223.97.249',
-					'111.223.97.250',
-					'111.223.97.251',
-					'111.223.97.252',
-					'111.223.97.253',
-					'111.223.97.254'
-				];
-
-	    foreach($ilumaIPs as $ilumaIP)
-	    {
-	    	array_push($whitelistIP, $ilumaIP);
-	    }
+		foreach($whitelistIPs as $key => $value)
+		{
+			$whitelistIPList[] = $value->ip_address;
+		}
 
  		if (!empty($_SERVER['HTTP_CLIENT_IP']))   //check ip from share internet
 	    {
@@ -112,7 +97,7 @@ class AdminController extends CBController {
 	      $ip=$_SERVER['REMOTE_ADDR'];
 	    }
 
- 		if(array_search($ip, $whitelistIP) === false){
+ 		if(array_search($ip, $whitelistIPList) === false){
 			return redirect()->route('AdminControllerGetHome');
 		} else {
 			return view('crudbooster::login');
