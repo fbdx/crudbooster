@@ -77,37 +77,30 @@ class AdminController extends CBController {
 	{
 		$whitelistIPs = DB::table('whitelist_ips')->select('ip_address')->get();
 
-		if(count($whitelistIPs) > 0)
+		$whitelistIPList= [];
+
+		foreach($whitelistIPs as $key => $value)
 		{
-			$whitelistIPList= [];
-
-			foreach($whitelistIPs as $key => $value)
-			{
-				$whitelistIPList[] = $value->ip_address;
-			}
-
-	 		if (!empty($_SERVER['HTTP_CLIENT_IP']))   //check ip from share internet
-		    {
-		      $ip=$_SERVER['HTTP_CLIENT_IP'];
-		    }
-		    elseif (!empty($_SERVER['HTTP_X_FORWARDED_FOR']))   //to check ip is pass from proxy
-		    {
-		      $ip=$_SERVER['HTTP_X_FORWARDED_FOR'];
-		    }
-		    else
-		    {
-		      $ip=$_SERVER['REMOTE_ADDR'];
-		    }
-
-	 		if(array_search($ip, $whitelistIPList) === false){
-				return redirect()->route('AdminControllerGetHome');
-			} else {
-				return view('crudbooster::login');
-			}
+			$whitelistIPList[] = $value->ip_address;
 		}
-		else
-		{
+
+ 		if (!empty($_SERVER['HTTP_CLIENT_IP']))   //check ip from share internet
+	    {
+	      $ip=$_SERVER['HTTP_CLIENT_IP'];
+	    }
+	    elseif (!empty($_SERVER['HTTP_X_FORWARDED_FOR']))   //to check ip is pass from proxy
+	    {
+	      $ip=$_SERVER['HTTP_X_FORWARDED_FOR'];
+	    }
+	    else
+	    {
+	      $ip=$_SERVER['REMOTE_ADDR'];
+	    }
+
+ 		if(array_search($ip, $whitelistIPList) === false){
 			return redirect()->route('AdminControllerGetHome');
+		} else {
+			return view('crudbooster::login');
 		}
 	}
 
