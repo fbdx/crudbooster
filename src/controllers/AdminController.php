@@ -292,7 +292,7 @@ class AdminController extends CBController {
         else
         {
         	Session::flush();
-        	return redirect()->route('getLogin')->with('message', 'Your OTP is wrong');
+        	return redirect()->route('getLogin')->with('message', 'Your One-Time Password is wrong');
         }
     }
 
