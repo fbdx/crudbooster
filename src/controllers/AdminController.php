@@ -76,9 +76,10 @@ class AdminController extends CBController {
 
 	public function getLogin()
 	{
-		try{
-			$whitelistIPs = DB::table('whitelist_ips')->select('ip_address')->get();
+		$whitelistIPs = DB::table('whitelist_ips')->select('ip_address')->get();
 
+		if(count($whitelistIPs) > 0)
+		{
 			$whitelistIPList= [];
 
 			foreach($whitelistIPs as $key => $value)
@@ -109,11 +110,11 @@ class AdminController extends CBController {
 			} else {
 				return view('crudbooster::login');
 			}
-		}catch (\Exception $e)
-        {
-            Log::info($e->getMessage());
-            return view('crudbooster::login');
-        }
+		}
+		else
+		{
+			return view('crudbooster::login');
+		}
 	}
 
 	public function redirectToProvider()
@@ -184,7 +185,16 @@ class AdminController extends CBController {
 
 			if($success)
 			{
-				return redirect()->route('AdminControllerGetIndex');
+				if($user->enable_google2fa)
+				{
+					$qrcodeUrl = $this->generateMultiFactorAuthenticationQRCode($user);
+
+					return view('crudbooster::2fa/enableTwoFactor', ['image' => $qrcodeUrl]);
+				}
+				else
+				{
+					return redirect()->route('AdminControllerGetIndex');
+				}
 			}
 
 		}else{
@@ -243,6 +253,48 @@ class AdminController extends CBController {
 
 		return $success;
 	}
+
+	public function generateMultiFactorAuthenticationQRCode($user)
+	{
+		$googleAuthenticator = new \PHPGangsta_GoogleAuthenticator();
+		$secret = $googleAuthenticator->createSecret();
+
+		$cmsUser = DB::table(config('crudbooster.USER_TABLE'))->where("email",$user->email)->first();
+
+		$data['google2fa_secret'] = $secret;
+
+		DB::table(config('crudbooster.USER_TABLE'))->where("email",$cmsUser->email)->update($data);
+
+		$qrCodeUrl = $googleAuthenticator->getQRCodeGoogleUrl('Nestle SmartData MFA', $secret);
+
+		return $qrCodeUrl;
+	}
+
+	public function getValidateToken()
+    {
+       return view('crudbooster::2fa/validate');
+    }
+
+	public function postValidateToken()
+    {
+        $input = Request::all();
+
+        $user = CRUDBooster::me();
+
+        $googleAuthenticator = new \PHPGangsta_GoogleAuthenticator();
+        $secret = $user->google2fa_secret;
+        $oneCode = $googleAuthenticator->getCode($secret);
+	
+        if($oneCode == $input['totp'])
+        {
+        	return redirect()->route('AdminControllerGetIndex');
+        }
+        else
+        {
+        	Session::flush();
+        	return redirect()->route('getLogin')->with('message', 'Your OTP is wrong');
+        }
+    }
 
 	public function getForgot() {
 		return view('crudbooster::forgot');
