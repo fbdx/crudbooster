@@ -187,9 +187,15 @@ class AdminController extends CBController {
 			{
 				if($user->enable_google2fa)
 				{
+					if(isset($user->google2fa_secret))
+					{
+						return view('crudbooster::2fa/validate');
+					}
+					
 					$qrcodeUrl = $this->generateMultiFactorAuthenticationQRCode($user);
 
 					return view('crudbooster::2fa/enableTwoFactor', ['image' => $qrcodeUrl]);
+
 				}
 				else
 				{
