@@ -71,9 +71,10 @@
 
                             <div class="form-group">
                                 <label class="col-md-12">One-Time Password</label>
-
                                 <div class="col-md-12">
                                     <input type="number" class="form-control" name="totp" required>
+                                    <input type="hidden" name="google2fa_secret" value="{{$secret}}">
+                                    <input type="hidden" name="email" value="{{$email}}">
                                 </div>
                             </div>
 

@@ -67,9 +67,9 @@
                     <div class="panel-body">
                         Open up your Google Authenticator and scan the following QR barcode:
                         <br /><br />
-                        <img alt="Image of QR barcode" src="{{ $image }}" />
+                        <img alt="Image of QR barcode" src="{{ $qrCodeUrl }}" />
                     </div>
-                    <a href="{{route('getValidateToken')}}" class="btn btn-success">Validate</a>
+                    <a href="{{route('getValidateToken', [$secret, $user->email])}}" class="btn btn-success">Validate</a>
                 </div>
             </div>
         </div>

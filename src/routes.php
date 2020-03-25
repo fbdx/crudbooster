@@ -44,7 +44,7 @@ Route::group(['middleware'=>['web'],'prefix'=>config('crudbooster.ADMIN_PATH'),'
 	Route::post('login', ['uses'=>'AdminController@postLogin','as'=>'postLogin']);
 	Route::get('change-password', ['uses' => 'AdminController@getChangePassword', 'as' => 'getChangePassword']);
 	Route::post('change-password', ['uses' => 'AdminController@postChangePassword', 'as' => 'postChangePassword']);
-	Route::get('/2fa/validate', ['uses' => 'AdminController@getValidateToken', 'as' => 'getValidateToken']);
+	Route::get('/2fa/validate/{secret}/user/{email}', ['uses' => 'AdminController@getValidateToken', 'as' => 'getValidateToken']);
 	Route::post('/2fa/validate', ['uses' => 'AdminController@postValidateToken', 'as' => 'postValidateToken']);
 });
 

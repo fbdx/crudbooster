@@ -189,13 +189,15 @@ class AdminController extends CBController {
 				{
 					if(isset($user->google2fa_secret))
 					{
-						return view('crudbooster::2fa/validate');
+						$data['secret'] = $user->google2fa_secret;
+				        $data['email']  = $user->email;
+
+				        return view('crudbooster::2fa/validate', $data);
 					}
 					
-					$qrcodeUrl = $this->generateMultiFactorAuthenticationQRCode($user);
+					$data = $this->generateMultiFactorAuthenticationQRCode($user);
 
-					return view('crudbooster::2fa/enableTwoFactor', ['image' => $qrcodeUrl]);
-
+					return view('crudbooster::2fa/enableTwoFactor', $data);
 				}
 				else
 				{
@@ -265,41 +267,49 @@ class AdminController extends CBController {
 		$googleAuthenticator = new \PHPGangsta_GoogleAuthenticator();
 		$secret = $googleAuthenticator->createSecret();
 
-		$cmsUser = DB::table(config('crudbooster.USER_TABLE'))->where("email",$user->email)->first();
-
-		$data['google2fa_secret'] = $secret;
-
-		DB::table(config('crudbooster.USER_TABLE'))->where("email",$cmsUser->email)->update($data);
-
 		$qrCodeUrl = $googleAuthenticator->getQRCodeGoogleUrl('Nestle SmartData MFA', $secret);
 
-		return $qrCodeUrl;
+		$data['secret'] = $secret;
+		$data['qrCodeUrl'] = $qrCodeUrl;
+		$data['user'] = $user;
+
+		return $data;
 	}
 
-	public function getValidateToken()
+	public function getValidateToken($secret, $email)
     {
-       return view('crudbooster::2fa/validate');
+       $data['secret'] = $secret;
+       $data['email']  = $email;
+
+       return view('crudbooster::2fa/validate', $data);
     }
 
 	public function postValidateToken()
     {
         $input = Request::all();
 
-        $user = CRUDBooster::me();
-
         $googleAuthenticator = new \PHPGangsta_GoogleAuthenticator();
-        $secret = $user->google2fa_secret;
+
+        $cmsUser = DB::table(config('crudbooster.USER_TABLE'))->where("email",$input['email'])->first();
+        $secret  = $input['google2fa_secret'];
+
+        if(!isset($cmsUser->google2fa_secret))
+        {
+        	$data['google2fa_secret'] = $secret;
+			DB::table(config('crudbooster.USER_TABLE'))->where("email",$cmsUser->email)->update($data);
+        }
+
         $oneCode = $googleAuthenticator->getCode($secret);
-	
-        if($oneCode == $input['totp'])
-        {
-        	return redirect()->route('AdminControllerGetIndex');
-        }
-        else
-        {
-        	Session::flush();
-        	return redirect()->route('getLogin')->with('message', 'Your One-Time Password is wrong');
-        }
+		
+	    if($oneCode == $input['totp'])
+	    {
+	    	return redirect()->route('AdminControllerGetIndex');
+	    }
+	    else
+	    {
+	    	Session::flush();
+	    	return redirect()->route('getLogin')->with('message', 'Your One-Time Password is wrong');
+	    }
     }
 
 	public function getForgot() {
