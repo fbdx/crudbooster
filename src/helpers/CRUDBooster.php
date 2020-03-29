@@ -159,6 +159,11 @@ class CRUDBooster
           DB::unprepared('SET IDENTITY_INSERT '.$table.' ON;');
         }
         if (DB::table($table)->insert($data)) {
+            if (env('DB_CONNECTION')=='sqlsrv')
+            {              
+              DB::unprepared('SET IDENTITY_INSERT '.$table.' OFF;');
+              DB::commit();
+            }
             return $data['id'];
         } else {
           if (env('DB_CONNECTION')=='sqlsrv')
@@ -168,11 +173,7 @@ class CRUDBooster
           }
             return false;
         }
-        if (env('DB_CONNECTION')=='sqlsrv')
-        {
-          DB::unprepared('SET IDENTITY_INSERT '.$table.' OFF;');
-          DB::commit();
-        }
+
     }
 
     public static function first($table, $id)
