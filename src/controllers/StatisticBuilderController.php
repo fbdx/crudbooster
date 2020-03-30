@@ -113,16 +113,31 @@
 
 	    	$component_name = $component->component_name;
 	    	$area_name = $component->area_name;
-	    	$config = json_decode($component->config);
+			$config = json_decode($component->config);
+
 	    	if($config) {
 	    		foreach($config as $key=>$value) {
 	    			if($value) {
-    					$command = 'showFunction';
-    					$value = view('crudbooster::statistic_builder.components.'.$component_name,compact('command','value','key','config','componentID'))->render();
-	    				$layout = str_replace('['.$key.']',$value,$layout);
-    				}
+//NEWCODE start
+						if($key == 'sql') {
+							$t = explode(';;', $value);
+							if(count($t) > 1) {
+								$dateColumn = $t[0];
+								$value = $t[1];
+							} else {
+								$dateColumn = 'm_date';
+								$value = $t[0];
+							}
+							$value = str_replace(['[wheredatescondition]','[anddatescondition]'], '',$value);
+						}
+//NEWCODE end
+						$command = 'showFunction';
+						$value = view('crudbooster::statistic_builder.components.'.$component_name,compact('command','value','key','config','componentID'))->render();
+						$value = $value > 0 ? number_format($value) : $value;
+						$layout = str_replace('['.$key.']',$value,$layout);
+					}
 	    		}
-	    	}
+			}
 
 	    	return response()->json(compact('componentID','layout'));
 	    }
@@ -134,46 +149,61 @@
 
 	    	$component_name = $component->component_name;
 	    	$area_name = $component->area_name;
-	    	$config = json_decode($component->config);
+			$config = json_decode($component->config);
+
+			
 	    	if($config) {
 	    		foreach($config as $key=>$value) {
 	    			if ($key=="sql")
 	    			{
-	    				if (strpos(strtolower($value),"where")!==false)
-	    				{
-
-	    					$value  = str_replace("where", "where m_date>='".$startdate."' AND m_date<='".$enddate."' AND",strtolower($value));
-	    					//$value .= " AND m_date>='".$startdate."' AND m_date<='".$enddate."'";
-
-	    				}
-	    				else
-	    				{
-	    					if (strpos($value,"[datescondition]")!==false)
+//NEWCODE EDITED start
+						$t = explode(';;', $value);
+						if(count($t) > 1) {
+							$dateColumn = $t[0];
+							$value = $t[1];
+						} else {
+							$dateColumn = 'm_date';
+							$value = $t[0];
+						}
+	    				// if (strpos(strtolower($value),"where")!==false)
+	    				// {
+	    				// 	$value  = str_replace("where", "where m_date>='".$startdate."' AND m_date<='".$enddate."' AND",strtolower($value));
+	    				// 	//$value .= " AND m_date>='".$startdate."' AND m_date<='".$enddate."'";
+	    				// }
+	    				// else
+	    				// {
+	    					if (strpos($value,"[wheredatescondition]")!==false)
 	    					{
-	    						$value = str_replace("[datescondition]", " WHERE m_date>='".$startdate."' AND m_date<='".$enddate."' ",$value);
-	    					}
-	    					else
+	    						$value = str_replace("[wheredatescondition]", " WHERE ".($dateColumn).">='".$startdate."' AND ".($dateColumn)."<='".$enddate."' ",$value);
+							}
+							elseif (strpos($value,"[anddatescondition]")!==false)
 	    					{
-	    						$pos = strpos ( $value, ' ' ,strpos($value,'FROM ')+5 );
-	    						if ($pos !== FALSE)
-	    						{
-	    							$value = substr_replace($value, " WHERE m_date>='".$startdate."' AND m_date<='".$enddate."' ", $pos, 0);
-	    							Log::error($value);
-	    						}
-	    						else
-	    						{
-	    							$value .= " WHERE m_date>='".$startdate."' AND m_date<='".$enddate."' ";
-	    							Log::error("m_date switched");
-	    							Log::error($value);
-	    						}
+	    						$value = str_replace("[anddatescondition]", " AND ".($dateColumn).">='".$startdate."' AND ".($dateColumn)."<='".$enddate."' ",$value);
 	    					}
+	    					// else
+	    					// {
+							// 	$pos = strpos ( $value, ' ' ,strpos($value,'FROM ')+5 );
+	    					// 	if ($pos !== FALSE)
+	    					// 	{
+	    					// 		$value = substr_replace($value, " WHERE m_date>='".$startdate."' AND m_date<='".$enddate."' ", $pos, 0);
+							// 		Log::error($value);
+	    					// 	}
+	    					// 	else
+	    					// 	{
+	    					// 		$value .= " WHERE m_date>='".$startdate."' AND m_date<='".$enddate."' ";
+	    					// 		Log::error("m_date switched");
+	    					// 		Log::error($value);
+	    					// 	}
+	    					// }
 
-	    					$sqlstring = $value;
-	    				}
-	    			}
+	    				// 	$sqlstring = $value;
+						// }
+//NEWCODE EDITED end
+					}
 	    			if($value) {
     					$command = 'showFunction';
-    					$value = view('crudbooster::statistic_builder.components.'.$component_name,compact('command','value','key','config','componentID'))->render();
+						$value = view('crudbooster::statistic_builder.components.'.$component_name,compact('command','value','key','config','componentID'))->render();
+						$value = $value > 0 ? number_format($value) : $value;
 	    				$layout = str_replace('['.$key.']',$value,$layout);
     				}
 	    		}
@@ -229,7 +259,8 @@
 
 	    	$config = json_decode($component_row->config);
 
-	    	$command = 'configuration';
+			$command = 'configuration';
+
 	    	return view('crudbooster::statistic_builder.components.'.$component_row->component_name,compact('command','componentID','config'));
 	    }
 
