@@ -349,9 +349,7 @@
                             $('#'+areaname).append("<div id='area-loading-"+obj.componentID+"' class='area-loading'><i class='fa fa-spin fa-spinner'></i></div>");
                             $.get(viewlink+obj.componentID+addon,function(view) {
                                 //console.log('View For CID '+view.componentID);
-                                $('#area-loading-'+obj.componentID).remove();
-                                $('#'+areaname).append(view.layout);
-
+                                $('#area-loading-'+obj.componentID).replaceWith( view.layout );
                             })
                         })
                     }
