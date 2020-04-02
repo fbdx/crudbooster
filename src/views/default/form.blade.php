@@ -43,9 +43,13 @@
            <div class="panel-heading">
              <strong><i class='{{CRUDBooster::getCurrentModule()->icon}}'></i> {!! $page_title or "Page Title" !!}</strong>
              <br><br>
-              @if($command != 'add' && $table == 'customer')
+              @if($command != 'add' && ($table == 'customer' || $table == 'customer_wyeths'))
+                <?php 
+                  if($table == 'customer') $subModule = 'Sample Requests'; 
+                  if($table == 'customer_wyeths') $subModule = 'Child Details'; 
+                ?>
                 @foreach ($sub_module as $sm)
-                    <a href="<?php echo CRUDBooster::adminPath($sm['path']).'?parent_table='.$table.'&parent_columns='.$sm['parent_columns'].'&custom_parent_alias='.$sm['custom_parent_alias'].'&parent_id='.$id.'&return_url='.CRUDBooster::adminPath('customer/edit').'/'.$id.'%3Fm%3D36&foreign_key='.$sm['foreign_key'].'&label=Sample+Request'.'&customer=true';?>"><button type="button" class="btn btn-info">Sample Request</button></a>
+                    <a href="<?php echo CRUDBooster::adminPath($sm['path']).'?parent_table='.$table.'&parent_columns='.$sm['parent_columns'].'&custom_parent_alias='.$sm['custom_parent_alias'].'&parent_id='.$id.'&return_url='.CRUDBooster::adminPath('customer/edit').'/'.$id.'%3Fm%3D36&foreign_key='.$sm['foreign_key'].'&label=Sample+Request'.'&customer=true';?>"><button type="button" class="btn btn-info">{{$subModule}}</button></a>
                 @endforeach
               @endif
            </div>
