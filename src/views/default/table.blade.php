@@ -29,8 +29,8 @@
                         showCancelButton: true,
                         confirmButtonColor: "#008D4C",
                         confirmButtonText: "{{trans('crudbooster.confirmation_yes')}}",
-                        closeOnConfirm: false,
-                        showLoaderOnConfirm: true
+                        closeOnConfirm: true,
+                        showLoaderOnConfirm: false
                     },
                     function () {
                         $('#form-table').submit();
