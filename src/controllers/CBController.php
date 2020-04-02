@@ -130,6 +130,8 @@ class CBController extends Controller
 	
     public $force_children = false;	
 
+    public $export_transfer = false;    
+
     public function cbLoader()
     {
         $this->cbInit();        
@@ -1863,6 +1865,14 @@ class CBController extends Controller
         if ($this->actionButtonSelected($id_selected, $button_name) === false) {
             $message = ! empty($this->alert['message']) ? $this->alert['message'] : 'Error';
             $type = ! empty($this->alert['type']) ? $this->alert['type'] : 'danger';
+        }
+
+        if ($this->export_transfer!==false)
+        {
+            $strpath = $this->export_transfer;
+            $this->export_transfer = false;
+            return response()->download($strpath);
+
         }
 
         return redirect()->back()->with(['message_type' => $type, 'message' => $message]);
