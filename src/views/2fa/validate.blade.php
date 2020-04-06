@@ -60,43 +60,36 @@
         </a>
       </div><!-- /.login-logo -->      
       <div class="login-box-body">
-    
-        @if ( Session::get('message') != '' )
-            <div class='alert alert-warning'>
-              {{ Session::get('message') }}
-            </div>  
-        @endif 
-    
-        <p class='login-box-msg'>{{trans("crudbooster.login_message")}}</p>
-        <form autocomplete='off' action="{{ route('postLogin') }}" method="post">
-      <input type="hidden" name="_token" value="{{ csrf_token() }}" />
-          <div class="form-group has-feedback">
-            <input autocomplete='off'  type="text" class="form-control" name='email' required placeholder="Email"/>
-            <span class="glyphicon glyphicon-user form-control-feedback"></span>
-          </div>
-          <div class="form-group has-feedback">
-            <input autocomplete='off'  type="password" class="form-control" name='password' required placeholder="Password"/>
-            <span class="glyphicon glyphicon-lock form-control-feedback"></span>
-          </div>
-          <div style="margin-bottom:10px" class='row'>
-            <div class='col-xs-12'>
-                <button type="submit" class="btn btn-primary btn-block btn-flat"><i class='fa fa-lock'></i> {{trans("crudbooster.button_sign_in")}}</button>                
-            </div>
-          </div>       
-          
-          <div class='row'>
-            <div class='col-xs-12' align="center"><p style="padding:10px 0px 10px 0px">{{trans("crudbooster.text_forgot_password")}} <a href='{{route("getForgot")}}'>{{trans("crudbooster.click_here")}}</a></p>
-            </div>
-            <div class='col-xs-12' align="center"><p style="padding:10px 0px 10px 0px">
-              <a href='{{route("googleLogin")}}'>Google Login</a></p>
-            </div>
-          </div>
-        </form>
-        
+        <div class="row">
+            <div class="col-md-8 col-md-offset-2">
+                <div class="panel panel-default">
+                    <div class="panel-heading">Google 2FA</div>
 
-    <br/>
-        <!--a href="#">I forgot my password</a-->
+                    <div class="panel-body">
+                        <form class="form-horizontal" role="form" method="POST" action="{{route('postValidateToken')}}">
+                            {!! csrf_field() !!}
 
+                            <div class="form-group">
+                                <label class="col-md-12">One-Time Password</label>
+                                <div class="col-md-12">
+                                    <input type="number" class="form-control" name="totp" required>
+                                    <input type="hidden" name="google2fa_secret" value="{{$secret}}">
+                                    <input type="hidden" name="email" value="{{$email}}">
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <div class="col-md-6">
+                                    <button type="submit" class="btn btn-primary">
+                                        <i class="fa fa-btn fa-mobile">&nbsp;</i>Validate
+                                    </button>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
       </div><!-- /.login-box-body -->
 
     </div><!-- /.login-box -->

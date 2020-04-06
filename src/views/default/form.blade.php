@@ -1,8 +1,28 @@
 @extends('crudbooster::admin_template')
 @section('content')
+      <style>
+        .customize {
+          float:left;
+          width:50%;
+          padding-top: 0px;
+          padding-right: 0px;
+          padding-bottom: 0px;
+          padding-left: 3%;
+        }
+
+        .clear {
+          clear:both;
+        }
+
+        @media only screen and (max-width: 768px){
+          .customize  {
+              width:100%;
+          }
+        }
+
+      </style>
 
         <div >
-
           @if (session('status'))
               <div class="alert alert-danger">
                   <p style="text-align: center;">
@@ -23,10 +43,15 @@
            <div class="panel-heading">
              <strong><i class='{{CRUDBooster::getCurrentModule()->icon}}'></i> {!! $page_title or "Page Title" !!}</strong>
              <br><br>
-              @foreach ($sub_module as $sm)
-
-                  <a href="<?php echo CRUDBooster::adminPath($sm['path']).'?parent_table='.$table.'&parent_columns='.$sm['parent_columns'].'&parent_id='.$id.'&return_url='.CRUDBooster::adminPath().'%2F'.$table.'%3Fm%3D36&foreign_key='.$sm['foreign_key'].'&label=Sample+Request';?>"><button type="button" class="btn btn-info">Sample Request</button></a>
-              @endforeach
+              @if($command != 'add' && ($table == 'customer' || $table == 'customer_wyeths'))
+                <?php 
+                  if($table == 'customer') $subModule = 'Sample Requests'; 
+                  if($table == 'customer_wyeths') $subModule = 'Child Details'; 
+                ?>
+                @foreach ($sub_module as $sm)
+                    <a href="<?php echo CRUDBooster::adminPath($sm['path']).'?parent_table='.$table.'&parent_columns='.$sm['parent_columns'].'&custom_parent_alias='.$sm['custom_parent_alias'].'&parent_id='.$id.'&return_url='.CRUDBooster::adminPath('customer/edit').'/'.$id.'%3Fm%3D36&foreign_key='.$sm['foreign_key'].'&label=Sample+Request'.'&customer=true';?>"><button type="button" class="btn btn-info">{{$subModule}}</button></a>
+                @endforeach
+              @endif
            </div>
 
            <div class="panel-body" style="padding:20px 0px 0px 0px">
@@ -43,7 +68,6 @@
                   <input type="hidden" name="hide_form" value='{!! serialize($hide_form) !!}'>
                 @endif
                         <div class="box-body" id="parent-form-area">
-
                           @if($command == 'detail')
                              @include("crudbooster::default.form_detail")
                           @else
@@ -93,14 +117,61 @@
 
         <script type="text/javascript">
           $(document).ready(function () {
-            $('#form-group-optin_subscriptions').hide();
-              $('#optin').change(function() {
-                if($('#optin').val()=='Yes')
-                {
-                  $('#form-group-optin_subscriptions').show();
-                }
-              });
+
+            $('#family-allergy-history-description').hide();
+
+            $('#postcode').change(function(){
+              var postcode  = $('#postcode').val();
+              $.ajax({
+                    url:"{{ CRUDBooster::adminPath('customer/postcode-mapping') }}",
+                    method: 'GET',
+                    data: {
+                      postcode : postcode,
+                    },
+                    success:function(data, status, xhr)
+                    {
+                      $('#addressLine1').val(data.street_name);
+                      $('#addressLine2').val(data.building_name);
+                      $('#addressLine3').val(data.building_number);
+                    },
+                    error: function (jqXhr, textStatus, errorMessage) {
+                        // alert(errorMessage);
+                    }
+                  });
+            });
+
+            $('#childrenfamily_allergy_history').change(function(){
+              if($('#childrenfamily_allergy_history').val()=='Yes')
+              {
+                $('#family-allergy-history-description').show();
+              }
+              else
+              {
+                $('#family-allergy-history-description').hide();
+              }
+            });
+
+            var today = new Date();
+
+            $('#childrenbirthDate').change(function(){
+              var age = _calculateAge($(this).val());
+              $('#childrenage').val(age);
+            });
+
+            $('#childdob').change(function(){
+              var age = _calculateAge($(this).val());
+              $('#current_age').val(age);
+            });
+
           });
+
+          function _calculateAge(birthDate) {
+            var birthDate = new Date(birthDate);
+            var diff_ms   = Date.now() - birthDate.getTime();
+            var age_dt    = new Date(diff_ms);
+
+            return Math.abs(age_dt.getUTCFullYear() - 1970);
+          }
         </script>
 
 @endsection

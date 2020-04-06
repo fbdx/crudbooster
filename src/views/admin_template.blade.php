@@ -1,10 +1,12 @@
 <!DOCTYPE html>
 <html>
 <head>
+
+    <?php header("Access-Control-Allow-Origin: *"); ?>
     <meta charset="UTF-8">
     <title>{{ ($page_title)?CRUDBooster::getSetting('appname').': '.strip_tags($page_title):"Admin Area" }}</title>
-  <meta name="csrf-token" content="{{ csrf_token() }}" />
-  <meta name='generator' content='CRUDBooster 5.3'/>
+    <meta name="csrf-token" content="{{ csrf_token() }}" />
+    <meta name='generator' content='CRUDBooster 5.3'/>
     <meta name='robots' content='noindex,nofollow'/>
     <link rel="shortcut icon" href="{{ CRUDBooster::getSetting('favicon')?asset(CRUDBooster::getSetting('favicon')):asset('vendor/crudbooster/assets/logo_crudbooster.png') }}">
     <meta content='width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no' name='viewport'>
@@ -101,7 +103,15 @@
             @if($button_export && CRUDBooster::getCurrentMethod() == 'getIndex')
             <a href="javascript:void(0)" id='btn_export_data' data-url-parameter='{{$build_query}}' title='Export Data' class="btn btn-sm btn-primary btn-export-data">
               <i class="fa fa-upload"></i> {{trans("crudbooster.button_export")}}
-            </a>
+            </a> 
+{{-- @start NEW CSV --}}
+<?php 
+$privilegeID = CRUDBooster::myPrivilegeId();?>
+@if($privilegeID == 6 ||  $privilegeID == 7)
+<a href="javascript:void(0)" id='export_data_v2' data-url-parameter='' title='Export Data' class="btn btn-sm btn-primary btn-export-data-v2">
+<i class="fa fa-upload"></i>&nbsp;Export CSV</a>
+@endif
+{{-- @end NEW CSV --}}
             @endif
 
             @if($button_import && CRUDBooster::getCurrentMethod() == 'getIndex')
@@ -110,9 +120,10 @@
             </a>
             @endif
 
-            @if(CRUDBooster::isSuperadmin())
+            @if(CRUDBooster::isSuperadmin() || CRUDBooster::myPrivilegeId() == 6)
               @if($module->name == 'Database' || $module->name == 'customer')
                 <button type="button" id="gigya_refresh" class="btn btn-success">Gigya Refresh</button>
+                <button type="button" id="sd_refresh" class="btn btn-success">SD Refresh</button>
               @endif
             @endif
 
@@ -122,6 +133,21 @@
                   $('#gigya_refresh').prop('disabled', true);
                   $.ajax({
                     url:"{{ CRUDBooster::adminPath('mainmerge/gigya-refresh') }}",
+                    method: 'GET',
+                    success:function(data, status, xhr)
+                    {
+                      alert(status);
+                    },
+                    error: function (jqXhr, textStatus, errorMessage) {
+                        alert(errorMessage);
+                    }
+                  });
+                });
+
+                $('#sd_refresh').click(function(){
+                  $('#sd_refresh').prop('disabled', true);
+                  $.ajax({
+                    url:"{{ CRUDBooster::adminPath('mainmerge/sd-refresh') }}",
                     method: 'GET',
                     success:function(data, status, xhr)
                     {

@@ -30,6 +30,8 @@ use Carbon;
 use App\Traits\GigyaApi;
 use App\Traits\SetSmartDataInfoToGigya;
 use Config;
+use GuzzleHttp\Exception\GuzzleException;
+use GuzzleHttp\Client;
 
 class CBController extends Controller {
 
@@ -59,7 +61,7 @@ class CBController extends Controller {
 
 	public $button_filter       = TRUE;
 	public $button_export       = TRUE;
-	public $button_import       = TRUE;
+	public $button_import       = FALSE;
 	public $button_show         = TRUE;
 	public $button_addmore      = TRUE;
 	public $button_table_action = TRUE;
@@ -95,12 +97,15 @@ class CBController extends Controller {
 	public $import_consignment	  = FALSE;
 	public $gigya_based			  = FALSE;
 	public $gigya_customer        = FALSE;
+	public $thailand_customer     = FALSE;
+	public $import_mobile_number  = FALSE;
+	public $import_offline	      = FALSE;
 
 	public function __construct()
 	{
-		$this->gigya_api_key  = config('gigyaaccess.GIGYAAPIKEY');
+		$this->gigya_api_key    = config('gigyaaccess.GIGYAAPIKEY');
 		$this->gigya_secret_key = config('gigyaaccess.GIGYASECRETKEY');
-		$this->gigya_user_key = config('gigyaaccess.GIGYAUSERKEY');
+		$this->gigya_user_key   = config('gigyaaccess.GIGYAUSERKEY');
 	}
 
 	public function cbLoader() {
@@ -271,7 +276,7 @@ class CBController extends Controller {
 				continue;
 			}
 
-			if(strpos($field,'.')!==FALSE) {
+			else if(strpos($field,'.')!==FALSE) {
 				$result->addselect($field);
 			}else{
 				$result->addselect($table.'.'.$field);
@@ -340,7 +345,7 @@ class CBController extends Controller {
 
 			}else{
 
-				$result->addselect($table.'.'.$field);
+				//$result->addselect($table.'.'.$field);
 				$columns_table[$index]['type_data']	 = CRUDBooster::getFieldType($table,$field);
 				$columns_table[$index]['field']      = $field;
 				$columns_table[$index]['field_raw']  = $field;
@@ -388,8 +393,26 @@ class CBController extends Controller {
 		if(Request::get('filter_column')) {
 
 			$filter_column = Request::get('filter_column');
-			$result->where(function($w) use ($filter_column,$fc) {
+			$result->where(function($w) use ($columns_table,$filter_column,$fc) {
 				foreach($filter_column as $key=>$fc) {
+
+					if($key) {
+						$icheck = false;
+						foreach($columns_table as $c)
+						{
+							if ($c['field']==$key)
+							{
+								if (strpos($c['name'], " as ") !== false) {
+										$key = "(".substr($c['name'], 0, strpos($c['name'], " as ")).")";
+										$icheck = true;
+										//dd($key);
+										break;
+								}
+							}
+						}
+					}
+
+
 					// dd($fc);
 					$value = @$fc['value'];
 					$type  = @$fc['type'];
@@ -414,13 +437,21 @@ class CBController extends Controller {
 						case 'like':
 						case 'not like':
 							$value = '%'.$value.'%';
-							if($key && $type && $value) $w->where($key,$type,$value);
+							if (!$icheck)
+								if($key && $type && $value) $w->where($key,$type,$value);
+							else
+								if($key && $type && $value) $w->whereRaw($key." ".$type." ".$value);
 						break;
 						case 'in':
 						case 'not in':
 							if($value) {
-								$value = explode(',',$value);
-								if($key && $value) $w->whereIn($key,$value);
+								$value2 = explode(',',$value);
+								if (!$icheck)
+									if($key && $value2) $w->whereIn($key,$value2);
+								else
+								{
+									if($key && $value2) $w->whereRaw($key." IN (".$value.")");
+								}
 							}
 						break;
 					}
@@ -435,23 +466,26 @@ class CBController extends Controller {
 				$type_data = @$fc['type_data'];
 				$label_data = @$fc['label'];
 
+				if($key) {
+					$icheck = false;
+					foreach($columns_table as $c)
+					{
+						if ($c['field']==$key)
+						{
+							if (strpos($c['name'], " as ") !== false) {
+									$key = "(".substr($c['name'], 0, strpos($c['name'], " as ")).")";
+									$icheck = true;
+									break;
+							}
+						}
+					}
+				}
 
 
 				if($sorting!='') {
 					if($key) {
 
-						$icheck = false;
-						foreach($columns_table as $c)
-						{
-							if ($c['field']==$key)
-							{
-								if (strpos($c['name'], " as ") !== false) {
-								    $key = "(".substr($c['name'], 0, strpos($c['name'], " as ")).")";
-										$icheck = true;
-										break;
-								}
-							}
-						}
+
 						if (!$icheck)
 							$result->orderby($key,$sorting);
 						else {
@@ -504,10 +538,13 @@ class CBController extends Controller {
 						$v = $o[1];
 						if(strpos($k, '.')!==FALSE) {
 							$orderby_table = explode(".",$k)[0];
+							$orderby_field = explode(".",$k)[1];
+							$result->orderby($orderby_table.'.'.$orderby_field,$v);
 						}else{
-							$orderby_table = $table;
+							$orderby_table = $this->table;
+							$result->orderby($orderby_table.'.'.$k,$v);
 						}
-						$result->orderby($orderby_table.'.'.$k,$v);
+
 					}
 				}
 
@@ -532,7 +569,7 @@ class CBController extends Controller {
 				$addaction[] = [
 					'label'=>$s['label'],
 					'icon'=>$s['button_icon'],
-					'url'=>CRUDBooster::adminPath($s['path']).'?parent_table='.$table_parent.'&parent_columns='.$s['parent_columns'].'&parent_id=[id]&return_url='.urlencode(Request::fullUrl()).'&foreign_key='.$s['foreign_key'].'&label='.urlencode($s['label']),
+					'url'=>CRUDBooster::adminPath($s['path']).'?parent_table='.$table_parent.'&parent_columns='.$s['parent_columns'].'&custom_parent_alias='.$s['custom_parent_alias'].'&parent_id=[id]&return_url='.urlencode(Request::fullUrl()).'&foreign_key='.$s['foreign_key'].'&label='.urlencode($s['label']),
 					'color'=>$s['button_color'],
                                         'showIf'=>$s['showIf']
 				];
@@ -625,7 +662,8 @@ class CBController extends Controller {
 	      if($this->button_table_action):
 
 	      		$button_action_style = $this->button_action_style;
-	      		$html_content[] = "<div class='button_action' style='text-align:right'>".view('crudbooster::components.action',compact('addaction','row','button_action_style','parent_field'))->render()."</div>";
+	      		$onlyView            = false;
+	      		$html_content[]      = "<div class='button_action' style='text-align:right'>".view('crudbooster::components.action',compact('addaction','row','button_action_style','parent_field', 'onlyView'))->render()."</div>";
 
           endif;//button_table_action
 
@@ -1232,8 +1270,9 @@ class CBController extends Controller {
 		$option_id		 = $this->option_id;
 		$option_fields	 = $this->option_fields;
 		$validator		 = $this->validation(NULL,true);
+		$gigya_customer  = $this->gigya_customer;
 
-		return view('crudbooster::default.form',compact('page_title','page_menu','command','option_id','validator','option_fields'));
+		return view('crudbooster::default.form',compact('page_title','page_menu','command','option_id','validator','option_fields', 'gigya_customer'));
 	}
 
 	public function postAddSave() {
@@ -1252,6 +1291,11 @@ class CBController extends Controller {
 		    $this->arr['created_at'] = date('Y-m-d H:i:s');
 		}
 
+		if($this->table == 'cms_users')
+		{
+			$this->arr['password_updated_at'] = date('Y-m-d H:i:s');
+		}
+
 		$this->hook_before_add($this->arr);
 
 		$this->arr[$this->primary_key] = $id = CRUDBooster::newId($this->table);
@@ -1267,7 +1311,21 @@ class CBController extends Controller {
 			unset($this->arr['subsource_id']);
 		}
 
-		DB::table($this->table)->insert($this->arr);
+		if($this->gigya_customer)
+		{
+			$recordId = DB::table($this->table)->insertGetId($this->arr);
+
+			if($this->arr['countryCode'] = 'SG')
+			{
+				$subsampleRecords = ['m_product' => 'First Welcome Gift', 'stock_keeping_unit' => '300001', 'm_date'=>date("Y-m-d h:i:s"), 'country'=>'SG', 'customer_id'=>$recordId];
+
+                DB::table('mainmerge')->insert($subsampleRecords);
+			}
+		}
+		else
+		{
+			DB::table($this->table)->insert($this->arr);
+		}
 
 		//Looping Data Input Again After Insert
 
@@ -1387,10 +1445,26 @@ class CBController extends Controller {
 								$child_array[$i]['id'] = $lastId;
 								if($ro['name']=='gigya_children')
 								{
-									$child_array[$i]['UID'] = $this->generateUid();
 									$child_array[$i]['applicationInternalIdentifier'] = $this->generateUid();
 									$child_array[$i]['interestCode'] = 'GG_CHILD_MILK_BRAND';
+
+									switch($child_array[$i]['sex'])
+									{
+										case 'Male'   : $child_array[$i]['sex'] = 1 ; break;
+										case 'Female' : $child_array[$i]['sex'] = 2 ; break;
+										default       : break;
+									}
 								}
+								if($ro['name']=='gigya_customer_pets')
+								{
+									$child_array[$i]['applicationInternalIdentifier'] = $this->generateUid();
+								}
+								if($ro['name']=='careline_detail')
+								{
+									$child_array[$i]['created_at'] = date("Y/m/d h:i:sa");
+									$child_array[$i]['updated_at'] = date("Y/m/d h:i:sa");
+								}
+
 								DB::table($childtable)->insert($child_array[$i]);
 							}
 						}
@@ -1406,7 +1480,7 @@ class CBController extends Controller {
 			}
 		}
 
-		if($this->gigya_based || $this->gigya_customer)
+		if($this->gigya_based || $this->gigya_customer || $this->thailand_customer)
 		{
 			$UID      = NULL;
 			$regToken = NULL;
@@ -1423,7 +1497,11 @@ class CBController extends Controller {
 	    	if(!isset($UID))
 	    	{
 	    		$register = $this->initRegistration();
-	    		$regToken = $register["regToken"];
+
+	    		if(is_array($register) && isset($register["regToken"]))
+	    		{
+		    		$regToken = $register["regToken"];
+	    		}
 	    	}
 
 	    	$rowArray = $this->arr;
@@ -1485,6 +1563,80 @@ class CBController extends Controller {
 	public function getEdit($id){
 		$this->cbLoader();
 
+		if($this->gigya_customer)
+		{
+			$customer = Customer::find($id);
+
+			try{
+				$client = new Client();
+				$response = $client->get('https://www.clubillume.com.sg/user/loyalty/'.$customer->email, [
+					'headers' => [
+				        'x-api-token' => 'WVqcLsu6l9ixSvSAhLPXAxh5nunZa0MVaKU6JP6QVfJDTT7eHMKy595pAMVRCHKQ99dJo6ewca7jncaA',
+				    ]
+				]);
+
+				$contents = json_decode($response->getBody()->getContents(), true);
+
+				if($contents['status'] == '200')
+				{
+					$data = $contents['data'];
+
+					if($data['loyalty'])
+					{
+						$loyaltyPoints = $data['loyalty'];
+					}
+
+					if($data['bagtag'])
+					{
+						$personalisedBagTag = $data['bagtag'];
+					}
+
+					$dataMapped = [];
+					$subSample  = [];
+
+					foreach($loyaltyPoints as $key => $value)
+					{
+						switch($key)
+						{
+							case 'currentPoint': $dataMapped['past_three_months_points'] = $value; break;
+							case 'totalPoint'  : $dataMapped['total_lifetime_points']    = $value; break;
+							case 'expiryDate'  : $dataMapped['membership_expiry_date']   = $value; break;
+							case 'tier'        : $dataMapped['membership_status']        = $value; break;
+							default            : break;
+						}
+					}
+
+					if(isset($dataMapped['past_three_months_points']))
+					{
+						$dataMapped['points_to_retain_solitaire'] = 1800 - $dataMapped['past_three_months_points'];
+					}
+
+					if(isset($loyaltyPoints['user_first_time_solitaire']))
+					{
+						if($loyaltyPoints['user_first_time_solitaire'] == FALSE)
+						{
+							$dataMapped['membership_status'] = 'Returning Solitaire';
+						}
+					}
+
+					DB::table($this->table)
+					->where('email', $customer->email)
+					->update($dataMapped);
+
+					if(isset($customer->mainMerge))
+					{
+						$subSample['personalised_tag_name'] = $personalisedBagTag;
+						$customer->mainMerge->update($subSample);
+					}
+				}
+			}
+			catch (\Exception $e)
+            {
+                Log::info($e->getMessage());
+            }
+
+		}
+
 		$row = DB::table($this->table)->where($this->primary_key,$id)->first();
 
 		if(isset($row->email) && $this->gigya_based)
@@ -1518,9 +1670,10 @@ class CBController extends Controller {
 		Session::put('current_row_id',$id);
 		$option_id		 = $this->option_id;
 		$option_fields	 = $this->option_fields;
-		$table = $this->table;
+		$table           = $this->table;
+		$gigya_customer  = $this->gigya_customer;
 
-		return view('crudbooster::default.form',compact('id','row','page_menu','page_title','command','option_id','option_fields','table'));
+		return view('crudbooster::default.form',compact('id','row','page_menu','page_title','command','option_id','option_fields','table', 'gigya_customer'));
 	}
 
 	public $countChild = 0;
@@ -1540,6 +1693,22 @@ class CBController extends Controller {
 		if (Schema::hasColumn($this->table, 'updated_at'))
 		{
 		    $this->arr['updated_at'] = date('Y-m-d H:i:s');
+		}
+
+		if($this->table == 'cms_users')
+		{
+			if(isset($this->arr['password']))
+			{
+				$this->arr['password_updated_at'] = date('Y-m-d H:i:s');
+			}
+
+			if(isset($this->arr['status']))
+			{
+				if($this->arr['status'] == 'Active')
+				{
+					$this->arr['failed_login_attempts'] = 0;
+				}
+			}
 		}
 
 		$this->hook_before_edit($this->arr,$id);
@@ -1638,9 +1807,17 @@ class CBController extends Controller {
 							$column_data[$colname] = Request::get($name.'-'.$colname)[$i];
 						}
 
-						// dd($column_data);
-
 						$child_array[] = $column_data;
+
+						if($ro['name']=='gigya_children')
+						{
+							switch($child_array[$i]['sex'])
+							{
+								case 'Male'   : $child_array[$i]['sex'] = 1 ; break;
+								case 'Female' : $child_array[$i]['sex'] = 2 ; break;
+								default       : break;
+							}
+						}
 
 						if($child_array[$i]['id'] == NULL){
 
@@ -1651,13 +1828,11 @@ class CBController extends Controller {
 								{
 									$newArray = array_merge($child_array[$key],$test);
 								}
-								// dd($newArray);
 								unset($newArray['id']);
 								$newArray['mobileno'] = $newArray['phones'];
 								$newArray['postcode'] = $newArray['zip'];
 								$remove_array = ['phones','zip','careline_max_datecreated','careline_callstatus','careline_currentstatus','careline_telecomaction','mainmerge_max_mdate'];
 								$newArray = array_diff_key($newArray, array_flip($remove_array));
-								// dd($newArray);
 								$lastId = CRUDBooster::newId($childtable);
 								$newArray['id'] = $lastId;
 								date_default_timezone_set("Asia/Kuala_Lumpur");
@@ -1671,11 +1846,18 @@ class CBController extends Controller {
 								$lastId = CRUDBooster::newId($childtable);
 								if($ro['name']=='gigya_children')
 								{
-									$child_array[$i]['UID'] = $this->generateUid();
 									$child_array[$i]['applicationInternalIdentifier'] = $this->generateUid();
 									$child_array[$i]['interestCode'] = 'GG_CHILD_MILK_BRAND';
 								}
-
+								if($ro['name']=='gigya_customer_pets')
+								{
+									$child_array[$i]['applicationInternalIdentifier'] = $this->generateUid();
+								}
+								if($ro['name']=='careline_detail')
+								{
+									$child_array[$i]['created_at'] = date("Y/m/d h:i:sa");
+									$child_array[$i]['updated_at'] = date("Y/m/d h:i:sa");
+								}
 
 								$success = DB::table($childtable)->insert($child_array[$i]);
 							}
@@ -1704,10 +1886,10 @@ class CBController extends Controller {
 
 		DB::table($this->table)->where($this->primary_key,$id)->update($this->arr);
 
-		$UID     = NULL;
+		$UID      = NULL;
 		$regToken = NULL;
 
-		if($this->gigya_customer || $this->gigya_based)
+		if($this->gigya_customer || $this->gigya_based || $this->thailand_customer)
 		{
 			$response = $this->searchViaEmail($row->email);
 			$results = $response['results'];
@@ -1720,7 +1902,11 @@ class CBController extends Controller {
 			if(!isset($UID))
 	    	{
 	    		$register = $this->initRegistration();
-	    		$regToken = $register["regToken"];
+
+	    		if(is_array($register) && isset($register["regToken"]))
+	    		{
+		    		$regToken = $register["regToken"];
+	    		}
 	    	}
 
 			$this->synchroToGigya($UID,$regToken,$row->email,$setInputData,$id,$this->arr,$this->table);
@@ -1730,8 +1916,75 @@ class CBController extends Controller {
 
 		$this->return_url = ($this->return_url)?$this->return_url:Request::get('return_url');
 
-		//insert log
-		CRUDBooster::insertLog(trans("crudbooster.log_update",['name'=>$this->arr[$this->title_field],'module'=>CRUDBooster::getCurrentModule()->name]));
+		// insert customized cms_log
+		if($this->gigya_customer)
+		{
+			$oldRecord = (array) $row;
+			$oldAssignedUser = DB::table('cms_users')->where('id', $oldRecord['userid'])->first();
+			if($oldAssignedUser)
+			{
+				$oldRecord['userid'] = $oldAssignedUser->name;
+			}
+
+			$newRecord = $this->arr;
+			$email     = $newRecord['email'];
+
+			// Compare the keys and values of two arrays, and return the differences:
+			$arrayDiff = array_diff_assoc($newRecord, $oldRecord);
+
+			if(isset($arrayDiff))
+			{
+				$fields      = array_keys($arrayDiff);
+				$description = '<ul>';
+
+				foreach($arrayDiff as $field => $value)
+				{
+					$label = NULL;
+
+					if($oldRecord[$field] == '')
+					{
+						$oldRecord[$field] = 'Empty';
+					}
+
+					foreach($this->data_inputan as $key => $row)
+					{
+						if($field == $row['name'])
+						{
+							$label = $row['label'];
+
+							if ($field == 'userid')
+							{
+								$assignedUser = DB::table('cms_users')->where('id', $value)->first();
+								if($assignedUser)
+								{
+									$value = $assignedUser->name;
+								}
+								else
+								{
+									$value = 'Empty';
+								}
+							}
+						}
+						else if($field == 'updated_at')
+						{
+							$label = 'Updated At';
+						}
+					}
+
+					$description .= '<li>Update data '.$label.' from '.$oldRecord[$field].' to '.$value.' for '.$email.' at '.CRUDBooster::getCurrentModule()->name.' .'."<br></li>";
+				}
+
+				$description .= '</ul>';
+
+				CRUDBooster::insertLog($description);
+			}
+		}
+		else
+		{
+			//insert log
+			CRUDBooster::insertLog(trans("crudbooster.log_update",['name'=>$this->arr[$this->title_field],'module'=>CRUDBooster::getCurrentModule()->name]));
+		}
+
 
 		if($this->return_url) {
 			CRUDBooster::redirect($this->return_url,trans("crudbooster.alert_update_data_success"),'success');
@@ -1774,6 +2027,7 @@ class CBController extends Controller {
 
 	public function getDetail($id)	{
 		$this->cbLoader();
+
 		$row  = DB::table($this->table)->where($this->primary_key,$id)->first();
 
 		if(isset($row->email) && $this->gigya_based)
@@ -1785,9 +2039,8 @@ class CBController extends Controller {
 			$data    = $results[0]['data'];
 			$UID     = null;
 
-			if($results)
+			if(isset($results))
 			{
-				// $UID = $results[0]['UID'];
 				$profile = $this->arrayMappingtoSD($profile, $data);
 				foreach ($row as $key1 => $value1) {
 					foreach ($profile as $key2 => $value2) {
@@ -1796,16 +2049,6 @@ class CBController extends Controller {
 						}
 					}
 				}
-			}
-			else
-			{
-				$initRegisterGigya = $this->initRegistration();
-				$regToken          = $initRegisterGigya['regToken'];
-				$rowArray 		   = (array) $row;
-				$setInputData 	   = $this->arrayMappingtoGigya($rowArray);
-				$data 			   = $this->setMainmergeGigyaCustomInformation($id);
-				$subscriptions     = $this->setGigyaSubscriptions($id);
-				$userRegisterGigya = $this->setAccountInfo($UID,$regToken,$setInputData,$data,$subscriptions);
 			}
 		}
 
@@ -1986,19 +2229,40 @@ class CBController extends Controller {
 						$a[$colname] = $value->$s;
 					}
 				}
+
 				$has_title_field = true;
+
 				foreach($a as $k=>$v) {
 					if($k == $this->title_field && $v == '') {
 						$has_title_field = false;
 						break;
 					}
 				}
+
 				if($has_title_field==false) continue;
+
+				if($has_created_at) {
+					$a['created_at'] = date('Y-m-d H:i:s');
+				}
+
 				try{
-					if($has_created_at) {
-						$a['created_at'] = date('Y-m-d H:i:s');
+					if($this->import_mobile_number)
+					{
+						if(isset($a['mobileno']) && isset($a['email']))
+						{
+							$email    = $a['email'];
+							$record   = DB::table($this->table)->where("email", $email);
+
+							if($record)
+							{
+								$update = $record->update(['mobileno' => $a['mobileno']]);
+							}
+						}
 					}
-					DB::table($this->table)->insert($a);
+					else
+					{
+						DB::table($this->table)->insert($a);
+					}
 					Cache::increment('success_'.$file_md5);
 				}catch(\Exception $e) {
 					$e = (string) $e;
@@ -2024,17 +2288,12 @@ class CBController extends Controller {
 			$select_column = array_filter($select_column);
 			$table_columns = DB::getSchemaBuilder()->getColumnListing($this->table);
 
-
 			$file = base64_decode(Request::get('file'));
 			$file = trim(str_replace('uploads','app',$file),'/');
 			$file = storage_path($file);
 
 			$rows = $this->csvToArray($file);
-			// Log::error($rows);
 			$f = $this->import_consignment;
-			//set_time_limit ( 600 );
-
-			//$rows = Excel::load($file,function($reader) {})->get();
 
 			$has_created_at = false;
 			if(CRUDBooster::isColumnExists($this->table,'created_at')) {
@@ -2043,13 +2302,15 @@ class CBController extends Controller {
 
 			$data_import_column = array();
 			$uploadNotUpdated = [];
+
+			// return response()->json(['select_column'=>$select_column, 'table_columns' => $table_columns]);
+
 			foreach($rows as $value) {
 
 				$a = array();
 				foreach($select_column as $sk => $s) {
 					$colname = $table_columns[$sk];
-
-						$a[$colname] = $value[$s];
+					$a[$colname] = $value[$s];
 				}
 
 				$has_title_field = true;
@@ -2062,8 +2323,6 @@ class CBController extends Controller {
 
 				if($has_title_field==false) continue;
 
-
-
 				try{
 					$f = $this->import_consignment;
 					if ($f == FALSE)
@@ -2071,42 +2330,47 @@ class CBController extends Controller {
 						if($has_created_at) {
 							$a['created_at'] = date('Y-m-d H:i:s');
 						}
-						$v = $this->validationArray($a);
-						if (!$v->fails())
-							DB::table($this->table)->insert($a);
-						else
+
+						if(!isset($a['m_date']))
 						{
-							Log::error('Validation issue');
-							$errors = $v->errors();
-							foreach ($errors->all() as $message) {
-		    					Log::error($message);
-							}
+							$a['m_date'] = date("Y-m-d H:i:s");
 						}
+
+						if($this->import_offline)
+						{
+							if(isset($a['childdob']))
+							{
+								$dateString = str_replace('/', '-', $a['childdob']); 
+								$a['childdob'] = date("Y-m-d", strtotime($dateString));
+							}
+
+							// return response()->json(['rows'=>$a, 'import_offline'=>$this->import_offline]);
+						}
+
+						DB::table($this->table)->insert($a);
 					}
 					else
 					{
-						//Log::error("notinloop");
-						// Log::error($a);
-						if ( (isset($a['m_product'])) && (isset($a['m_date'])) && (isset($a['email'])) && (isset($a['mobileno'])) && (isset($a['childname'])) && (isset($a['childdob'])) ) {
-							if (($a['consigmentno'] != '')||($a['returnreason'] != '')||($a['batchno'] != ''))
+						if ((isset($a['m_product'])) && (isset($a['m_date'])) && (isset($a['email'])) && (isset($a['mobileno'])) && (isset($a['childname'])) && (isset($a['childdob'])) )
+						{
+							if (($a['consigmentno'] != '')||($a['returnreason'] != '')||($a['batchno'] != '')||$a['delivery_status'] != '')
 							{
-								$arr = array();
-								foreach ($a as $key => $value){
-									if (($key!=='consigmentno')&&($key!='batchno')&&($key!='created_at')&&($key!='returnreason')&&($key!='m_date'))
-										$arr[] = array($key,'=',$value);
+								$a['order_number']    = $value['order_number'];
+								$a['delivery_status'] = $value['delivery_status'];
+
+								$recordID = (int) substr($a['order_number'],3);
+								$record   = DB::table($this->table)->where("id", $recordID);
+
+								if($record)
+								{
+									$countCheckDB = $record->update(['consigmentno' => $a['consigmentno'],'batchno' => $a['batchno'],'returnreason'=> $a['returnreason'], 'delivery_status' => $a['delivery_status']]);
 								}
 
-								$checkDB = DB::table($this->table)->where($arr);
-
-								$countCheckDB = $checkDB->update(
-									['consigmentno' => $a['consigmentno'],'batchno' => $a['batchno'],'returnreason'=>$a['returnreason']]
-								);
-								// Log::debug($testCheck);
 								if($countCheckDB == 0){
 									$uploadNotUpdated[] = $a;
 								}
+
 								$uploadStatus = 'Successful';
-								//Log::error(DB::getQueryLog());
 							}
 						} else {
 							$uploadStatus = "Fail to match record";

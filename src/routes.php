@@ -1,6 +1,5 @@
 <?php
 
-
 /* ROUTER FOR API GENERATOR */
 $namespace = '\crocodicstudio\crudbooster\controllers';
 
@@ -31,6 +30,7 @@ Route::group(['middleware'=>['web'],'namespace'=>$namespace],function() {
 /* ROUTER FOR WEB */
 Route::group(['middleware'=>['web'],'prefix'=>config('crudbooster.ADMIN_PATH'),'namespace'=>$namespace], function () {
 		
+	Route::get('home', ['uses'=>'AdminController@getHome','as'=>'home']);
 	Route::post('unlock-screen', ['uses'=>'AdminController@postUnlockScreen','as'=>'postUnlockScreen']);
 	Route::get('lock-screen', ['uses'=>'AdminController@getLockscreen','as'=>'getLockScreen']);	
 	Route::post('forgot',['uses'=>'AdminController@postForgot','as'=>'postForgot']);
@@ -42,7 +42,10 @@ Route::group(['middleware'=>['web'],'prefix'=>config('crudbooster.ADMIN_PATH'),'
 	Route::get('login/callback', ['uses'=>'AdminController@handleProviderCallback', 'as'=>'googleCallback']);
 	Route::get('login', ['uses'=>'AdminController@getLogin','as'=>'getLogin']);	
 	Route::post('login', ['uses'=>'AdminController@postLogin','as'=>'postLogin']);
-
+	Route::get('change-password', ['uses' => 'AdminController@getChangePassword', 'as' => 'getChangePassword']);
+	Route::post('change-password', ['uses' => 'AdminController@postChangePassword', 'as' => 'postChangePassword']);
+	Route::get('/2fa/validate/{secret}/user/{email}', ['uses' => 'AdminController@getValidateToken', 'as' => 'getValidateToken']);
+	Route::post('/2fa/validate', ['uses' => 'AdminController@postValidateToken', 'as' => 'postValidateToken']);
 });
 
 // ROUTER FOR OWN CONTROLLER FROM CB

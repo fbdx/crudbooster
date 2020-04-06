@@ -36,7 +36,19 @@
 
 
     @if(g('return_url'))
-    <p><a href='{{g("return_url")}}'><i class='fa fa-chevron-circle-{{ trans('crudbooster.left') }}'></i> &nbsp; {{trans('crudbooster.form_back_to_list',['module'=>ucwords(str_replace('_',' ',g('parent_table')))])}}</a></p>
+    <?php 
+      if(g('customer'))
+      {
+        $titleReturn = 'Back To Customer Profile';
+      }
+      else
+      {
+        $titleReturn = trans('crudbooster.form_back_to_list',['module'=>ucwords(str_replace('_',' ',g('parent_table')))]);
+      }
+    ?>
+      <p>
+        <a href='{{g("return_url")}}'><i class='fa fa-chevron-circle-{{ trans('crudbooster.left') }}'></i> &nbsp; {{$titleReturn}}</a>
+      </p>
     @endif
 
     @if($parent_table)
@@ -47,11 +59,33 @@
             <tr class='active'>
               <td colspan="2"><strong><i class='fa fa-bars'></i> {{ ucwords(urldecode(g('label'))) }}</strong></td>
             </tr>
-            @foreach(explode(',',urldecode(g('parent_columns'))) as $c)
-            <tr>
-              <td width="25%"><strong>{{ ucwords(str_replace('_',' ',$c)) }}</strong></td><td>: {{ $parent_table->$c }}</td>
-            </tr>
-            @endforeach            
+            @if(g('custom_parent_alias'))
+              @foreach(explode(',',urldecode(g('custom_parent_alias'))) as $c)
+                <?php 
+                  switch($c)
+                  {
+                    case "First Name"    : $value = $parent_table->firstname; 
+                                           break;
+                    case "Last Name"     : $value = $parent_table->lastname; 
+                                           break;
+                    case "Email"         : $value = $parent_table->email; 
+                                           break;
+                    case "Mobile Number" : $value = $parent_table->mobileno; 
+                                           break;
+                    default              : break;
+                  }
+                ?>
+                <tr>
+                  <td width="25%"><strong>{{ ucwords(str_replace('_',' ',$c)) }}</strong></td><td>: {{ $value }}</td>
+                </tr>
+              @endforeach
+            @else
+              @foreach(explode(',',urldecode(g('parent_columns'))) as $c)
+                <tr>
+                  <td width="25%"><strong>{{ ucwords(str_replace('_',' ',$c)) }}</strong></td><td>: {{ $parent_table->$c }}</td>
+                </tr>
+              @endforeach
+            @endif            
           </tbody>
         </table>    
       </div>

@@ -3,7 +3,7 @@
 	use crocodicstudio\crudbooster\controllers\Controller;
 	use Illuminate\Support\Facades\Session;
 	use Illuminate\Support\Facades\Storage;
-	use Illuminate\Support\Facades\Request;	
+	use Illuminate\Support\Facades\Request;
 	use Illuminate\Support\Facades\DB;
 	use Illuminate\Support\Facades\App;
 	use Illuminate\Support\Facades\Mail;
@@ -15,6 +15,7 @@
 	use Illuminate\Support\Facades\Excel;
 	use CRUDBooster;
 	use PDF;
+	use Log;
 
 	class StatisticBuilderController extends CBController {
 
@@ -25,39 +26,39 @@
 	        $this->limit              = 20;
 	        $this->orderby      	  = ["id"=>"desc"];
 	        $this->global_privilege   = FALSE;
-	        
-			$this->button_table_action = TRUE;   
-			$this->button_action_style = "button_icon_text";     
+
+			$this->button_table_action = TRUE;
+			$this->button_action_style = "button_icon_text";
 			$this->button_add          = TRUE;
 			$this->button_delete       = TRUE;
 			$this->button_edit         = TRUE;
 			$this->button_detail       = FALSE;
 			$this->button_show         = TRUE;
-			$this->button_filter       = FALSE;        
-			$this->button_export       = FALSE;	        
-			$this->button_import       = FALSE;							      
+			$this->button_filter       = FALSE;
+			$this->button_export       = FALSE;
+			$this->button_import       = FALSE;
 
 			$this->col         = array();
 			$this->col[]       = array("label"=>"Name","name"=>"name" );
-			
+
 			$this->form        = array();
 			$this->form[]      = array("label"=>"Name","name"=>"name","type"=>"text","required"=>TRUE,"validation"=>"required|min:3|max:255","placeholder"=>"You can only enter the letter only");
-			
+
 			$this->addaction   = array();
 			$this->addaction[] = ['label'=>'Builder','url'=>CRUDBooster::mainpath('builder').'/[id]','icon'=>'fa fa-wrench'];
-	    }	    
+	    }
 
 	    public function getShowDashboard() {
 	    	$this->cbLoader();
-	    	$m = CRUDBooster::sidebarDashboard();	 
-	    	$m->path = str_replace("statistic_builder/show/","",$m->path);   	
+	    	$m = CRUDBooster::sidebarDashboard();
+	    	$m->path = str_replace("statistic_builder/show/","",$m->path);
 	    	if($m->type != 'Statistic') {
 	    		redirect('/');
 	    	}
 			$row               = CRUDBooster::first($this->table,['slug'=>$m->path]);
-			
+
 			$id_cms_statistics = $row->id;
-			$page_title        = $row->name;	    				
+			$page_title        = $row->name;
 	    	return view('crudbooster::statistic_builder.show',compact('page_title','id_cms_statistics'));
 	    }
 
@@ -65,8 +66,8 @@
 	    	$this->cbLoader();
 			$row               = CRUDBooster::first($this->table,['slug'=>$slug]);
 			$id_cms_statistics = $row->id;
-			$page_title        = $row->name;				
-			$ispdf			   = false;	    				
+			$page_title        = $row->name;
+			$ispdf			   = false;
 	    	return view('crudbooster::statistic_builder.show',compact('page_title','id_cms_statistics','ispdf','slug'));
 	    }
 
@@ -78,7 +79,7 @@
 				CRUDBooster::redirect(CRUDBooster::adminPath(),trans('crudbooster.denied_access'));
 			}
 
-	    	$page_title = 'Statistic Builder';	    		    	
+	    	$page_title = 'Statistic Builder';
 	    	return view('crudbooster::statistic_builder.builder',compact('page_title','id_cms_statistics'));
 	    }
 
@@ -95,88 +96,118 @@
 	    	$this->cbLoader();
 			$row               = CRUDBooster::first($this->table,['slug'=>$slug]);
 			$id_cms_statistics = $row->id;
-			$page_title        = $row->name;	    			
-			$ispdf			   = true;				
+			$page_title        = $row->name;
+			$ispdf			   = true;
 			$appname		   = CRUDBooster::getSetting('appname');
 
 	    	return view('crudbooster::statistic_builder.show',compact('page_title','id_cms_statistics','ispdf','appname'));
-	    	//$pdf = PDF::setOptions(['enable-javascript'=> true, 'javascript-delay' => 3500, 'enable-smart-shrinking'=>true, 'no-stop-slow-scripts'=>true])->loadView('crudbooster::statistic_builder.show', compact('page_title','id_cms_statistics','ispdf'));	    	
+	    	//$pdf = PDF::setOptions(['enable-javascript'=> true, 'javascript-delay' => 3500, 'enable-smart-shrinking'=>true, 'no-stop-slow-scripts'=>true])->loadView('crudbooster::statistic_builder.show', compact('page_title','id_cms_statistics','ispdf'));
 			//return $pdf->download('invoice.pdf');
 	    }
 
 	    public function getViewComponent($componentID) {
-	    	$component = CRUDBooster::first('cms_statistic_components',['componentID'=>$componentID]);	
+	    	$component = CRUDBooster::first('cms_statistic_components',['componentID'=>$componentID]);
 
-	    	$command = 'layout';	    	
+	    	$command = 'layout';
 	    	$layout = view('crudbooster::statistic_builder.components.'.$component->component_name,compact('command','componentID'))->render();
 
 	    	$component_name = $component->component_name;
 	    	$area_name = $component->area_name;
-	    	$config = json_decode($component->config);
+			$config = json_decode($component->config);
+
 	    	if($config) {
 	    		foreach($config as $key=>$value) {
 	    			if($value) {
-    					$command = 'showFunction';
-    					$value = view('crudbooster::statistic_builder.components.'.$component_name,compact('command','value','key','config','componentID'))->render();
-	    				$layout = str_replace('['.$key.']',$value,$layout);
-    				}	    			
+//NEWCODE start
+						if($key == 'sql') {
+							$t = explode(';;', $value);
+							if(count($t) > 1) {
+								$dateColumn = $t[0];
+								$value = $t[1];
+							} else {
+								$dateColumn = 'm_date';
+								$value = $t[0];
+							}
+							$value = str_replace(['[wheredatescondition]','[anddatescondition]'], '',$value);
+						}
+//NEWCODE end
+						$command = 'showFunction';
+						$value = view('crudbooster::statistic_builder.components.'.$component_name,compact('command','value','key','config','componentID'))->render();
+						$value = $value > 0 ? number_format($value) : $value;
+						$layout = str_replace('['.$key.']',$value,$layout);
+					}
 	    		}
-	    	}	    	
+			}
 
 	    	return response()->json(compact('componentID','layout'));
 	    }
 	    public function getViewComponentDates($componentID,$startdate,$enddate) {
-	    	$component = CRUDBooster::first('cms_statistic_components',['componentID'=>$componentID]);	
+	    	$component = CRUDBooster::first('cms_statistic_components',['componentID'=>$componentID]);
 
-	    	$command = 'layout';	    	
+	    	$command = 'layout';
 	    	$layout = view('crudbooster::statistic_builder.components.'.$component->component_name,compact('command','componentID'))->render();
 
 	    	$component_name = $component->component_name;
 	    	$area_name = $component->area_name;
-	    	$config = json_decode($component->config);
+			$config = json_decode($component->config);
+
+			
 	    	if($config) {
 	    		foreach($config as $key=>$value) {
 	    			if ($key=="sql")
 	    			{
-	    				if (strpos(strtolower($value),"where")!==false)
-	    				{
-
-	    					$value  = str_replace("where", "where m_date>='".$startdate."' AND m_date<='".$enddate."' AND",strtolower($value));
-	    					//$value .= " AND m_date>='".$startdate."' AND m_date<='".$enddate."'";
-
-	    				}
-	    				else
-	    				{
-	    					if (strpos($value,"[datescondition]")!==false)
+//NEWCODE EDITED start
+						$t = explode(';;', $value);
+						if(count($t) > 1) {
+							$dateColumn = $t[0];
+							$value = $t[1];
+						} else {
+							$dateColumn = 'm_date';
+							$value = $t[0];
+						}
+	    				// if (strpos(strtolower($value),"where")!==false)
+	    				// {
+	    				// 	$value  = str_replace("where", "where m_date>='".$startdate."' AND m_date<='".$enddate."' AND",strtolower($value));
+	    				// 	//$value .= " AND m_date>='".$startdate."' AND m_date<='".$enddate."'";
+	    				// }
+	    				// else
+	    				// {
+	    					if (strpos($value,"[wheredatescondition]")!==false)
 	    					{
-	    						$value = str_replace("[datescondition]", " WHERE m_date>='".$startdate."' AND m_date<='".$enddate."' ",$value); 	
-	    					}
-	    					else
+	    						$value = str_replace("[wheredatescondition]", " WHERE ".($dateColumn).">='".$startdate."' AND ".($dateColumn)."<='".$enddate."' ",$value);
+							}
+							elseif (strpos($value,"[anddatescondition]")!==false)
 	    					{
-	    						$pos = strpos ( $value, ' ' ,strpos($value,'FROM ')+5 );
-	    						if ($pos !== FALSE)
-	    						{
-	    							$value = substr_replace($value, " WHERE m_date>='".$startdate."' AND m_date<='".$enddate."' ", $pos, 0); 
-	    							Log::error($value);
-	    						}
-	    						else
-	    						{
-	    							$value .= " WHERE m_date>='".$startdate."' AND m_date<='".$enddate."' ";
-	    							Log::error("m_date switched");
-	    							Log::error($value);
-	    						}
+	    						$value = str_replace("[anddatescondition]", " AND ".($dateColumn).">='".$startdate."' AND ".($dateColumn)."<='".$enddate."' ",$value);
 	    					}
-	    					
-	    					$sqlstring = $value;
-	    				}
-	    			}
+	    					// else
+	    					// {
+							// 	$pos = strpos ( $value, ' ' ,strpos($value,'FROM ')+5 );
+	    					// 	if ($pos !== FALSE)
+	    					// 	{
+	    					// 		$value = substr_replace($value, " WHERE m_date>='".$startdate."' AND m_date<='".$enddate."' ", $pos, 0);
+							// 		Log::error($value);
+	    					// 	}
+	    					// 	else
+	    					// 	{
+	    					// 		$value .= " WHERE m_date>='".$startdate."' AND m_date<='".$enddate."' ";
+	    					// 		Log::error("m_date switched");
+	    					// 		Log::error($value);
+	    					// 	}
+	    					// }
+
+	    				// 	$sqlstring = $value;
+						// }
+//NEWCODE EDITED end
+					}
 	    			if($value) {
     					$command = 'showFunction';
-    					$value = view('crudbooster::statistic_builder.components.'.$component_name,compact('command','value','key','config','componentID'))->render();
+						$value = view('crudbooster::statistic_builder.components.'.$component_name,compact('command','value','key','config','componentID'))->render();
+						$value = $value > 0 ? number_format($value) : $value;
 	    				$layout = str_replace('['.$key.']',$value,$layout);
-    				}	    			
+    				}
 	    		}
-	    	}	    	
+	    	}
 
 	    	return response()->json(compact('componentID','layout'));
 	    }
@@ -192,7 +223,7 @@
 
 	    	$command = 'layout';
 	    	$layout = view('crudbooster::statistic_builder.components.'.$component_name,compact('command','componentID'))->render();
-	    	
+
 	    	$data = [
 	    		'id_cms_statistics'=>$id_cms_statistics,
 	    		'componentID'=>$componentID,
@@ -211,7 +242,7 @@
 	    	->where('componentID',Request::get('componentid'))
 	    	->update([
 	    		'sorting'=>Request::get('sorting'),
-	    		'area_name'=>Request::get('areaname')	    		
+	    		'area_name'=>Request::get('areaname')
 	    		]);
 	    	return response()->json(['status'=>true]);
 	    }
@@ -228,8 +259,9 @@
 
 	    	$config = json_decode($component_row->config);
 
-	    	$command = 'configuration';
-	    	return view('crudbooster::statistic_builder.components.'.$component_row->component_name,compact('command','componentID','config'));	
+			$command = 'configuration';
+
+	    	return view('crudbooster::statistic_builder.components.'.$component_row->component_name,compact('command','componentID','config'));
 	    }
 
 	    public function postSaveComponent() {
@@ -248,13 +280,13 @@
 			CRUDBooster::insertLog(trans("crudbooster.log_try_view",['name'=>'Delete Component','module'=>'Statistic']));
 			CRUDBooster::redirect(CRUDBooster::adminPath(),trans('crudbooster.denied_access'));
 		}
-		    
+
 	    	DB::table('cms_statistic_components')->where('componentID',$id)->delete();
 	    	return response()->json(['status'=>true]);
 	    }
 
-	   
-	    public function hook_before_add(&$arr) {        
+
+	    public function hook_before_add(&$arr) {
 	        //Your code here
 	    	$arr['slug'] = str_slug($arr['name']);
 	    }

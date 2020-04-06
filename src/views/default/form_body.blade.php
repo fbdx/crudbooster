@@ -74,13 +74,27 @@ foreach($forms as $form) {
 			$header_group_class = "header-group-$index";
 		}else{
 			$header_group_class = ($header_group_class)?:"header-group-$index";	
-		}      
+		}   
 
 		?>
 		@if(file_exists(base_path('/vendor/crocodicstudio/crudbooster/src/views/default/type_components/'.$type.'/component.blade.php')))
-			@include('crudbooster::default.type_components.'.$type.'.component')
+			@if($type == 'child')
+				@if($gigya_customer)
+					<div class="clear"></div>
+				@endif
+				@include('crudbooster::default.type_components.'.$type.'.component')
+			@else
+				@include('crudbooster::default.type_components.'.$type.'.component')
+			@endif
 		@elseif(file_exists(resource_path('views/vendor/crudbooster/type_components/'.$type.'/component.blade.php')))
-			@include('vendor.crudbooster.type_components.'.$type.'.component')
+			@if($type == 'child')
+				@if($gigya_customer)
+					<div class="clear"></div>
+				@endif
+				@include('vendor.crudbooster.type_components.'.$type.'.component')
+			@else
+				@include('vendor.crudbooster.type_components.'.$type.'.component')
+			@endif
 		@else
 			<p class='text-danger'>{{$type}} is not found in type component system</p><br/>
 		@endif

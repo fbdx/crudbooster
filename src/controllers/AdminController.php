@@ -7,8 +7,11 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Facades\Log;
+use App\PasswordHistory;
 use Socialite;
 use CRUDBooster;
+use Carbon\Carbon;
 
 use Illuminate\Support\Facades\Schema;
 
@@ -51,28 +54,67 @@ class AdminController extends CBController {
 		}
 	}
 
+	public function getHome()
+	{
+		if (!empty($_SERVER['HTTP_CLIENT_IP']))   //check ip from share internet
+	    {
+	      $ip=$_SERVER['HTTP_CLIENT_IP'];
+	    }
+	    elseif (!empty($_SERVER['HTTP_X_FORWARDED_FOR']))   //to check ip is pass from proxy
+	    {
+	      $ip=$_SERVER['HTTP_X_FORWARDED_FOR'];
+	    }
+	    else
+	    {
+	      $ip=$_SERVER['REMOTE_ADDR'];
+	    }
+
+	    // dump($ip);
+	    
+		return view('crudbooster::main');
+	}
+
 	public function getLogin()
 	{
-		// $whitelistIP = ['211.25.211.2','121.123.162.90','210.19.137.50','121.122.44.126','210.19.32.54','210.19.164.146','96.9.161.226','211.25.211.154', '211.25.211.2', '103.118.20.198','14.140.116.135','14.140.116.145','14.140.116.156','59.144.18.118', '103.118.21.114', '127.0.0.1', '211.24.79.202','192.168.10.1'];	
+		$whitelistIPs = DB::table('whitelist_ips')->select('ip_address')->get();
 
- 	// 	if (!empty($_SERVER['HTTP_CLIENT_IP']))   //check ip from share internet
-	 //    {
-	 //      $ip=$_SERVER['HTTP_CLIENT_IP'];
-	 //    }
-	 //    elseif (!empty($_SERVER['HTTP_X_FORWARDED_FOR']))   //to check ip is pass from proxy
-	 //    {
-	 //      $ip=$_SERVER['HTTP_X_FORWARDED_FOR'];
-	 //    }
-	 //    else
-	 //    {
-	 //      $ip=$_SERVER['REMOTE_ADDR'];
-	 //    }
+		if(count($whitelistIPs) > 0)
+		{
+			$whitelistIPList= [];
 
- 	// 	if(array_search($ip, $whitelistIP) === false){
-		// 	return view('crudbooster::main');
-		// } else {
+			foreach($whitelistIPs as $key => $value)
+			{
+				$whitelistIPList[] = $value->ip_address;
+			}
+
+	 		if (!empty($_SERVER['HTTP_CLIENT_IP']))   //check ip from share internet
+		    {
+		      $ip=$_SERVER['HTTP_CLIENT_IP'];
+		    }
+		    elseif (!empty($_SERVER['HTTP_X_FORWARDED_FOR']))   //to check ip is pass from proxy
+		    {
+		      $ip=$_SERVER['HTTP_X_FORWARDED_FOR'];
+		    }
+		    else
+		    {
+		      $ip=$_SERVER['REMOTE_ADDR'];
+		    }
+
+		    if($stringCut = strpos($ip, ":"))
+		    {
+		    	$ip = substr($ip, 0, $stringCut);
+		    }
+
+	 		if(array_search($ip, $whitelistIPList) === false){
+				return redirect()->route('AdminControllerGetHome');
+			} else {
+				return view('crudbooster::login');
+			}
+		}
+		else
+		{
 			return view('crudbooster::login');
-		// }
+		}
 	}
 
 	public function redirectToProvider()
@@ -120,16 +162,61 @@ class AdminController extends CBController {
 		$password 	= Request::input("password");
 		$user 		= DB::table(config('crudbooster.USER_TABLE'))->where("email",$email)->first();
 
+		if($user->status == 'Locked')
+		{
+			return redirect()->route('getLogin')->with('message', 'This account has been locked. Please contact the admin to unlock it.');
+		}
+
 		if(\Hash::check($password,$user->password)) {
+
+			if(isset($user->password_updated_at))
+			{
+				$now              = Carbon::now();
+				$passwordExpiryAt = Carbon::parse($user->password_updated_at)->addDays($user->password_expiry_days);
+
+				if($passwordExpiryAt < $now)
+				{
+				    Session::flush();
+			        return redirect()->route('getChangePassword')->with('message','Your Password has expired. Please change it.');
+			    }
+			}
 
 			$success = $this->saveIntoSessionAndRedirect($user);
 
 			if($success)
 			{
-				return redirect()->route('AdminControllerGetIndex');
+				if($user->enable_google2fa)
+				{
+					if(isset($user->google2fa_secret))
+					{
+						$data['secret'] = $user->google2fa_secret;
+				        $data['email']  = $user->email;
+
+				        return view('crudbooster::2fa/validate', $data);
+					}
+					
+					$data = $this->generateMultiFactorAuthenticationQRCode($user);
+
+					return view('crudbooster::2fa/enableTwoFactor', $data);
+				}
+				else
+				{
+					return redirect()->route('AdminControllerGetIndex');
+				}
 			}
 
 		}else{
+
+			$loginAttempts = $user->failed_login_attempts;
+			$loginCount    = $loginAttempts + 1;
+
+			DB::table(config('crudbooster.USER_TABLE'))->where("email",$email)->update(['failed_login_attempts' => $loginCount]);
+
+			if($loginCount >= 3)
+			{
+				DB::table(config('crudbooster.USER_TABLE'))->where("email",$email)->update(['status' => 'Locked']);
+			}
+
 			return redirect()->route('getLogin')->with('message', trans('crudbooster.alert_password_wrong'));
 		}
 	}
@@ -175,6 +262,56 @@ class AdminController extends CBController {
 		return $success;
 	}
 
+	public function generateMultiFactorAuthenticationQRCode($user)
+	{
+		$googleAuthenticator = new \PHPGangsta_GoogleAuthenticator();
+		$secret = $googleAuthenticator->createSecret();
+
+		$qrCodeUrl = $googleAuthenticator->getQRCodeGoogleUrl('Nestle SmartData MFA', $secret);
+
+		$data['secret'] = $secret;
+		$data['qrCodeUrl'] = $qrCodeUrl;
+		$data['user'] = $user;
+
+		return $data;
+	}
+
+	public function getValidateToken($secret, $email)
+    {
+       $data['secret'] = $secret;
+       $data['email']  = $email;
+
+       return view('crudbooster::2fa/validate', $data);
+    }
+
+	public function postValidateToken()
+    {
+        $input = Request::all();
+
+        $googleAuthenticator = new \PHPGangsta_GoogleAuthenticator();
+
+        $cmsUser = DB::table(config('crudbooster.USER_TABLE'))->where("email",$input['email'])->first();
+        $secret  = $input['google2fa_secret'];
+
+        if(!isset($cmsUser->google2fa_secret))
+        {
+        	$data['google2fa_secret'] = $secret;
+			DB::table(config('crudbooster.USER_TABLE'))->where("email",$cmsUser->email)->update($data);
+        }
+
+        $oneCode = $googleAuthenticator->getCode($secret);
+		
+	    if($oneCode == $input['totp'])
+	    {
+	    	return redirect()->route('AdminControllerGetIndex');
+	    }
+	    else
+	    {
+	    	Session::flush();
+	    	return redirect()->route('getLogin')->with('message', 'Your One-Time Password is wrong');
+	    }
+    }
+
 	public function getForgot() {
 		return view('crudbooster::forgot');
 	}
@@ -205,6 +342,83 @@ class AdminController extends CBController {
 		CRUDBooster::insertLog(trans("crudbooster.log_forgot",['email'=>g('email'),'ip'=>Request::server('REMOTE_ADDR')]));
 
 		return redirect()->route('getLogin')->with('message', trans("crudbooster.message_forgot_password"));
+	}
+
+	public function getChangePassword() {
+
+		$user = DB::table(config('crudbooster.USER_TABLE'))->where("id",$id)->first();
+
+		$data['user'] = (array) $user;
+
+		return view('crudbooster::change', $data);
+	}
+
+	public function postChangePassword(\Illuminate\Http\Request $request) {
+
+		$input = $request->all();
+		$email = $input['email'];
+		$user  = DB::table(config('crudbooster.USER_TABLE'))->where("email",$email)->first();
+
+		if(\Hash::check($input['current-password'],$user->password))
+		{
+			$validator = Validator::make($input, [
+			    'email'                => 'required|email|exists:'.config('crudbooster.USER_TABLE'),
+			    'current-password'     => 'required',
+			    'new-password'         => ['required', 'min:16', 'regex:/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*(_|[^\w])).+$/'],
+			    'confirm-new-password' => 'required',
+			]);
+
+			if ($validator->fails())
+			{
+				$message     = $validator->messages();
+				$message_all = $message->all();
+				
+				return redirect()->back()->with("errors",$message)->with(['message'=>trans('crudbooster.alert_validation_error',['error'=>implode(', ',$message_all)]),'message_type'=>'warning'])->withInput();
+			}
+
+			if(\Hash::check($input['new-password'],$user->password))
+			{
+				return redirect()->back()->with("message", 'New Password cannot be same as your current password. Please choose a different password.');
+			}
+
+			if($input['new-password'] != $input['confirm-new-password'] )
+			{
+				return redirect()->back()->with("message", 'The confirm new password does not match.');
+			}
+
+			$passwordHistories = DB::table('password_histories')->where("user_id",$user->id)->get();
+
+		    foreach($passwordHistories as $passwordHistory)
+		    {
+		        if (\Hash::check($input['new-password'], $passwordHistory->password)) 
+		        {
+		            return redirect()->back()->with("message","Your new password can not be same as any of your recent passwords. Please choose a new password.");
+		        }
+		    }
+
+			$data['password'] = \Hash::make($input['new-password']);
+			$data['password_updated_at'] = date('Y-m-d H:i:s');
+
+			unset($input["_token"]);
+			unset($input["new-password"]);
+			unset($input["confirm-new-password"]);
+
+			DB::table(config('crudbooster.USER_TABLE'))->where("email",$email)->update($data);
+
+			$passwordHistory = PasswordHistory::create([
+	            'user_id'  => $user->id,
+	            'password' => $data['password']
+	        ]);
+
+	        Session::flush();
+
+			return redirect()->route('getLogin')->with('message','Password changed successfully. You can now login with your new password!');
+		}
+		else
+		{
+			return redirect()->back()->with("message", 'Your current password does not matches with the password you provided. Please try again.');
+		}
+
 	}
 
 	public function getLogout() {

@@ -1,13 +1,50 @@
     <script>
         console.warn = function() {}
     </script>
-    <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/morris.js/0.5.1/morris.css">    
+    <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/morris.js/0.5.1/morris.css">
     <script src="//cdnjs.cloudflare.com/ajax/libs/raphael/2.1.0/raphael-min.js"></script>
     <script src="//cdnjs.cloudflare.com/ajax/libs/morris.js/0.5.1/morris.min.js"></script>
-    <script src="{{ asset ('vendor/crudbooster/assets/adminlte/plugins/datepicker/bootstrap-datepicker.js') }}" charset="UTF-8"></script>   
+    <script src="{{ asset ('vendor/crudbooster/assets/adminlte/plugins/datepicker/bootstrap-datepicker.js') }}" charset="UTF-8"></script>
     <script src="//cdnjs.cloudflare.com/ajax/libs/Chart.js/2.7.1/Chart.bundle.js"></script>
-    <script src="{{ asset ('vendor/crudbooster/assets/js/Chart.PieceLabel.js') }}"></script> 
+    <script src="{{ asset ('vendor/crudbooster/assets/js/Chart.PieceLabel.js') }}"></script>
     <!--<script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels"></script>-->
+
+    <!-- NEW NEW -->
+        <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+        <link rel="stylesheet" href="https://www.stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css">
+        <link rel="stylesheet" href="https://www.cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+        <style>
+            .border-shadow{
+                box-shadow: rgba(9, 30, 66, 0.28) 0px 4px 8px -2px, rgba(9, 30, 66, 0.3) 0px 0px 1px;
+                color: rgb(37, 56, 88);
+                font-size: 12px;
+                line-height: 20px;
+                margin-bottom: 24px;
+                transform: rotateX(0deg);
+                transform-origin: 50% 0px;
+                transition-property: visibility, height, margin-bottom, opacity, transform, padding;
+                transition-duration: 0s, 0.2s, 0.2s, 0.2s, 0.2s;
+                transition-timing-function: ease-in-out;
+                border-radius: 4px;
+                padding: 4px;
+            }
+            .blue-dark-1{
+                background-color: #f6f6ff;
+            }
+            .blue-dark-2{
+                background-color: #e9e9ff;
+            }
+            .blue-dark-3{
+                background-color: #d7d7ff;
+            }
+            .blue-dark-4{
+                background-color: #bbbbff;
+            }
+            .blue-dark-5{
+                background-color: #a6a6ff;
+            }
+        </style>
+    <!-- NEW NEW  -->    
 
     <script type="text/javascript">
         var lang = '{{App::getLocale()}}';
@@ -64,12 +101,12 @@
     <style type="text/css">
         .control-sidebar ul {
             padding:0 0 0 0;
-            margin:0 0 0 0;            
+            margin:0 0 0 0;
             list-style-type:none;
         }
         .control-sidebar ul li {
             text-align: center;
-            padding: 10px;            
+            padding: 10px;
             border-bottom: 1px solid #555555;
         }
         .control-sidebar ul li:hover {
@@ -77,23 +114,23 @@
         }
         .control-sidebar ul li .title {
             text-align: center;
-            color: #ffffff;            
+            color: #ffffff;
         }
         .control-sidebar ul li img {
-            width: 100%;            
+            width: 100%;
         }
 
         ::-webkit-scrollbar {
             width: 5px;
             height: 5px;
         }
-         
-        ::-webkit-scrollbar-track {            
+
+        ::-webkit-scrollbar-track {
             background: #000000;
         }
-         
+
         ::-webkit-scrollbar-thumb {
-            background: #333333;          
+            background: #333333;
         }
 
         .ui-datepicker{ z-index: 99999 !important;}
@@ -103,14 +140,14 @@
     <script type="text/javascript">
         var id_cms_statistics = '{{$id_cms_statistics}}';
 
-        function addWidget(id_cms_statistics,area,component) {      
+        function addWidget(id_cms_statistics,area,component) {
             var id = new Date().getTime();
             $('#'+area).append("<div id='"+id+"' class='area-loading'><i class='fa fa-spin fa-spinner'></i></div>");
 
-            var sorting = $('#'+area+' .border-box').length;             
+            var sorting = $('#'+area+' .border-box').length;
             $.post("{{CRUDBooster::mainpath('add-component')}}",{component_name:component,id_cms_statistics:id_cms_statistics,sorting:sorting,area:area},function(response) {
-                $('#'+area).append(response.layout);   
-                $('#'+id).remove();                
+                $('#'+area).append(response.layout);
+                $('#'+id).remove();
             })
         }
 
@@ -121,19 +158,19 @@
     <!-- jQuery UI 1.11.4 -->
     <style type="text/css">
         .sort-highlight {
-            border:3px dashed #cccccc;                    
+            border:3px dashed #cccccc;
         }
         .layout-grid {
             border:1px dashed #cccccc;
             min-height: 150px;
         }
         .layout-grid + .layout-grid {
-            border-left:1px dashed transparent;            
+            border-left:1px dashed transparent;
         }
-        .border-box {           
-            position: relative;         
+        .border-box {
+            position: relative;
         }
-        .border-box .action {           
+        .border-box .action {
             font-size: 20px;
             display: none;
             text-align: center;
@@ -149,19 +186,19 @@
             border-bottom-right-radius: 5px;
             border-bottom-left-radius: 5px;
             position: absolute;
-            margin-top: -20px;          
+            margin-top: -20px;
             right: 0;
             z-index: 999;
-            opacity: 0.8;   
+            opacity: 0.8;
         }
         .border-box .action a {
             color: #ffffff;
         }
-        
+
         .border-box:hover {
             /*border:2px dotted #BC3F30;*/
         }
-        
+
         @if(CRUDBooster::getCurrentMethod() == 'getBuilder')
         .border-box:hover .action {
             display: block;
@@ -170,35 +207,35 @@
             cursor: move;
         }
         @endif
-        
+
         .connectedSortable {
             position: relative;
         }
-        .area-loading {        
-            position: relative; 
-            width: 100%;  
-            height: 130px;          
+        .area-loading {
+            position: relative;
+            width: 100%;
+            height: 130px;
             background: #dedede;
             border: 4px dashed #cccccc;
             font-size: 50px;
             color: #aaaaaa;
             margin-bottom: 20px;
         }
-        .area-loading i {           
+        .area-loading i {
             position: absolute;
             left:45%;
-            top:30%;            
-            transform: translate(-50%, -50%);                 
+            top:30%;
+            transform: translate(-50%, -50%);
         }
     </style>
     <script src="https://code.jquery.com/ui/1.11.4/jquery-ui.min.js"></script>
     <link rel="stylesheet" href="//code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
     <script type="text/javascript">
-    $(function() {      
+    $(function() {
 
         var sortablesList = [];
 
-        //var chartColorsData = 
+        //var chartColorsData =
         $(".dropdown li a").click(function(){
 
             for (var i = 0, len = sortablesList.length; i < len; i++) {
@@ -224,21 +261,21 @@
           runSortables();
 
 
-       });                
-        
+       });
+
 
         var cloneSidebar = $('.control-sidebar').clone();
-        
+
 
         @if(CRUDBooster::getCurrentMethod() == 'getBuilder')
-            createSortable();        
+            createSortable();
         @endif
 
         function createSortable() {
             $(".connectedSortable").sortable({
                 placeholder: "sort-highlight",
                 connectWith: ".connectedSortable",
-                handle: ".panel-heading, .inner-box, .box-header, .btn-add-widget",            
+                handle: ".panel-heading, .inner-box, .box-header, .btn-add-widget",
                 forcePlaceholderSize: true,
                 zIndex: 999999,
                 stop: function(event, ui) {
@@ -250,11 +287,11 @@
                         var component = $('#'+idName+' > a').data('component');
                         //console.log(areaname);
                         $('#'+idName).remove();
-                        addWidget(id_cms_statistics,areaname,component);                        
+                        addWidget(id_cms_statistics,areaname,component);
                         $('.control-sidebar').html(cloneSidebar);
-                        cloneSidebar = $('.control-sidebar').clone(); 
-                         
-                        createSortable();             
+                        cloneSidebar = $('.control-sidebar').clone();
+
+                        createSortable();
                     }
                 },
                 update: function(event, ui){
@@ -263,22 +300,22 @@
                         var areaname = $('#'+componentID).parent('.connectedSortable').attr("id");
                         var index = $('#'+componentID).index();
 
-                        
+
                         sortablesList.push($.post("{{CRUDBooster::mainpath('update-area-component')}}",{componentid:componentID,sorting:index,areaname:areaname},function(response) {
-                            
+
                         }));
                     }
                 }
               });
         }
-           
+
     })
-     
+
     </script>
 
     <script type="text/javascript">
 
-        function runSortables() 
+        function runSortables()
         {
             var d2 = new Date();
             var n2 = d2.getFullYear();
@@ -304,20 +341,18 @@
             }
             $('.connectedSortable').each(function() {
                 var areaname = $(this).attr('id');
-                
-                $.get("{{CRUDBooster::mainpath('list-component')}}/"+id_cms_statistics+"/"+areaname,function(response) {            
+
+                $.get("{{CRUDBooster::mainpath('list-component')}}/"+id_cms_statistics+"/"+areaname,function(response) {
                     if(response.components) {
-                        
+
                         $.each(response.components,function(i,obj) {
                             $('#'+areaname).append("<div id='area-loading-"+obj.componentID+"' class='area-loading'><i class='fa fa-spin fa-spinner'></i></div>");
                             $.get(viewlink+obj.componentID+addon,function(view) {
                                 //console.log('View For CID '+view.componentID);
-                                $('#area-loading-'+obj.componentID).remove();
-                                $('#'+areaname).append(view.layout);
-                                
+                                $('#area-loading-'+obj.componentID).replaceWith( view.layout );
                             })
-                        })                      
-                    }                   
+                        })
+                    }
                 })
             })
         }
@@ -342,7 +377,7 @@
                     runSortables();
                   }
             });
-            
+
             $('.open-datetimepicker').click(function() {
                   $(this).next('.input_date').datepicker('show');
             });
@@ -350,9 +385,9 @@
             $('.open-datetimepicker').click(function() {
                   $(this).next('.input_date').datepicker('show');
             });
-            
+
             runSortables();
-            
+
             $(document).on('click','.btn-delete-component',function() {
                 var componentID = $(this).data('componentid');
                 var $this = $(this);
@@ -367,13 +402,13 @@
                   closeOnConfirm: true
                 },
                 function(){
-                    
+
                     $.get("{{CRUDBooster::mainpath('delete-component')}}/"+componentID,function() {
                         $this.parents('.border-box').remove();
-                        
+
                     });
                 });
-                
+
             })
             $(document).on('click','.btn-edit-component',function() {
                 var componentID = $(this).data('componentid');
@@ -388,8 +423,8 @@
                 })
             })
 
-            $('#modal-statistic .btn-submit').click(function() {         
-                
+            $('#modal-statistic .btn-submit').click(function() {
+
                 $('#modal-statistic form .has-error').removeClass('has-error');
 
                 var required_input = [];
@@ -401,26 +436,26 @@
                     if(value == '') {
                         required_input.push($input.attr('name'));
                     }
-                })    
+                })
 
-                if(required_input.length) {  
+                if(required_input.length) {
                     setTimeout(function() {
                         $.each(required_input,function(i,name) {
                             $('#modal-statistic form').find('input[name="'+name+'"],textarea[name="'+name+'"],select[name="'+name+'"]').parent('.form-group').addClass('has-error');
                         })
-                    },200);                  
-                    
+                    },200);
+
                     return false;
                 }
 
                 var $button = $(this).text('Saving...').addClass('disabled');
-                
+
                 $.ajax({
                     data:$('#modal-statistic form').serialize(),
                     type:'POST',
                     url:"{{CRUDBooster::mainpath('save-component')}}",
                     success:function() {
-                        
+
                         $button.removeClass('disabled').text('Save Changes');
                         $('#modal-statistic').modal('hide');
                         window.location.href = "{{Request::fullUrl()}}";
@@ -453,7 +488,7 @@
     </div><!-- /.modal -->
 
     <div id='statistic-area'>
-        
+
         <div class="row" style="padding-bottom:15px;">
 
             <div class="col-sm-2 dropdown" style="display:inline-block;margin-top:20px;">
@@ -468,42 +503,42 @@
             </div>
             <div class="col-sm-2 datestuff" style="display:none;">
                 Date From:
-                <div class="input-group">                               
+                <div class="input-group">
                     <span class="input-group-addon open-datetimepicker"><a><i class='fa fa-calendar '></i></a></span>
-                    <input type='text' title="Date From" readonly class='form-control notfocus input_date' name="testdate1" id="testdate1" value='1970-01-01'/>                       
+                    <input type='text' title="Date From" readonly class='form-control notfocus input_date' name="testdate1" id="testdate1" value='1970-01-01'/>
                 </div>
             </div>
             <div class="col-sm-2 datestuff" style="display:none;">
                 Date To:
-                <div class="input-group">                               
+                <div class="input-group">
                     <span class="input-group-addon open-datetimepicker"><a><i class='fa fa-calendar '></i></a></span>
-                    <input type='text' title="Date To" readonly class='form-control notfocus input_date' name="testdate2" id="testdate2" value='1970-01-01'/>                       
+                    <input type='text' title="Date To" readonly class='form-control notfocus input_date' name="testdate2" id="testdate2" value='1970-01-01'/>
                 </div>
             </div>
             <div class="col-sm-2" style="display:inline-block;margin-top:20px;">
-                <a href="{{CRUDBooster::mainpath('pdf')}}/{{$slug}}" id="printpdf" class="btn btn-primary" style="width:100%;" target="printout" role="button">Print/PDF</a>                
+                <a href="{{CRUDBooster::mainpath('pdf')}}/{{$slug}}" id="printpdf" class="btn btn-primary" style="width:100%;" target="printout" role="button">Print/PDF</a>
             </div>
 
         </div>
         <div class="statistic-row row">
-            <div id='area1' class="col-sm-3 connectedSortable">             
+            <div id='area1' class="col-sm-3 connectedSortable">
 
             </div>
             <div id='area2' class="col-sm-3 connectedSortable">
-               
+
             </div>
             <div id='area3' class="col-sm-3 connectedSortable">
 
             </div>
             <div id='area4' class="col-sm-3 connectedSortable">
-                
-            </div>            
+
+            </div>
         </div>
 
         <div class='statistic-row row'>
                 <div id='area5' class="col-sm-12 connectedSortable">
- 
+
                 </div>
         </div>
-    
+
     </div><!--END STATISTIC AREA-->
