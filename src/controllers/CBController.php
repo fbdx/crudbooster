@@ -1459,6 +1459,12 @@ class CBController extends Controller {
 								{
 									$child_array[$i]['applicationInternalIdentifier'] = $this->generateUid();
 								}
+								if($ro['name']=='careline_detail')
+								{
+									$child_array[$i]['created_at'] = date("Y/m/d h:i:sa");
+									$child_array[$i]['updated_at'] = date("Y/m/d h:i:sa");
+								}
+
 								DB::table($childtable)->insert($child_array[$i]);
 							}
 						}
@@ -1846,6 +1852,11 @@ class CBController extends Controller {
 								if($ro['name']=='gigya_customer_pets')
 								{
 									$child_array[$i]['applicationInternalIdentifier'] = $this->generateUid();
+								}
+								if($ro['name']=='careline_detail')
+								{
+									$child_array[$i]['created_at'] = date("Y/m/d h:i:sa");
+									$child_array[$i]['updated_at'] = date("Y/m/d h:i:sa");
 								}
 
 								$success = DB::table($childtable)->insert($child_array[$i]);

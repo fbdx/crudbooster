@@ -158,6 +158,11 @@
               $('#childrenage').val(age);
             });
 
+            $('#childdob').change(function(){
+              var age = _calculateAge($(this).val());
+              $('#current_age').val(age);
+            });
+
           });
 
           function _calculateAge(birthDate) {
