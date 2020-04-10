@@ -1639,25 +1639,25 @@ class CBController extends Controller {
 
 		$row = DB::table($this->table)->where($this->primary_key,$id)->first();
 
-		if(isset($row->email) && $this->gigya_based)
-		{
-			$response = $this->searchViaEmail($row->email);
-			$results  = $response['results'];
-			$profile  = $results[0]['profile'];
-			$data     = $results[0]['data'];
+		// if(isset($row->email) && $this->gigya_based)
+		// {
+		// 	$response = $this->searchViaEmail($row->email);
+		// 	$results  = $response['results'];
+		// 	$profile  = $results[0]['profile'];
+		// 	$data     = $results[0]['data'];
 
-			if($profile)
-			{
-				$profile = $this->arrayMappingtoSD($profile, $data);
-				foreach ($row as $key1 => $value1) {
-					foreach ($profile as $key2 => $value2) {
-						if($key2 == $key1){
-							$row->$key1 = $profile->$key2;
-						}
-					}
-				}
-			}
-		}
+		// 	if($profile)
+		// 	{
+		// 		$profile = $this->arrayMappingtoSD($profile, $data);
+		// 		foreach ($row as $key1 => $value1) {
+		// 			foreach ($profile as $key2 => $value2) {
+		// 				if($key2 == $key1){
+		// 					$row->$key1 = $profile->$key2;
+		// 				}
+		// 			}
+		// 		}
+		// 	}
+		// }
 
 		if(!CRUDBooster::isRead() && $this->global_privilege==FALSE || $this->button_edit==FALSE) {
 			CRUDBooster::insertLog(trans("crudbooster.log_try_edit",['name'=>$row->{$this->title_field},'module'=>CRUDBooster::getCurrentModule()->name]));
@@ -2030,27 +2030,27 @@ class CBController extends Controller {
 
 		$row  = DB::table($this->table)->where($this->primary_key,$id)->first();
 
-		if(isset($row->email) && $this->gigya_based)
-		{
-			$response = $this->searchViaEmail($row->email);
+		// if(isset($row->email) && $this->gigya_based)
+		// {
+		// 	$response = $this->searchViaEmail($row->email);
 
-			$results = $response['results'];
-			$profile = $results[0]['profile'];
-			$data    = $results[0]['data'];
-			$UID     = null;
+		// 	$results = $response['results'];
+		// 	$profile = $results[0]['profile'];
+		// 	$data    = $results[0]['data'];
+		// 	$UID     = null;
 
-			if(isset($results))
-			{
-				$profile = $this->arrayMappingtoSD($profile, $data);
-				foreach ($row as $key1 => $value1) {
-					foreach ($profile as $key2 => $value2) {
-						if($key2 == $key1){
-							$row->$key1 = $profile->$key2;
-						}
-					}
-				}
-			}
-		}
+		// 	if(isset($results))
+		// 	{
+		// 		$profile = $this->arrayMappingtoSD($profile, $data);
+		// 		foreach ($row as $key1 => $value1) {
+		// 			foreach ($profile as $key2 => $value2) {
+		// 				if($key2 == $key1){
+		// 					$row->$key1 = $profile->$key2;
+		// 				}
+		// 			}
+		// 		}
+		// 	}
+		// }
 
 		if(!CRUDBooster::isRead() && $this->global_privilege==FALSE || $this->button_detail==FALSE) {
 			CRUDBooster::insertLog(trans("crudbooster.log_try_view",['name'=>$row->{$this->title_field},'module'=>CRUDBooster::getCurrentModule()->name]));
