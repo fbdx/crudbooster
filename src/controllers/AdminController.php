@@ -267,7 +267,7 @@ class AdminController extends CBController {
 		$googleAuthenticator = new \PHPGangsta_GoogleAuthenticator();
 		$secret = $googleAuthenticator->createSecret();
 
-		$qrCodeUrl = $googleAuthenticator->getQRCodeGoogleUrl('Nestle SmartData MFA', $secret);
+		$qrCodeUrl = $googleAuthenticator->getQRCodeGoogleUrl('Nestle_SmartData_MFA', $secret);
 
 		$data['secret'] = $secret;
 		$data['qrCodeUrl'] = $qrCodeUrl;
