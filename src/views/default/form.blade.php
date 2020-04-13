@@ -43,14 +43,14 @@
            <div class="panel-heading">
              <strong><i class='{{CRUDBooster::getCurrentModule()->icon}}'></i> {!! $page_title or "Page Title" !!}</strong>
              <br><br>
-              @if($command != 'add' && ($table == 'customer' || $table == 'customer_wyeths'))
+              @if($command != 'add' && ($table == 'customer' || $table == 'wyeth_customers'))
                 <?php 
                   if($table == 'customer') 
                   {
                     $subModule = 'Sample Requests'; 
                     $submodule_return_url = CRUDBooster::adminPath('customer/edit');
                   }
-                  if($table == 'customer_wyeths') 
+                  if($table == 'wyeth_customers') 
                   {
                     $subModule = 'Child Details'; 
                     $submodule_return_url = CRUDBooster::adminPath('customer_wyeths/edit');
