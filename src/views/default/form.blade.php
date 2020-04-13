@@ -53,7 +53,7 @@
                   if($table == 'wyeth_customers') 
                   {
                     $subModule = 'Child Details'; 
-                    $submodule_return_url = CRUDBooster::adminPath('customer_wyeths/edit');
+                    $submodule_return_url = CRUDBooster::adminPath('wyeth_customers/edit');
                   }
                 ?>
                 @foreach ($sub_module as $sm)
