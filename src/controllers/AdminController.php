@@ -76,45 +76,45 @@ class AdminController extends CBController {
 
 	public function getLogin()
 	{
-		$whitelistIPs = DB::table('whitelist_ips')->select('ip_address')->get();
+		// $whitelistIPs = DB::table('whitelist_ips')->select('ip_address')->get();
 
-		if(count($whitelistIPs) > 0)
-		{
-			$whitelistIPList= [];
+		// if(count($whitelistIPs) > 0)
+		// {
+		// 	$whitelistIPList= [];
 
-			foreach($whitelistIPs as $key => $value)
-			{
-				$whitelistIPList[] = $value->ip_address;
-			}
+		// 	foreach($whitelistIPs as $key => $value)
+		// 	{
+		// 		$whitelistIPList[] = $value->ip_address;
+		// 	}
 
-	 		if (!empty($_SERVER['HTTP_CLIENT_IP']))   //check ip from share internet
-		    {
-		      $ip=$_SERVER['HTTP_CLIENT_IP'];
-		    }
-		    elseif (!empty($_SERVER['HTTP_X_FORWARDED_FOR']))   //to check ip is pass from proxy
-		    {
-		      $ip=$_SERVER['HTTP_X_FORWARDED_FOR'];
-		    }
-		    else
-		    {
-		      $ip=$_SERVER['REMOTE_ADDR'];
-		    }
+	 // 		if (!empty($_SERVER['HTTP_CLIENT_IP']))   //check ip from share internet
+		//     {
+		//       $ip=$_SERVER['HTTP_CLIENT_IP'];
+		//     }
+		//     elseif (!empty($_SERVER['HTTP_X_FORWARDED_FOR']))   //to check ip is pass from proxy
+		//     {
+		//       $ip=$_SERVER['HTTP_X_FORWARDED_FOR'];
+		//     }
+		//     else
+		//     {
+		//       $ip=$_SERVER['REMOTE_ADDR'];
+		//     }
 
-		    if($stringCut = strpos($ip, ":"))
-		    {
-		    	$ip = substr($ip, 0, $stringCut);
-		    }
+		//     if($stringCut = strpos($ip, ":"))
+		//     {
+		//     	$ip = substr($ip, 0, $stringCut);
+		//     }
 
-	 		if(array_search($ip, $whitelistIPList) === false){
-				return redirect()->route('AdminControllerGetHome');
-			} else {
+	 // 		if(array_search($ip, $whitelistIPList) === false){
+		// 		return redirect()->route('AdminControllerGetHome');
+		// 	} else {
 				return view('crudbooster::login');
-			}
-		}
-		else
-		{
-			return view('crudbooster::login');
-		}
+		// 	}
+		// }
+		// else
+		// {
+		// 	return view('crudbooster::login');
+		// }
 	}
 
 	public function redirectToProvider()
