@@ -9,11 +9,13 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Log;
 use App\PasswordHistory;
+use App\Mail\ForgotPassword;
+use Illuminate\Support\Facades\Mail;
 use Socialite;
 use CRUDBooster;
 use Carbon\Carbon;
-
 use Illuminate\Support\Facades\Schema;
+
 
 class AdminController extends CBController {
 
@@ -330,14 +332,17 @@ class AdminController extends CBController {
 		}
 
 		$rand_string = str_random(5);
-		$password = \Hash::make($rand_string);
+		$password    = \Hash::make($rand_string);
 
 		DB::table(config('crudbooster.USER_TABLE'))->where('email',Request::input('email'))->update(array('password'=>$password));
 
 		$appname = CRUDBooster::getSetting('appname');
 		$user = CRUDBooster::first(config('crudbooster.USER_TABLE'),['email'=>g('email')]);
 		$user->password = $rand_string;
-		CRUDBooster::sendEmail(['to'=>$user->email,'data'=>$user,'template'=>'forgot_password_backend']);
+		$user->link     = env('APP_URL').'/admin/change-password';
+
+        Mail::to($user->email)->send(new ForgotPassword($user));
+		// CRUDBooster::sendEmail(['to'=>$user->email,'data'=>$user,'template'=>'forgot_password_backend']);
 
 		CRUDBooster::insertLog(trans("crudbooster.log_forgot",['email'=>g('email'),'ip'=>Request::server('REMOTE_ADDR')]));
 
