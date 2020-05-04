@@ -23,7 +23,7 @@
         "maatwebsite/excel": "2.1.*",                
         "unisharp/laravel-filemanager": "1.7.*",
         "intervention/imagecache":"2.*",
-        "proengsoft/laravel-jsvalidation":">2.1.0"
+        "proengsoft/laravel-jsvalidation":"1.*"
     },
     "autoload": {
         "psr-4": {
