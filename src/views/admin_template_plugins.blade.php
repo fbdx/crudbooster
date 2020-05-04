@@ -13,7 +13,7 @@
 	<!-- REQUIRED JS SCRIPTS -->
 
 	<!-- jQuery 3.5.0 -->
-	<script src="{{ asset ('vendor/crudbooster/assets/adminlte/plugins/jQuery/jQuery-3.0.0.min.js') }}"></script>
+	<script src="{{ asset ('vendor/crudbooster/assets/adminlte/plugins/jQuery/jQuery-3.5.0.min.js') }}"></script>
 	
 	<!-- Bootstrap 4.4.1 JS -->
 	<script src="{{ asset ('vendor/crudbooster/assets/adminlte/bootstrap/js/bootstrap.min.js') }}" type="text/javascript"></script>
