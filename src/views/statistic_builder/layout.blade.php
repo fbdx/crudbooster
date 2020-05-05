@@ -23,7 +23,7 @@
 
     <!-- REQUIRED JS SCRIPTS -->
 
-    <!-- jQuery 2.1.3 -->
+    <!-- jQuery 3.5.0 -->
     <script src="{{ asset ('vendor/crudbooster/assets/adminlte/plugins/jQuery/jQuery-3.5.0.min.js') }}"></script>
 
     <!-- Bootstrap 3.3.2 JS -->
