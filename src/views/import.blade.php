@@ -140,9 +140,15 @@
                                             ?>
                                             @if(CRUDBooster::myPrivilegeId()==1)
                                               {{-- <th data-no-column='{{$k}}'>{{ $column }} {!! $help !!}</th> --}}
-                                              @if( $column == 'firstname' || $column == 'email' || $column == 'mobileno' || $column == 'm_product' || $column == 'childdob' || $column == 'childname' || $column == 'm_date') 
+                                              @if( $column == 'firstname' || $column == 'lastname' || $column == 'mail_address' || $column == 'tracking_number' || $column == 'email' || $column == 'mobileno' || $column == 'm_product' || $column == 'childdob' || $column == 'childname' || $column == 'm_date') 
                                                 @if($column == "firstname")
                                                   <th data-no-column='{{$k}}'>First Name{!! $help !!}</th>
+                                                @elseif($column == "lastname")
+                                                  <th data-no-column='{{$k}}'>Last Name{!! $help !!}</th>
+                                                @elseif($column == "mail_address")
+                                                  <th data-no-column='{{$k}}'>Mail Address{!! $help !!}</th>
+                                                @elseif($column == "tracking_number")
+                                                  <th data-no-column='{{$k}}'>Tracking Number{!! $help !!}</th>
                                                 @elseif($column == "m_product")
                                                   <th data-no-column='{{$k}}'>Product Name{!! $help !!}</th>
                                                 @elseif($column == "m_date")
@@ -190,7 +196,7 @@
                                                 @endif
                                               @endif
                                             @else
-                                              @if( $column == 'email' || $column == 'mobileno' || $column == 'm_product' || $column == 'childdob' || $column == 'childname' || $column == 'm_date' || $column == 'consigmentno') 
+                                              @if( $column == 'firstname' || $column == 'lastname' || $column == 'mail_address' || $column == 'tracking_number' || $column == 'email' || $column == 'mobileno' || $column == 'm_product' || $column == 'childdob' || $column == 'childname' || $column == 'm_date' || $column == 'consigmentno') 
                                                 @if($column == "m_product")
                                                   <th data-no-column='{{$k}}'>Product Name{!! $help !!}</th>
                                                 @elseif($column == "m_date")
@@ -205,6 +211,16 @@
                                                   <th data-no-column='{{$k}}'>Child DOB{!! $help !!}</th>
                                                 @elseif($column == "consigmentno")
                                                   <th data-no-column='{{$k}}'>Consignment Number{!! $help !!}</th>
+                                                @elseif($column == "firstname")
+                                                  <th data-no-column='{{$k}}'>First Name{!! $help !!}</th>
+                                                @elseif($column == "lastname")
+                                                  <th data-no-column='{{$k}}'>Last Name{!! $help !!}</th>
+                                                @elseif($column == "mail_address")
+                                                  <th data-no-column='{{$k}}'>Mail Address{!! $help !!}</th>
+                                                @elseif($column == "tracking_number")
+                                                  <th data-no-column='{{$k}}'>Tracking Number{!! $help !!}</th>
+                                                @elseif($column == "mobileno")
+                                                  <th data-no-column='{{$k}}'>Mobile Number{!! $help !!}</th>
                                                 @endif
                                               @endif
                                             @endif
@@ -217,7 +233,7 @@
                                             <?php if($column == 'id' || $column == 'created_at' || $column == 'updated_at' || $column == 'deleted_at') continue;?>
 
                                             @if(CRUDBooster::myPrivilegeId()==1)
-                                              @if( $column == 'firstname' || $column == 'email' || $column == 'mobileno' || $column == 'm_product' || $column == 'childdob' || $column == 'childname' || $column == 'm_date') 
+                                              @if( $column == 'firstname' || $column == 'lastname' || $column == 'mail_address' || $column == 'tracking_number' || $column == 'email' || $column == 'mobileno' || $column == 'm_product' || $column == 'childdob' || $column == 'childname' || $column == 'm_date') 
                                                 <td data-no-column='{{$k}}'>
                                                     <select style='width:120px' class='form-control select_column' name='select_column[{{$k}}]'>
                                                         <option value=''>** Set Column for {{$column}}</option>
@@ -239,7 +255,7 @@
                                                 </td>
                                               @endif
                                             @else
-                                              @if( $column == 'email' || $column == 'mobileno' || $column == 'm_product' || $column == 'childdob' || $column == 'childname' || $column == 'm_date' || $column == 'consigmentno') 
+                                              @if( $column == 'firstname' || $column == 'lastname' || $column == 'mail_address' || $column == 'tracking_number' || $column == 'email' || $column == 'mobileno' || $column == 'm_product' || $column == 'childdob' || $column == 'childname' || $column == 'm_date' || $column == 'consigmentno') 
                                                 <td data-no-column='{{$k}}'>
                                                     <select style='width:120px' class='form-control select_column' name='select_column[{{$k}}]'>
                                                         <option value=''>** Set Column for {{$column}}</option>
