@@ -164,7 +164,7 @@
                                                 @endif
                                               @endif
                                             @elseif(CRUDBooster::myPrivilegeId()==2)
-                                              @if( $column == 'm_product' || $column == 'firstname' || $column == 'lastname' || $column =='lastname' || $column == 'email' || $column == 'address1' || $column == 'address2' || $column == 'postcode' || $column == 'city' || $column =='state' || $column == 'mobileno' || $column == 'childname' || $column == 'childdob' || $column == 'maternalmilkbrand' || $column == 'm_source')
+                                              @if( $column == 'm_product' || $column == 'firstname' || $column == 'lastname' || $column == 'email' || $column == 'mail_address' || $column == 'tracking_number'|| $column == 'address1' || $column == 'address2' || $column == 'postcode' || $column == 'city' || $column =='state' || $column == 'mobileno' || $column == 'childname' || $column == 'childdob' || $column == 'maternalmilkbrand' || $column == 'm_source')
                                                 @if($column == "m_product")
                                                   <th data-no-column='{{$k}}'>Product Name{!! $help !!}</th> 
                                                 @elseif($column == "firstname")
@@ -173,6 +173,10 @@
                                                   <th data-no-column='{{$k}}'>Last Name{!! $help !!}</th>
                                                 @elseif($column == "email")
                                                   <th data-no-column='{{$k}}'>Email{!! $help !!}</th>
+                                                @elseif($column == "mail_address")
+                                                  <th data-no-column='{{$k}}'>Mail Address{!! $help !!}</th>
+                                                @elseif($column == "tracking_number")
+                                                  <th data-no-column='{{$k}}'>Tracking Number{!! $help !!}</th>
                                                 @elseif($column == "address1")
                                                   <th data-no-column='{{$k}}'>Address 1{!! $help !!}</th>
                                                 @elseif($column == "address2")
@@ -244,7 +248,7 @@
                                                 </td>
                                               @endif
                                             @elseif(CRUDBooster::myPrivilegeId()==2)
-                                             @if( $column == 'm_product' || $column == 'firstname' || $column == 'lastname' || $column =='lastname' || $column == 'email' || $column == 'address1' || $column == 'address2' || $column == 'postcode' || $column == 'city' || $column =='state' || $column == 'mobileno' || $column == 'childname' || $column == 'childdob' || $column == 'maternalmilkbrand' || $column == 'm_source')
+                                             @if( $column == 'm_product' || $column == 'firstname' || $column == 'lastname' || $column == 'email' || $column == 'mail_address' || $column == 'tracking_number'|| $column == 'address1' || $column == 'address2' || $column == 'postcode' || $column == 'city' || $column =='state' || $column == 'mobileno' || $column == 'childname' || $column == 'childdob' || $column == 'maternalmilkbrand' || $column == 'm_source')
                                                 <td data-no-column='{{$k}}'>
                                                     <select style='width:120px' class='form-control select_column' name='select_column[{{$k}}]'>
                                                         <option value=''>** Set Column for {{$column}}</option>
@@ -345,7 +349,7 @@
                         <div class="box-body">
 
                             <div class='callout callout-success' style="font-size: 16px;">
-                                  @if(CRUDBooster::myPrivilegeId()==2 || CRUDBooster::myPrivilegeId()==6)
+                                  @if(CRUDBooster::myPrivilegeId()==6)
                                     <h4>Welcome to the Consignment No. Bulk Update Tool</h4>
                                     Please read the instructions below before using this tool: <br/>
                                     * File format should be : <b>csv</b><br/>

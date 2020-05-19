@@ -2331,13 +2331,13 @@ class CBController extends Controller {
 							$a['created_at'] = date('Y-m-d H:i:s');
 						}
 
-						if(!isset($a['m_date']))
-						{
-							$a['m_date'] = date("Y-m-d H:i:s");
-						}
-
 						if($this->import_offline)
 						{
+							if(!isset($a['m_date']))
+							{
+								$a['m_date'] = date("Y-m-d H:i:s");
+							}
+						
 							if(isset($a['childdob']))
 							{
 								$dateString = str_replace('/', '-', $a['childdob']); 
