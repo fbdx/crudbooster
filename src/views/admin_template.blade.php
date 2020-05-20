@@ -127,6 +127,13 @@ $privilegeID = CRUDBooster::myPrivilegeId();?>
               @endif
             @endif
 
+            @if(CRUDBooster::isSuperadmin() || CRUDBooster::myPrivilegeId() == 2)
+              @if($module->name == 'NIN Fulfillment Journey')
+                <button type="button" id="sms_alert" class="btn btn-success">Send SMS Alert</button>
+                <button type="button" id="email_alert" class="btn btn-success">Send Email Alert</button>
+              @endif
+            @endif
+
             <script type="text/javascript">
               $(document).ready(function () {
                 $('#gigya_refresh').click(function(){
@@ -148,6 +155,36 @@ $privilegeID = CRUDBooster::myPrivilegeId();?>
                   $('#sd_refresh').prop('disabled', true);
                   $.ajax({
                     url:"{{ CRUDBooster::adminPath('mainmerge/sd-refresh') }}",
+                    method: 'GET',
+                    success:function(data, status, xhr)
+                    {
+                      alert(status);
+                    },
+                    error: function (jqXhr, textStatus, errorMessage) {
+                        alert(errorMessage);
+                    }
+                  });
+                });
+
+                $('#sms_alert').click(function(){
+                  $('#sms_alert').prop('disabled', true);
+                  $.ajax({
+                    url:"{{ CRUDBooster::adminPath('sfmc_alerts/sms-alert') }}",
+                    method: 'GET',
+                    success:function(data, status, xhr)
+                    {
+                      alert(status);
+                    },
+                    error: function (jqXhr, textStatus, errorMessage) {
+                        alert(errorMessage);
+                    }
+                  });
+                });
+
+                $('#email_alert').click(function(){
+                  $('#email_alert').prop('disabled', true);
+                  $.ajax({
+                    url:"{{ CRUDBooster::adminPath('sfmc_alerts/email-alert') }}",
                     method: 'GET',
                     success:function(data, status, xhr)
                     {
