@@ -360,11 +360,10 @@
                                     * Please only include customers who are already inside the 'Offline' tab in Smart Data for this process
                                   @else
                                     <h4>Welcome to Data Importer Tool</h4>
-                                    Before doing upload a file, its better to read this bellow instructions : <br/>
-                                    * File format should be : xls or xlsx or csv<br/>
-                                    * If you have a big file data, we can't guarantee. So, please split those files into some parts of file (at least max 5 MB).<br/>
-                                    * This tool is generate data automatically so, be carefull about your table xls structure. Please make sure correctly the table structure.<br/>
-                                    * Table structure : Line 1 is heading column , and next is the data.  (For example, you can export any module you wish to XLS format)                                                                
+                                    Before uploading a file, please read the instructions below.<br/>
+                                    * When filling in data, you should use the template previously provided.<br/>
+                                    * Due to timeout concerns, please split your data into a maximum of 1000 rows each per upload.<br/>
+                                    * Please be sure to map the data correctly once the file has been attached and you have clicked the 'Upload' button.<br/>                                    
                                   @endif
                               </div>
 
