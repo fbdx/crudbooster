@@ -120,8 +120,8 @@ $privilegeID = CRUDBooster::myPrivilegeId();?>
             </a>
             @endif
 
-            @if(CRUDBooster::isSuperadmin() || CRUDBooster::myPrivilegeId() == 6)
-              @if($module->name == 'Database' || $module->name == 'customer')
+            @if(CRUDBooster::isSuperadmin() || CRUDBooster::myPrivilegeId() == 6 || CRUDBooster::myPrivilegeId() == 11)
+              @if($module->name == 'Database' || $module->name == 'customer' || $module->name == 'DBT Offline')
                 <button type="button" id="gigya_refresh" class="btn btn-success">Gigya Refresh</button>
                 <button type="button" id="sd_refresh" class="btn btn-success">SD Refresh</button>
               @endif
