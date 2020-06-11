@@ -2320,6 +2320,8 @@ class CBController extends Controller {
 
 			if(isset($rows) && $this->table == 'dbt_whatsapp_numbers')
 			{
+				DB::statement("DROP VIEW IF EXISTS CustomerView");
+
 				DB::statement("CREATE VIEW CustomerView AS
 						SELECT c.firstname, c.lastname, c.email, c.mobileno, g.preference_name, g.customer_id
 						FROM customer c
@@ -2395,7 +2397,7 @@ class CBController extends Controller {
 						if($this->sfmc_alert)
 						{
 							$a['batch'] = $batch;
-							$result = SMSAlertController::sendSMSAlert($a['mobileno']);
+							SMSAlertController::sendSMSAlert($a['mobileno']);
 						}
 
 						DB::table($this->table)->insert($a);
