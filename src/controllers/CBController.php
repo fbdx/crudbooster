@@ -6,6 +6,7 @@ error_reporting(E_ALL ^ E_NOTICE ^ E_WARNING);
 use crocodicstudio\crudbooster\controllers\Controller;
 use App\Customer;
 use App\Mainmerge;
+use App\DbtWhatsappNumber;
 use Illuminate\Support\Facades\Session;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Request;
@@ -32,6 +33,7 @@ use App\Traits\SetSmartDataInfoToGigya;
 use Config;
 use GuzzleHttp\Exception\GuzzleException;
 use GuzzleHttp\Client;
+use App\Http\Controllers\Alerts\SMSAlertController;
 
 class CBController extends Controller {
 
@@ -100,6 +102,7 @@ class CBController extends Controller {
 	public $thailand_customer     = FALSE;
 	public $import_mobile_number  = FALSE;
 	public $import_offline	      = FALSE;
+	public $sfmc_alert            = FALSE;
 
 	public function __construct()
 	{
@@ -2110,6 +2113,26 @@ class CBController extends Controller {
 	    return $data;
 	}
 
+	public function removeMobileNumberDuplication($rows)
+	{
+		$newRows = [];
+
+		foreach($rows as $key => $value)
+		{
+			$existingMobileNo = DbtWhatsappNumber::where("mobileno", $value["mobileno"])->first();
+			$customerMobileNo = Customer::where("mobileno", $value["mobileno"])->first();
+
+			if(isset($existingMobileNo) || isset($customerMobileNo))
+			{
+				continue;
+			}
+
+			$newRows[$key] = $value;
+		}
+
+		return $newRows;
+	}
+
 	public function getImportData() {
 		$this->cbLoader();
 		$data['page_menu']       = Route::getCurrentRoute()->getActionName();
@@ -2293,6 +2316,12 @@ class CBController extends Controller {
 			$file = storage_path($file);
 
 			$rows = $this->csvToArray($file);
+
+			if(isset($rows) && $this->table == 'dbt_whatsapp_numbers')
+			{
+				$rows = $this->removeMobileNumberDuplication($rows);
+			}
+			
 			$f = $this->import_consignment;
 
 			$has_created_at = false;
@@ -2304,6 +2333,12 @@ class CBController extends Controller {
 			$uploadNotUpdated = [];
 
 			// return response()->json(['select_column'=>$select_column, 'table_columns' => $table_columns]);
+
+			if($this->sfmc_alert)
+			{
+				$batch = DB::table($this->table)->max('batch');
+				$batch++;
+			}
 
 			foreach($rows as $value) {
 
@@ -2345,6 +2380,12 @@ class CBController extends Controller {
 							}
 
 							// return response()->json(['rows'=>$a, 'import_offline'=>$this->import_offline]);
+						}
+
+						if($this->sfmc_alert)
+						{
+							$a['batch'] = $batch;
+							$result = SMSAlertController::sendSMSAlert($a['mobileno']);
 						}
 
 						DB::table($this->table)->insert($a);
