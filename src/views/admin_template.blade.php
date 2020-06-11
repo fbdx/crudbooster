@@ -125,9 +125,9 @@ $privilegeID = CRUDBooster::myPrivilegeId();?>
                 <button type="button" id="gigya_refresh" class="btn btn-success">Gigya Refresh</button>
                 <button type="button" id="sd_refresh" class="btn btn-success">SD Refresh</button>
               @endif
-              @if($module->name == 'DBT Offline')
+              <!-- @if($module->name == 'DBT Offline')
               <button type="button" id="dbt_refresh" class="btn btn-success">DBT Refresh</button>
-              @endif
+              @endif -->
             @endif
 
             @if(CRUDBooster::isSuperadmin() || CRUDBooster::myPrivilegeId() == 2)
@@ -199,20 +199,20 @@ $privilegeID = CRUDBooster::myPrivilegeId();?>
                   });
                 });
 
-                $('#dbt_refresh').click(function(){
-                  $('#dbt_refresh').prop('disabled', true);
-                  $.ajax({
-                    url:"{{ CRUDBooster::adminPath('dbt_offline_forms/dbt-refresh') }}",
-                    method: 'GET',
-                    success:function(data, status, xhr)
-                    {
-                      alert(status);
-                    },
-                    error: function (jqXhr, textStatus, errorMessage) {
-                        alert(errorMessage);
-                    }
-                  });
-                });
+                // $('#dbt_refresh').click(function(){
+                //   $('#dbt_refresh').prop('disabled', true);
+                //   $.ajax({
+                //     url:"{{ CRUDBooster::adminPath('dbt_offline_forms/dbt-refresh') }}",
+                //     method: 'GET',
+                //     success:function(data, status, xhr)
+                //     {
+                //       alert(status);
+                //     },
+                //     error: function (jqXhr, textStatus, errorMessage) {
+                //         alert(errorMessage);
+                //     }
+                //   });
+                // });
               });
             </script>
 
