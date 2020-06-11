@@ -2117,10 +2117,20 @@ class CBController extends Controller {
 	{
 		$newRows = [];
 
+		DB::statement("DROP VIEW IF EXISTS CustomerView");
+
+		DB::statement("CREATE VIEW CustomerView AS
+						SELECT c.firstname, c.lastname, c.email, c.mobileno, g.preference_name, g.customer_id
+						FROM customer c
+						INNER JOIN gigya_preferences g
+						ON g.customer_id = c.id"
+					 );
+
 		foreach($rows as $key => $value)
 		{
 			$existingMobileNo = DbtWhatsappNumber::where("mobileno", $value["mobileno"])->first();
-			$customerMobileNo = Customer::where("mobileno", $value["mobileno"])->first();
+			$customerMobileNo = DB::table("customerview")->where("mobileno", $value["mobileno"])->first();
+			// $customerMobileNo = Customer::where("mobileno", $value["mobileno"])->first();
 
 			if(isset($existingMobileNo) || isset($customerMobileNo))
 			{
@@ -2129,6 +2139,8 @@ class CBController extends Controller {
 
 			$newRows[$key] = $value;
 		}
+
+		DB::statement("DROP VIEW IF EXISTS CustomerView");
 
 		return $newRows;
 	}
