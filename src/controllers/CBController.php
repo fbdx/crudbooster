@@ -704,6 +704,12 @@ class CBController extends Controller {
 			DB::table('cms_settings')->where('name','default_paper_size')->update(['content'=>$papersize]);
 		}
 
+		$userName = CRUDBooster::myName();
+
+		$description = $userName.' has export data from '.CRUDBooster::getCurrentModule()->name;
+
+		CRUDBooster::insertLog($description);
+
 		switch($filetype) {
 			case "pdf":
 				$view = view('crudbooster::export',$response)->render();
