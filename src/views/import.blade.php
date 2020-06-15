@@ -200,7 +200,7 @@
                                                 @endif
                                               @endif
                                             @else
-                                              @if( $column == 'firstname' || $column == 'lastname' || $column == 'mail_address' || $column == 'tracking_number' || $column == 'email' || $column == 'mobileno' || $column == 'address1' || $column == 'brand_source' || $column == 'm_product' || $column == 'childdob' || $column == 'childname' || $column == 'm_date' || $column == 'consigmentno') 
+                                              @if( $column == 'firstname' || $column == 'lastname' || $column == 'mail_address' || $column == 'tracking_number' || $column == 'email' || $column == 'mobileno' || $column == 'address1' || $column == 'm_product' || $column == 'childdob' || $column == 'childname' || $column == 'm_date' || $column == 'consigmentno' || $column == 'brand_source' || $column == 'optin' || $column == 'brand_preference' || $column == 'state' || $column == 'postcode' || $column == 'activity_source' || $column == 'activity_type' || $column == 'activity_name' || $column == 'language_preference' || $column == 'contact_preference' || $column == 'birthdate' || $column == 'gender') 
                                                 @if($column == "m_product")
                                                   <th data-no-column='{{$k}}'>Product Name{!! $help !!}</th>
                                                 @elseif($column == "m_date")
@@ -227,6 +227,28 @@
                                                   <th data-no-column='{{$k}}'>Address{!! $help !!}</th>
                                                 @elseif($column == "brand_source")
                                                   <th data-no-column='{{$k}}'>Brand Source{!! $help !!}</th>
+                                                @elseif($column == "optin")
+                                                  <th data-no-column='{{$k}}'>Opt In{!! $help !!}</th>
+                                                @elseif($column == "brand_preference")
+                                                  <th data-no-column='{{$k}}'>Brand Preference{!! $help !!}</th>
+                                                @elseif($column == "state")
+                                                  <th data-no-column='{{$k}}'>State{!! $help !!}</th>
+                                                @elseif($column == "postcode")
+                                                  <th data-no-column='{{$k}}'>Postcode{!! $help !!}</th>
+                                                @elseif($column == "activity_source")
+                                                  <th data-no-column='{{$k}}'>Activity Source{!! $help !!}</th>
+                                                @elseif($column == "activity_type")
+                                                  <th data-no-column='{{$k}}'>Activity Type{!! $help !!}</th>
+                                                @elseif($column == "activity_name")
+                                                  <th data-no-column='{{$k}}'>Activity Name{!! $help !!}</th>
+                                                @elseif($column == "language_preference")
+                                                  <th data-no-column='{{$k}}'>Language Preference{!! $help !!}</th>
+                                                @elseif($column == "contact_preference")
+                                                  <th data-no-column='{{$k}}'>Contact Preference{!! $help !!}</th>
+                                                @elseif($column == "birthdate")
+                                                  <th data-no-column='{{$k}}'>Birth Date{!! $help !!}</th>
+                                                @elseif($column == "gender")
+                                                  <th data-no-column='{{$k}}'>Gender{!! $help !!}</th>
                                                 @elseif($column == "mobileno")
                                                   <th data-no-column='{{$k}}'>Mobile Number{!! $help !!}</th>
                                                 @endif
@@ -263,7 +285,7 @@
                                                 </td>
                                               @endif
                                             @else
-                                              @if( $column == 'firstname' || $column == 'lastname' || $column == 'mail_address' || $column == 'tracking_number' || $column == 'email' || $column == 'mobileno' || $column == 'm_product' || $column == 'childdob' || $column == 'childname' || $column == 'm_date' || $column == 'consigmentno' || $column == 'address1' || $column == 'brand_source') 
+                                              @if( $column == 'firstname' || $column == 'lastname' || $column == 'mail_address' || $column == 'tracking_number' || $column == 'email' || $column == 'mobileno' || $column == 'm_product' || $column == 'childdob' || $column == 'childname' || $column == 'm_date' || $column == 'consigmentno' || $column == 'address1' || $column == 'brand_source' || $column == 'optin' || $column == 'brand_preference' || $column == 'state' || $column == 'postcode' || $column == 'activity_source' || $column == 'activity_type' || $column == 'activity_name' || $column == 'language_preference' || $column == 'contact_preference' || $column == 'birthdate' || $column == 'gender' ) 
                                                 <td data-no-column='{{$k}}'>
                                                     <select style='width:120px' class='form-control select_column' name='select_column[{{$k}}]'>
                                                         <option value=''>** Set Column for {{$column}}</option>
