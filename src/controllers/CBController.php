@@ -2403,7 +2403,6 @@ class CBController extends Controller {
 						if($this->sfmc_alert)
 						{
 							$a['batch'] = $batch;
-							SMSAlertController::sendSMSAlert($a['mobileno']);
 						}
 
 						DB::table($this->table)->insert($a);
