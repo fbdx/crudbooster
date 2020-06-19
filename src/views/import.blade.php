@@ -126,7 +126,7 @@
                         case 'childdob' : $field = 'Child DOB'; break;
                         case 'childname' : $field = 'Child Name'; break;
                         case 'm_date' : $field = 'Date Request'; break;
-                        case 'consigmentno' : $field = 'Consigment Number'; break;
+                        case 'consigmentno' : $field = 'Consignment Number'; break;
                         case 'brand_source' : $field = 'Brand Source'; break;
                         case 'optin' : $field = 'Opt In'; break;
                         case 'brand_preference' : $field = 'Brand Preference'; break;
@@ -139,7 +139,8 @@
                         case 'contact_preference' : $field = 'Contact Preference'; break;
                         case 'birthdate' : $field = 'Birth Date'; break;
                         case 'gender' : $field = 'Gender'; break;
-                        case 'batch' ; $field = 'Batch'; break;
+                        case 'batch' : $field = 'Batch'; break;
+                        case 'postage_remarks' : $field = 'Postage Remark'; break;
                         default : $field = 'Default'; break;
                       }
 

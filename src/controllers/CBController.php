@@ -2397,7 +2397,18 @@ class CBController extends Controller {
 								$a['childdob'] = date("Y-m-d", strtotime($dateString));
 							}
 
-							// return response()->json(['rows'=>$a, 'import_offline'=>$this->import_offline]);
+							$existingRecords = DB::table($this->table)->where("email", $a["email"])->where("m_product", $a["m_product"])->get()->toArray();
+
+							if(count($existingRecords) >= 2)
+							{
+								$latestRecord = end($existingRecords);
+
+								DB::table($this->table)
+                                ->where("id", $latestRecord->id)
+                                ->update($a);
+
+                                continue;
+							}
 						}
 
 						if($this->sfmc_alert)
@@ -2406,10 +2417,12 @@ class CBController extends Controller {
 						}
 
 						DB::table($this->table)->insert($a);
+
+						$uploadStatus = 'Successful';
 					}
 					else
 					{
-						if ((isset($a['m_product'])) && (isset($a['m_date'])) && (isset($a['email'])) && (isset($a['mobileno'])) && (isset($a['childname'])) && (isset($a['childdob'])) )
+						if ((isset($a['m_product'])) || (isset($a['m_date'])) || (isset($a['email'])) || (isset($a['mobileno'])) || (isset($a['childname'])) || (isset($a['childdob'])) )
 						{
 							if (($a['consigmentno'] != '')||($a['returnreason'] != '')||($a['batchno'] != '')||$a['delivery_status'] != '')
 							{
