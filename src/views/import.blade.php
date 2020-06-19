@@ -140,7 +140,7 @@
                         case 'birthdate' : $field = 'Birth Date'; break;
                         case 'gender' : $field = 'Gender'; break;
                         case 'batch' : $field = 'Batch'; break;
-                        case 'postage_remarks' : $field = 'Postage Remark'; break;
+                        case 'postage_remark' : $field = 'Postage Remark'; break;
                         default : $field = 'Default'; break;
                       }
 
