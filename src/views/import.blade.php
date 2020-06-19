@@ -123,8 +123,10 @@
                         case 'mobileno' : $field = 'Mobile Number'; break;
                         case 'address1' : $field = 'Address'; break;
                         case 'm_product' : $field = 'Product Name'; break;
+                        case 'm_source' : $field = 'Source'; break;
                         case 'childdob' : $field = 'Child DOB'; break;
                         case 'childname' : $field = 'Child Name'; break;
+                        case 'currentgumbrand' : $field = 'Curent Gum Brand'; break;
                         case 'm_date' : $field = 'Date Request'; break;
                         case 'consigmentno' : $field = 'Consignment Number'; break;
                         case 'brand_source' : $field = 'Brand Source'; break;
