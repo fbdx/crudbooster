@@ -319,7 +319,10 @@ class AdminController extends CBController {
 	}
 
 	public function postForgot() {
-		$validator = Validator::make(Request::all(),
+
+		$input = Request::all();
+		$email = $input["email"];
+		$validator = Validator::make($input,
 			[
 			'email'=>'required|email|exists:'.config('crudbooster.USER_TABLE')
 			]
@@ -331,22 +334,74 @@ class AdminController extends CBController {
 			return redirect()->back()->with(['message'=>implode(', ',$message),'message_type'=>'danger']);
 		}
 
-		$rand_string = str_random(5);
-		$password    = \Hash::make($rand_string);
-
-		DB::table(config('crudbooster.USER_TABLE'))->where('email',Request::input('email'))->update(array('password'=>$password));
+		// $rand_string = str_random(5);
+		// $password    = \Hash::make($rand_string);
+		// DB::table(config('crudbooster.USER_TABLE'))->where('email',Request::input('email'))->update(array('password'=>$password));
 
 		$appname = CRUDBooster::getSetting('appname');
 		$user = CRUDBooster::first(config('crudbooster.USER_TABLE'),['email'=>g('email')]);
-		$user->password = $rand_string;
-		$user->link     = env('APP_URL').'/admin/change-password';
+		$user->link     = env('APP_URL').'/admin/reset-password/'.$email;
 
         Mail::to($user->email)->send(new ForgotPassword($user));
-		// CRUDBooster::sendEmail(['to'=>$user->email,'data'=>$user,'template'=>'forgot_password_backend']);
 
 		CRUDBooster::insertLog(trans("crudbooster.log_forgot",['email'=>g('email'),'ip'=>Request::server('REMOTE_ADDR')]));
 
 		return redirect()->route('getLogin')->with('message', trans("crudbooster.message_forgot_password"));
+	}
+
+	public function getResetPassword($email) {
+		$data["email"] = $email;
+		return view('crudbooster::reset_password', $data);
+	}
+
+	public function postResetPassword(\Illuminate\Http\Request $request) {
+
+		$input = $request->all();
+		$email = $input["email"];
+		$user  = DB::table(config('crudbooster.USER_TABLE'))->where("email",$email)->first();
+
+		$validator = Validator::make($input,
+			[
+				'new-password'         => ['required', 'min:16', 'regex:/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*(_|[^\w])).+$/'],
+				'confirm-new-password' => 'required',
+			]
+		);
+
+		if ($validator->fails())
+		{
+			$message = $validator->errors()->all();
+			return redirect()->back()->with(['message'=>implode(', ',$message),'message_type'=>'danger']);
+		}
+
+		if($input['new-password'] != $input['confirm-new-password'] )
+		{
+			return redirect()->back()->with("message", 'The confirm new password does not match.');
+		}
+
+		$passwordHistories = DB::table('password_histories')->where("user_id",$user->id)->get();
+
+	    foreach($passwordHistories as $passwordHistory)
+	    {
+	        if (\Hash::check($input['new-password'], $passwordHistory->password)) 
+	        {
+	            return redirect()->back()->with("message","Your new password can not be same as any of your recent passwords. Please choose a new password.");
+	        }
+	    }
+
+	    $data['password'] = \Hash::make($input['new-password']);
+		$data['password_updated_at'] = date('Y-m-d H:i:s');
+
+		// dump(config('crudbooster.USER_TABLE'));
+		// dd($data);
+
+		DB::table(config('crudbooster.USER_TABLE'))->where("email",$email)->update($data);
+
+		$passwordHistory = PasswordHistory::create([
+            'user_id'  => $user->id,
+            'password' => $data['password']
+        ]);
+
+		return redirect()->route('getLogin')->with('message', 'Password reset successfully. You can now login with your new password.');
 	}
 
 	public function getChangePassword() {
