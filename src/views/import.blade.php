@@ -109,6 +109,48 @@
                     $action = $action_path."/done-import?file=".Request::get('file').'&import=1';
                   ?>
 
+                  <?php 
+
+                    function checkFormColumns($column)
+                    {
+                      switch($column)
+                      {
+                        case 'firstname' : $field = 'First Name'; break;
+                        case 'lastname' : $field = 'Last Name'; break;
+                        case 'mail_address' : $field = 'Mail Address'; break;
+                        case 'tracking_number' : $field = 'Tracking Number'; break;
+                        case 'email' : $field = 'Email'; break;
+                        case 'mobileno' : $field = 'Mobile Number'; break;
+                        case 'address1' : $field = 'Address'; break;
+                        case 'm_product' : $field = 'Product Name'; break;
+                        case 'm_source' : $field = 'Source'; break;
+                        case 'childdob' : $field = 'Child DOB'; break;
+                        case 'childname' : $field = 'Child Name'; break;
+                        case 'currentgumbrand' : $field = 'Curent Gum Brand'; break;
+                        case 'm_date' : $field = 'Date Request'; break;
+                        case 'consigmentno' : $field = 'Consignment Number'; break;
+                        case 'brand_source' : $field = 'Brand Source'; break;
+                        case 'optin' : $field = 'Opt In'; break;
+                        case 'brand_preference' : $field = 'Brand Preference'; break;
+                        case 'state' : $field = 'State'; break;
+                        case 'postcode' : $field = 'Postcode'; break;
+                        case 'activity_source' : $field = 'Activity Source'; break;
+                        case 'activity_type' : $field = 'Activity Type'; break;
+                        case 'activity_name' : $field = 'Activity Name'; break;
+                        case 'language_preference' : $field = 'Language Preference'; break;
+                        case 'contact_preference' : $field = 'Contact Preference'; break;
+                        case 'birthdate' : $field = 'Birth Date'; break;
+                        case 'gender' : $field = 'Gender'; break;
+                        case 'batch' : $field = 'Batch'; break;
+                        case 'postage_remark' : $field = 'Postage Remark'; break;
+                        default : $field = 'Default'; break;
+                      }
+
+                      return $field;
+                    }
+
+                  ?>
+
                 <form method='post' id="form" enctype="multipart/form-data" action='{{$action}}'>
                         <input type="hidden" name="_token" value="{{ csrf_token() }}">             
                         <div class="box-body table-responsive no-padding">
@@ -137,119 +179,30 @@
                                                 $relational_table = substr($column, 3);
                                                 $help = "<a href='#' title='This is foreign key, so the System will be inserting new data to table `$relational_table` if doesn`t exists'><strong>(?)</strong></a>";
                                               }
+
+                                              $field = checkFormColumns($column);
+
+                                              if($field == 'Default') continue;
                                             ?>
-                                            @if(CRUDBooster::myPrivilegeId()==1)
-                                              {{-- <th data-no-column='{{$k}}'>{{ $column }} {!! $help !!}</th> --}}
-                                              @if( $column == 'firstname' || $column == 'email' || $column == 'mobileno' || $column == 'm_product' || $column == 'childdob' || $column == 'childname' || $column == 'm_date') 
-                                                @if($column == "firstname")
-                                                  <th data-no-column='{{$k}}'>First Name{!! $help !!}</th>
-                                                @elseif($column == "m_product")
-                                                  <th data-no-column='{{$k}}'>Product Name{!! $help !!}</th>
-                                                @elseif($column == "m_date")
-                                                  <th data-no-column='{{$k}}'>Date Request{!! $help !!}</th>
-                                                @elseif($column == "email")
-                                                  <th data-no-column='{{$k}}'>Email{!! $help !!}</th>
-                                                @elseif($column == "mobileno")
-                                                  <th data-no-column='{{$k}}'>Mobile Number{!! $help !!}</th>
-                                                @elseif($column == "childname")
-                                                  <th data-no-column='{{$k}}'>Child Name{!! $help !!}</th>
-                                                @elseif($column == "childdob")
-                                                  <th data-no-column='{{$k}}'>Child DOB{!! $help !!}</th>
-                                                @endif
-                                              @endif
-                                            @elseif(CRUDBooster::myPrivilegeId()==2)
-                                              @if( $column == 'm_product' || $column == 'firstname' || $column == 'lastname' || $column =='lastname' || $column == 'email' || $column == 'address1' || $column == 'address2' || $column == 'postcode' || $column == 'city' || $column =='state' || $column == 'mobileno' || $column == 'childname' || $column == 'childdob' || $column == 'maternalmilkbrand' || $column == 'm_source')
-                                                @if($column == "m_product")
-                                                  <th data-no-column='{{$k}}'>Product Name{!! $help !!}</th> 
-                                                @elseif($column == "firstname")
-                                                  <th data-no-column='{{$k}}'>First Name{!! $help !!}</th>
-                                                @elseif($column == "lastname")
-                                                  <th data-no-column='{{$k}}'>Last Name{!! $help !!}</th>
-                                                @elseif($column == "email")
-                                                  <th data-no-column='{{$k}}'>Email{!! $help !!}</th>
-                                                @elseif($column == "address1")
-                                                  <th data-no-column='{{$k}}'>Address 1{!! $help !!}</th>
-                                                @elseif($column == "address2")
-                                                  <th data-no-column='{{$k}}'>Address 2{!! $help !!}</th>
-                                                @elseif($column == "postcode")
-                                                  <th data-no-column='{{$k}}'>Postcode{!! $help !!}</th>
-                                                @elseif($column == "city")
-                                                  <th data-no-column='{{$k}}'>City{!! $help !!}</th>
-                                                @elseif($column == "state")
-                                                  <th data-no-column='{{$k}}'>State{!! $help !!}</th>
-                                                @elseif($column == "mobileno")
-                                                  <th data-no-column='{{$k}}'>Mobile Number{!! $help !!}</th>
-                                                @elseif($column == "childname")
-                                                  <th data-no-column='{{$k}}'>Child Name{!! $help !!}</th>
-                                                @elseif($column == "childdob")
-                                                  <th data-no-column='{{$k}}'>Child DOB{!! $help !!}</th>
-                                                @elseif($column == "maternalmilkbrand")
-                                                  <th data-no-column='{{$k}}'>Maternal Milk Brand{!! $help !!}</th>
-                                                @elseif($column == "m_source")
-                                                  <th data-no-column='{{$k}}'>Source{!! $help !!}</th>
-                                                @endif
-                                              @endif
-                                            @else
-                                              @if( $column == 'email' || $column == 'mobileno' || $column == 'm_product' || $column == 'childdob' || $column == 'childname' || $column == 'm_date' || $column == 'consigmentno') 
-                                                @if($column == "m_product")
-                                                  <th data-no-column='{{$k}}'>Product Name{!! $help !!}</th>
-                                                @elseif($column == "m_date")
-                                                  <th data-no-column='{{$k}}'>Date Request{!! $help !!}</th>
-                                                @elseif($column == "email")
-                                                  <th data-no-column='{{$k}}'>Email{!! $help !!}</th>
-                                                @elseif($column == "mobileno")
-                                                  <th data-no-column='{{$k}}'>Mobile Number{!! $help !!}</th>
-                                                @elseif($column == "childname")
-                                                  <th data-no-column='{{$k}}'>Child Name{!! $help !!}</th>
-                                                @elseif($column == "childdob")
-                                                  <th data-no-column='{{$k}}'>Child DOB{!! $help !!}</th>
-                                                @elseif($column == "consigmentno")
-                                                  <th data-no-column='{{$k}}'>Consignment Number{!! $help !!}</th>
-                                                @endif
-                                              @endif
-                                            @endif
+                                            <th data-no-column='{{$k}}'>{{$field}}{!! $help !!}</th>
                                           @endforeach
                                       </tr>                                      
                                   </thead>
                                   <tbody>
                                         <tr>
                                         @foreach($table_columns as $k=>$column)
-                                            <?php if($column == 'id' || $column == 'created_at' || $column == 'updated_at' || $column == 'deleted_at') continue;?>
-
-                                            @if(CRUDBooster::myPrivilegeId()==1)
-                                              @if( $column == 'firstname' || $column == 'email' || $column == 'mobileno' || $column == 'm_product' || $column == 'childdob' || $column == 'childname' || $column == 'm_date') 
-                                                <td data-no-column='{{$k}}'>
-                                                    <select style='width:120px' class='form-control select_column' name='select_column[{{$k}}]'>
-                                                        <option value=''>** Set Column for {{$column}}</option>
-                                                        @foreach($data_import_column as $import_column)
-                                                        <option value='{{$import_column}}'>{{$import_column}}</option>
-                                                        @endforeach
-                                                    </select>
-                                                </td>
-                                              @endif
-                                            @elseif(CRUDBooster::myPrivilegeId()==2)
-                                             @if( $column == 'm_product' || $column == 'firstname' || $column == 'lastname' || $column =='lastname' || $column == 'email' || $column == 'address1' || $column == 'address2' || $column == 'postcode' || $column == 'city' || $column =='state' || $column == 'mobileno' || $column == 'childname' || $column == 'childdob' || $column == 'maternalmilkbrand' || $column == 'm_source')
-                                                <td data-no-column='{{$k}}'>
-                                                    <select style='width:120px' class='form-control select_column' name='select_column[{{$k}}]'>
-                                                        <option value=''>** Set Column for {{$column}}</option>
-                                                        @foreach($data_import_column as $import_column)
-                                                        <option value='{{$import_column}}'>{{$import_column}}</option>
-                                                        @endforeach
-                                                    </select>
-                                                </td>
-                                              @endif
-                                            @else
-                                              @if( $column == 'email' || $column == 'mobileno' || $column == 'm_product' || $column == 'childdob' || $column == 'childname' || $column == 'm_date' || $column == 'consigmentno') 
-                                                <td data-no-column='{{$k}}'>
-                                                    <select style='width:120px' class='form-control select_column' name='select_column[{{$k}}]'>
-                                                        <option value=''>** Set Column for {{$column}}</option>
-                                                        @foreach($data_import_column as $import_column)
-                                                        <option value='{{$import_column}}'>{{$import_column}}</option>
-                                                        @endforeach
-                                                    </select>
-                                                </td>
-                                              @endif
-                                            @endif
+                                            <?php 
+                                              $field = checkFormColumns($column);
+                                              if($field == 'Default') continue;
+                                            ?>
+                                              <td data-no-column='{{$k}}'>
+                                                  <select style='width:120px' class='form-control select_column' name='select_column[{{$k}}]'>
+                                                      <option value=''>** Set Column for {{$column}}</option>
+                                                      @foreach($data_import_column as $import_column)
+                                                      <option value='{{$import_column}}'>{{$import_column}}</option>
+                                                      @endforeach
+                                                  </select>
+                                              </td>
                                         @endforeach
                                         </tr>
                                   </tbody>
@@ -329,7 +282,7 @@
                         <div class="box-body">
 
                             <div class='callout callout-success' style="font-size: 16px;">
-                                  @if(CRUDBooster::myPrivilegeId()==2 || CRUDBooster::myPrivilegeId()==6)
+                                  @if(CRUDBooster::myPrivilegeId()==6)
                                     <h4>Welcome to the Consignment No. Bulk Update Tool</h4>
                                     Please read the instructions below before using this tool: <br/>
                                     * File format should be : <b>csv</b><br/>
@@ -340,11 +293,10 @@
                                     * Please only include customers who are already inside the 'Offline' tab in Smart Data for this process
                                   @else
                                     <h4>Welcome to Data Importer Tool</h4>
-                                    Before doing upload a file, its better to read this bellow instructions : <br/>
-                                    * File format should be : xls or xlsx or csv<br/>
-                                    * If you have a big file data, we can't guarantee. So, please split those files into some parts of file (at least max 5 MB).<br/>
-                                    * This tool is generate data automatically so, be carefull about your table xls structure. Please make sure correctly the table structure.<br/>
-                                    * Table structure : Line 1 is heading column , and next is the data.  (For example, you can export any module you wish to XLS format)                                                                
+                                    Before uploading a file, please read the instructions below.<br/>
+                                    * When filling in data, you should use the template previously provided.<br/>
+                                    * Due to timeout concerns, please split your data into a maximum of 1000 rows each per upload.<br/>
+                                    * Please be sure to map the data correctly once the file has been attached and you have clicked the 'Upload' button.<br/>                                    
                                   @endif
                               </div>
 

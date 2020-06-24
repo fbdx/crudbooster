@@ -120,10 +120,20 @@ $privilegeID = CRUDBooster::myPrivilegeId();?>
             </a>
             @endif
 
-            @if(CRUDBooster::isSuperadmin() || CRUDBooster::myPrivilegeId() == 6)
+            @if(CRUDBooster::isSuperadmin() || CRUDBooster::myPrivilegeId() == 6 || CRUDBooster::myPrivilegeId() == 11)
               @if($module->name == 'Database' || $module->name == 'customer')
                 <button type="button" id="gigya_refresh" class="btn btn-success">Gigya Refresh</button>
                 <button type="button" id="sd_refresh" class="btn btn-success">SD Refresh</button>
+              @endif
+              <!-- @if($module->name == 'DBT Offline')
+              <button type="button" id="dbt_refresh" class="btn btn-success">DBT Refresh</button>
+              @endif -->
+            @endif
+
+            @if(CRUDBooster::isSuperadmin() || CRUDBooster::myPrivilegeId() == 2)
+              @if($module->name == 'NIN Fulfillment Journey')
+                <button type="button" id="sms_alert" class="btn btn-success">Send SMS Alert</button>
+                <button type="button" id="email_alert" class="btn btn-success">Send Email Alert</button>
               @endif
             @endif
 
@@ -158,6 +168,51 @@ $privilegeID = CRUDBooster::myPrivilegeId();?>
                     }
                   });
                 });
+
+                $('#sms_alert').click(function(){
+                  $('#sms_alert').prop('disabled', true);
+                  $.ajax({
+                    url:"{{ CRUDBooster::adminPath('sfmc_alerts/sms-alert') }}",
+                    method: 'GET',
+                    success:function(data, status, xhr)
+                    {
+                      alert(status);
+                    },
+                    error: function (jqXhr, textStatus, errorMessage) {
+                        alert(errorMessage);
+                    }
+                  });
+                });
+
+                $('#email_alert').click(function(){
+                  $('#email_alert').prop('disabled', true);
+                  $.ajax({
+                    url:"{{ CRUDBooster::adminPath('sfmc_alerts/email-alert') }}",
+                    method: 'GET',
+                    success:function(data, status, xhr)
+                    {
+                      alert(status);
+                    },
+                    error: function (jqXhr, textStatus, errorMessage) {
+                        alert(errorMessage);
+                    }
+                  });
+                });
+
+                // $('#dbt_refresh').click(function(){
+                //   $('#dbt_refresh').prop('disabled', true);
+                //   $.ajax({
+                //     url:"{{ CRUDBooster::adminPath('dbt_offline_forms/dbt-refresh') }}",
+                //     method: 'GET',
+                //     success:function(data, status, xhr)
+                //     {
+                //       alert(status);
+                //     },
+                //     error: function (jqXhr, textStatus, errorMessage) {
+                //         alert(errorMessage);
+                //     }
+                //   });
+                // });
               });
             </script>
 
