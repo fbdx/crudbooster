@@ -342,7 +342,7 @@ class AdminController extends CBController {
 		$user       = CRUDBooster::first(config('crudbooster.USER_TABLE'),['email'=>g('email')]);
 		$token      = $this->generateRandomUID();
 
-		$user->link = env('APP_URL').'/admin/reset-password/'.$email.'/token/'.$token;
+		$user->link = route('getResetPassword', ['email' => $email, 'token' => $token]);
 
         Mail::to($user->email)->send(new ForgotPassword($user));
 
