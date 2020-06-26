@@ -71,6 +71,7 @@
         <form autocomplete='off' action="{{ route('postResetPassword') }}" method="post">
           <input type="hidden" name="_token" value="{{ csrf_token() }}" />
           <input type="hidden" name="email" value="{{$email}}">
+          <input type="hidden" name="password_reset_token" value="{{$token}}">
           <div class="form-group">
             <label for="email">New Password:</label>
             <input type="password" class="form-control" name="new-password" id="new-password" required>

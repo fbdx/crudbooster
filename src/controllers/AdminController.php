@@ -338,9 +338,11 @@ class AdminController extends CBController {
 		// $password    = \Hash::make($rand_string);
 		// DB::table(config('crudbooster.USER_TABLE'))->where('email',Request::input('email'))->update(array('password'=>$password));
 
-		$appname = CRUDBooster::getSetting('appname');
-		$user = CRUDBooster::first(config('crudbooster.USER_TABLE'),['email'=>g('email')]);
-		$user->link     = env('APP_URL').'/admin/reset-password/'.$email;
+		$appname    = CRUDBooster::getSetting('appname');
+		$user       = CRUDBooster::first(config('crudbooster.USER_TABLE'),['email'=>g('email')]);
+		$token      = $this->generateRandomUID();
+
+		$user->link = env('APP_URL').'/admin/reset-password/'.$email.'/token/'.$token;
 
         Mail::to($user->email)->send(new ForgotPassword($user));
 
@@ -349,8 +351,23 @@ class AdminController extends CBController {
 		return redirect()->route('getLogin')->with('message', trans("crudbooster.message_forgot_password"));
 	}
 
-	public function getResetPassword($email) {
+	public function getResetPassword($email,$token) {
+
+		$user = DB::table(config('crudbooster.USER_TABLE'))->where("email",$email)->first();
+
+		if(isset($user))
+		{
+			if(isset($user->password_reset_token))
+			{
+				if($token == $user->password_reset_token)
+				{
+					return redirect()->route('getLogin')->with('message', "Your password has changed. Please login with your new password.");
+				}
+			}
+		}
+
 		$data["email"] = $email;
+		$data["token"] = $token;
 		return view('crudbooster::reset_password', $data);
 	}
 
@@ -358,6 +375,7 @@ class AdminController extends CBController {
 
 		$input = $request->all();
 		$email = $input["email"];
+		$token = $input["password_reset_token"];
 		$user  = DB::table(config('crudbooster.USER_TABLE'))->where("email",$email)->first();
 
 		$validator = Validator::make($input,
@@ -390,6 +408,7 @@ class AdminController extends CBController {
 
 	    $data['password'] = \Hash::make($input['new-password']);
 		$data['password_updated_at'] = date('Y-m-d H:i:s');
+		$data['password_reset_token'] = $token;
 
 		// dump(config('crudbooster.USER_TABLE'));
 		// dd($data);
@@ -479,6 +498,16 @@ class AdminController extends CBController {
 			return redirect()->back()->with("message", 'Your current password does not matches with the password you provided. Please try again.');
 		}
 
+	}
+
+	public function generateRandomUID()
+	{
+		return sprintf('%04x%04x%04x%04x%04x%04x%04x%04x',
+        	   mt_rand(0, 0xffff), mt_rand(0, 0xffff),
+        	   mt_rand(0, 0xffff),
+        	   mt_rand(0, 0x0fff) | 0x4000,
+        	   mt_rand(0, 0x3fff) | 0x8000,
+        	   mt_rand(0, 0xffff), mt_rand(0, 0xffff), mt_rand(0, 0xffff));
 	}
 
 	public function getLogout() {
