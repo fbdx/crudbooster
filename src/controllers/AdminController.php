@@ -345,7 +345,7 @@ class AdminController extends CBController {
 		$user->link = route('getResetPassword', ['email' => $email, 'token' => $identityToken]);
 
         Mail::to($user->email)->send(new ForgotPassword($user));
-        DB::table(config('crudbooster.USER_TABLE'))->where('email',Request::input('email'))->update(array('password_reset_identity_token'=>$identityToken));
+        DB::table(config('crudbooster.USER_TABLE'))->where('email',Request::input('email'))->update(array('password_reset_identity_token'=>$identityToken, 'password_reset_token' => null));
 
 		CRUDBooster::insertLog(trans("crudbooster.log_forgot",['email'=>g('email'),'ip'=>Request::server('REMOTE_ADDR')]));
 
