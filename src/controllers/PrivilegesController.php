@@ -76,7 +76,8 @@ class PrivilegesController extends CBController
 
         $this->arr[$this->primary_key] = DB::table($this->table)->max($this->primary_key) + 1;
 
-        DB::table($this->table)->insert($this->arr);
+        CRUDBooster::insert($this->table,$this->arr);
+        //DB::table($this->table)->insert($this->arr);
         $id = $this->arr[$this->primary_key];
 
         //set theme
@@ -94,7 +95,8 @@ class PrivilegesController extends CBController
                 $arrs['is_delete'] = @$data['is_delete'] ?: 0;
                 $arrs['id_cms_privileges'] = $id;
                 $arrs['id_cms_moduls'] = $id_modul;
-                DB::table("cms_privileges_roles")->insert($arrs);
+                //DB::table("cms_privileges_roles")->insert($arrs);
+                CRUDBooster::insert("cms_privileges_roles",$arrs);
 
                 $module = DB::table('cms_moduls')->where('id', $id_modul)->first();
             }
