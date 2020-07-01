@@ -177,7 +177,8 @@ class PrivilegesController extends CBController
                     $arrs['is_delete'] = @$data['is_delete'] ?: 0;
                     $arrs['id_cms_privileges'] = $id;
                     $arrs['id_cms_moduls'] = $id_modul;
-                    DB::table("cms_privileges_roles")->insert($arrs);
+                    //DB::table("cms_privileges_roles")->insert($arrs);
+                    CRUDBooster::insert("cms_privileges_roles",$arrs);
                 }
             }
         }
