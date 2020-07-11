@@ -6,6 +6,7 @@ error_reporting(E_ALL ^ E_NOTICE ^ E_WARNING);
 use crocodicstudio\crudbooster\controllers\Controller;
 use App\Customer;
 use App\Mainmerge;
+use App\DbtWhatsappNumber;
 use Illuminate\Support\Facades\Session;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Request;
@@ -32,6 +33,7 @@ use App\Traits\SetSmartDataInfoToGigya;
 use Config;
 use GuzzleHttp\Exception\GuzzleException;
 use GuzzleHttp\Client;
+use App\Http\Controllers\Alerts\SMSAlertController;
 
 class CBController extends Controller {
 
@@ -100,6 +102,7 @@ class CBController extends Controller {
 	public $thailand_customer     = FALSE;
 	public $import_mobile_number  = FALSE;
 	public $import_offline	      = FALSE;
+	public $sfmc_alert            = FALSE;
 
 	public function __construct()
 	{
@@ -711,6 +714,12 @@ class CBController extends Controller {
 		if(Request::input('default_paper_size')) {
 			DB::table('cms_settings')->where('name','default_paper_size')->update(['content'=>$papersize]);
 		}
+
+		$userName = CRUDBooster::myName();
+
+		$description = $userName.' has export data from '.CRUDBooster::getCurrentModule()->name;
+
+		CRUDBooster::insertLog($description);
 
 		switch($filetype) {
 			case "pdf":
@@ -2121,6 +2130,27 @@ class CBController extends Controller {
 	    return $data;
 	}
 
+	public function removeMobileNumberDuplication($rows)
+	{
+		$newRows = [];
+
+		foreach($rows as $key => $value)
+		{
+			$existingMobileNo = DbtWhatsappNumber::where("mobileno", $value["mobileno"])->first();
+			$customerMobileNo = DB::table("customerview")->where("mobileno", $value["mobileno"])->first();
+			// $customerMobileNo = Customer::where("mobileno", $value["mobileno"])->first();
+
+			if(isset($existingMobileNo) || isset($customerMobileNo))
+			{
+				continue;
+			}
+
+			$newRows[$key] = $value;
+		}
+
+		return $newRows;
+	}
+
 	public function getImportData() {
 		$this->cbLoader();
 		$data['page_menu']       = Route::getCurrentRoute()->getActionName();
@@ -2304,6 +2334,23 @@ class CBController extends Controller {
 			$file = storage_path($file);
 
 			$rows = $this->csvToArray($file);
+
+			if(isset($rows) && $this->table == 'dbt_whatsapp_numbers')
+			{
+				DB::statement("DROP VIEW IF EXISTS CustomerView");
+
+				DB::statement("CREATE VIEW CustomerView AS
+						SELECT c.firstname, c.lastname, c.email, c.mobileno, g.preference_name, g.customer_id
+						FROM customer c
+						INNER JOIN gigya_preferences g
+						ON g.customer_id = c.id"
+					 );
+
+				$rows = $this->removeMobileNumberDuplication($rows);
+
+				DB::statement("DROP VIEW IF EXISTS CustomerView");
+			}
+			
 			$f = $this->import_consignment;
 
 			$has_created_at = false;
@@ -2315,6 +2362,12 @@ class CBController extends Controller {
 			$uploadNotUpdated = [];
 
 			// return response()->json(['select_column'=>$select_column, 'table_columns' => $table_columns]);
+
+			if($this->sfmc_alert)
+			{
+				$batch = DB::table($this->table)->max('batch');
+				$batch++;
+			}
 
 			foreach($rows as $value) {
 
@@ -2355,14 +2408,32 @@ class CBController extends Controller {
 								$a['childdob'] = date("Y-m-d", strtotime($dateString));
 							}
 
-							// return response()->json(['rows'=>$a, 'import_offline'=>$this->import_offline]);
+							$existingRecords = DB::table($this->table)->where("email", $a["email"])->where("m_product", $a["m_product"])->get()->toArray();
+
+							if(count($existingRecords) >= 2)
+							{
+								$latestRecord = end($existingRecords);
+
+								DB::table($this->table)
+                                ->where("id", $latestRecord->id)
+                                ->update($a);
+
+                                continue;
+							}
+						}
+
+						if($this->sfmc_alert)
+						{
+							$a['batch'] = $batch;
 						}
 
 						DB::table($this->table)->insert($a);
+
+						$uploadStatus = 'Successful';
 					}
 					else
 					{
-						if ((isset($a['m_product'])) && (isset($a['m_date'])) && (isset($a['email'])) && (isset($a['mobileno'])) && (isset($a['childname'])) && (isset($a['childdob'])) )
+						if ((isset($a['m_product'])) || (isset($a['m_date'])) || (isset($a['email'])) || (isset($a['mobileno'])) || (isset($a['childname'])) || (isset($a['childdob'])) )
 						{
 							if (($a['consigmentno'] != '')||($a['returnreason'] != '')||($a['batchno'] != '')||$a['delivery_status'] != '')
 							{
