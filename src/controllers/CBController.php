@@ -2477,6 +2477,7 @@ class CBController extends Controller {
 				]
 			]);
 		}
+		$this->hook_after_import();
 		return response()->json(['status'=>true]);
 	}
 
@@ -2655,6 +2656,10 @@ class CBController extends Controller {
 	}
 
 	public function hook_after_delete($id) {
+	}
+
+	public function hook_after_import() {	
+		
 	}
 
 }
