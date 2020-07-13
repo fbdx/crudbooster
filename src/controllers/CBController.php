@@ -190,15 +190,18 @@ class CBController extends Controller {
 		return $isFind;
 	}
 
-	public function getIndex() {
-		$this->cbLoader();
+	public function checkAccess() {
 		$module = CRUDBooster::getCurrentModule();
 
 		if(!CRUDBooster::isView() && $this->global_privilege==FALSE) {
 			CRUDBooster::insertLog(trans('crudbooster.log_try_view',['module'=>$module->name]));
 			CRUDBooster::redirect(CRUDBooster::adminPath(),trans('crudbooster.denied_access'));
 		}
+	}
 
+	public function processParents()
+	{
+		$data = [];
 		if(Request::get('parent_table')) {
 			$parentTablePK = CB::pk(g('parent_table'));
 			$data['parent_table'] = DB::table(Request::get('parent_table'))->where($parentTablePK,Request::get('parent_id'))->first();
@@ -214,8 +217,16 @@ class CBController extends Controller {
 						unset($this->columns_table[$i]);
 					}
 				}
-			}
+			}			
 		}
+		return $data;
+	}
+
+	public function getIndex() {
+		$this->cbLoader();
+		$this->checkAccess();		
+
+		$data = $this->processParents();
 
 		$data['table'] 	  = $this->table;
 		$data['table_pk'] = CB::pk($this->table);
