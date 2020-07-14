@@ -2268,9 +2268,9 @@ class CBController extends Controller {
 							}
 						} //END IS INT
 					}else{
-						if ($colname=="datereceived")
+						/*if ($colname=="datereceived")
 							$a[$colname] = Carbon\Carbon::createFromFormat('d/m/Y H:i', $value->$s);
-						else
+						else*/
 							$a[$colname] = $value->$s;
 					}
 				}
@@ -2381,8 +2381,8 @@ class CBController extends Controller {
 				foreach($select_column as $sk => $s) {
 					$colname = $table_columns[$sk];
 					$a[$colname] = $value[$s];
-					if ($colname=="datereceived")					
-						$a[$colname] = Carbon\Carbon::createFromFormat('d/m/Y H:i', $value[$s]);
+					/*if ($colname=="datereceived")					
+						$a[$colname] = Carbon\Carbon::createFromFormat('d/m/Y H:i', $value[$s]);*/
 				}
 
 				$has_title_field = true;
