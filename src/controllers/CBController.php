@@ -2228,6 +2228,7 @@ class CBController extends Controller {
 			if(Schema::hasColumn($this->table,'created_at')) {
 				$has_created_at = true;
 			}
+
 			$data_import_column = array();
 			foreach($rows as $value) {
 				$a = array();
@@ -2236,7 +2237,7 @@ class CBController extends Controller {
 					if(CRUDBooster::isForeignKey($colname)) {
 						//Skip if value is empty
 						if($value->$s == '') continue;
-						if(intval($value->$s)) {
+						if(intval($value->$s)) {							
 							$a[$colname] = $value->$s;
 						}else{
 							$relation_table = CRUDBooster::getTableForeignKey($colname);
@@ -2267,7 +2268,10 @@ class CBController extends Controller {
 							}
 						} //END IS INT
 					}else{
-						$a[$colname] = $value->$s;
+						if ($colname=="datereceived")
+							$a[$colname] = Carbon\Carbon::createFromFormat('d/m/Y H:i', $value->$s);
+						else
+							$a[$colname] = $value->$s;
 					}
 				}
 
@@ -2285,6 +2289,8 @@ class CBController extends Controller {
 				if($has_created_at) {
 					$a['created_at'] = date('Y-m-d H:i:s');
 				}
+
+				
 
 				try{
 					if($this->import_mobile_number)
@@ -2375,6 +2381,8 @@ class CBController extends Controller {
 				foreach($select_column as $sk => $s) {
 					$colname = $table_columns[$sk];
 					$a[$colname] = $value[$s];
+					if ($colname=="datereceived")					
+						$a[$colname] = Carbon\Carbon::createFromFormat('d/m/Y H:i', $value[$s]);
 				}
 
 				$has_title_field = true;
