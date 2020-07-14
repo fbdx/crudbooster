@@ -143,6 +143,10 @@
                         case 'gender' : $field = 'Gender'; break;
                         case 'batch' : $field = 'Batch'; break;
                         case 'postage_remark' : $field = 'Postage Remark'; break;
+                        case 'datereceived' : $field = 'Date Received'; break;
+                        case 'phoneno' : $field = 'Phone No'; break;
+                        case 'address' : $field = 'Address'; break;
+                        case 'product' : $field = 'Product'; break;                        
                         default : $field = 'Default'; break;
                       }
 

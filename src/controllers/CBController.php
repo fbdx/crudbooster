@@ -2160,9 +2160,9 @@ class CBController extends Controller {
 			$file = base64_decode(Request::get('file'));
 			$file = trim(str_replace('uploads','app',$file),'/');
 			$file = storage_path($file);
-			/*$rows = Excel::load($file,function($reader) {
-			})->get();*/
-			$rows = $this->csvToArray($file);
+			$rows = Excel::load($file,function($reader) {
+			})->get();
+			//$rows = $this->csvToArray($file);
 			//Log::error($rows);
 			//Log::error(count($rows));
 			//return (count($rows));
