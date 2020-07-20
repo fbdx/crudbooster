@@ -2409,6 +2409,11 @@ class CBController extends Controller {
 							{
 								$a['m_date'] = date("Y-m-d H:i:s");
 							}
+
+							if(!isset($a['fulfillment_record']))
+							{
+								$a['fulfillment_record'] = true;
+							}
 						
 							if(isset($a['childdob']))
 							{
