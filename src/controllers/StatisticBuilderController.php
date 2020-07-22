@@ -157,7 +157,7 @@
 	    			if ($key=="sql")
 	    			{
 //NEWCODE EDITED start
-						$t = explode(';;', $value);
+						$t = explode('::', $value);
 						if(count($t) > 1) {
 							$dateColumn = $t[0];
 							$value = $t[1];
