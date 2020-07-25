@@ -170,7 +170,7 @@
                                                                            <?=@$roles->is_read ? "checked" : ""?> value='1'/></td>
                                     <td class='success' align="center"><input type='checkbox' class='is_edit' name='privileges[<?=$modul->id?>][is_edit]'
                                                                               <?=@$roles->is_edit ? "checked" : ""?> value='1'/></td>
-                                    <td class='danger' align="center"><input type='checkbox' class='is_delete' name='privileges[<?=$modul->id?>][is_delete]'
+                                    <td style="display:none;" class='danger' align="center"><input type='checkbox' class='is_delete' name='privileges[<?=$modul->id?>][is_delete]'
                                                                              <?=@$roles->is_delete ? "checked" : ""?> value='1'/></td>
                                 </tr>
                             @endforeach
