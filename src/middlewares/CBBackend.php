@@ -28,6 +28,11 @@ class CBBackend
 
             return redirect($url);
         }
+        if (!CRUDBooster::checkSession()){
+            $url = url($admin_path.'/login');
+
+            return redirect($url)->with('message', trans('crudbooster.not_logged_in'));
+        }
 
         return $next($request);
     }

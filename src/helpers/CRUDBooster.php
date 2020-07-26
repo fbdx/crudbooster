@@ -14,6 +14,27 @@ use Validator;
 
 class CRUDBooster
 {
+    public static function checkSession()
+    {
+        $userid = CRUDBooster::myId();
+        $user = DB::table("cms_users")->where("id", $userid)->first();
+
+        if ($user==null) 
+        {   
+            Session::flush();
+            return false;
+        }
+
+        if (Session::getId()==$user->sessionid)
+            return true;
+        else
+        {
+            Session::flush();
+            return false;
+        }
+    }
+
+
     public static function uploadBase64($value, $id = null)
     {
         if (! self::myId()) {
