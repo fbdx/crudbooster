@@ -102,7 +102,7 @@ class AdminController extends CBController
                             Session::put('admin_lock', 0);
                             Session::put('theme_color', $priv->theme_color);
                             Session::put("appname", CRUDBooster::getSetting('appname'));
-
+                            DB::table("cms_users")->where("id",$users->id)->update(['sessionid' => Session::getId()]);
                             CRUDBooster::insertLog(trans("crudbooster.log_login", ['email' => $users->email, 'ip' => Request::server('REMOTE_ADDR')]));
 
                             $cb_hook_session = new \App\Http\Controllers\CBHook;
@@ -168,7 +168,7 @@ class AdminController extends CBController
                 Session::put('admin_lock', 0);
                 Session::put('theme_color', $priv->theme_color);
                 Session::put("appname", CRUDBooster::getSetting('appname'));
-
+                DB::table("cms_users")->where("id",$users->id)->update(['sessionid' => Session::getId()]);
                 CRUDBooster::insertLog(trans("crudbooster.log_login", ['email' => $users->email, 'ip' => Request::server('REMOTE_ADDR')]));
 
                 $cb_hook_session = new \App\Http\Controllers\CBHook;
