@@ -114,6 +114,13 @@ $privilegeID = CRUDBooster::myPrivilegeId();?>
 {{-- @end NEW CSV --}}
             @endif
 
+            @if($button_export_v2 && CRUDBooster::getCurrentMethod() == 'getIndex')
+            <a href="javascript:void(0)" id='export_data_v2' data-url-parameter='' title='Export Data' class="btn btn-sm btn-primary btn-export-data-v2">
+              <i class="fa fa-upload"></i>&nbsp;Export CSV (PPI hashed)
+            </a>
+            @endif
+
+
             @if($button_import && CRUDBooster::getCurrentMethod() == 'getIndex')
             <a href="{{ CRUDBooster::mainpath('import-data') }}" id='btn_import_data' data-url-parameter='{{$build_query}}' title='Import Data' class="btn btn-sm btn-primary btn-import-data">
               <i class="fa fa-download"></i> {{trans("crudbooster.button_import")}}

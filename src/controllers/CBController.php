@@ -63,6 +63,7 @@ class CBController extends Controller {
 
 	public $button_filter       = TRUE;
 	public $button_export       = TRUE;
+	public $button_export_v2    = FALSE;
 	public $button_import       = FALSE;
 	public $button_show         = TRUE;
 	public $button_addmore      = TRUE;
@@ -136,6 +137,7 @@ class CBController extends Controller {
 		$this->data['button_delete']         = $this->button_delete;
 		$this->data['button_filter']         = $this->button_filter;
 		$this->data['button_export']         = $this->button_export;
+		$this->data['button_export_v2']      = $this->button_export_v2;
 		$this->data['button_addmore']        = $this->button_addmore;
 		$this->data['button_cancel']         = $this->button_cancel;
 		$this->data['button_save']           = $this->button_save;
