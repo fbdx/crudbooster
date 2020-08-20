@@ -336,7 +336,7 @@ class AdminController extends CBController {
 
 		// $rand_string = str_random(5);
 		// $password    = \Hash::make($rand_string);
-		DB::table(config('crudbooster.USER_TABLE'))->where('email',Request::input('email'))->update(array('password'=>$password));
+		// DB::table(config('crudbooster.USER_TABLE'))->where('email',Request::input('email'))->update(array('password'=>$password));
 
 		$appname       = CRUDBooster::getSetting('appname');
 		$user          = CRUDBooster::first(config('crudbooster.USER_TABLE'),['email'=>g('email')]);

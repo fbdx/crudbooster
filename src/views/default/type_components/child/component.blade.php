@@ -558,6 +558,7 @@
 						<tbody>
 
 							<?php
+
 								$childTable = $form['table'];
 								$columns_tbody = [];
 								$data_child = DB::table($form['table'])
@@ -593,6 +594,17 @@
 										$d->birthDateReliability = 'Pregnant';
 									}
 
+									if(isset($d->birthDate))
+									{
+										$birthdate = strtotime($d->birthDate);
+								        $now = time();
+								        $age = 0;
+								        while ($now >= ($birthdate = strtotime("+1 YEAR", $birthdate))) {
+								            $age++;
+								        }
+
+										$d->age = $age;
+									}
 							?>
 							<tr>
 								@foreach($form['columns'] as $col)

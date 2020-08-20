@@ -242,7 +242,7 @@
                         display:false
                     },
                     title: {
-                        display: false,
+                        display: true,
                         //text: 'Chart.js Bar Chart'
                     },
                     scales: {
