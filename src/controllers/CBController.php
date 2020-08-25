@@ -2417,48 +2417,13 @@ class CBController extends Controller {
                             if(isset($response) && is_array($response))
                             {
                                 $results = $response['results'];
+                                $result  = $results[0];
+                                $profile = $result["profile"];
+                                $data    = $result["data"];
 
                                 if(!isset($a['uniqueIdentifier']))
                                 {
-                                    $result = $results[0];
-                                    $profile = $result["profile"];
-                                    $data = $result["data"];
-
-                                    if($table == 'lgms_customers')
-                                    {
-                                        $a["uniqueIdentifier"] = $result['UID'];
-                                        $a["created"]          = $result["created"];
-                                        $a["lastUpdated"]      = $result["lastUpdated"];
-
-                                        $a["firstname"] = $profile["firstName"];
-                                        $a["lastname"]  = $profile["lastName"];
-                                        $a["address"]   = $profile["address"];
-
-                                        $a["address1"] = $data["addressLine1"];
-                                        $a["mobileno"] = $data["mobile"];
-                                    }
-
-                                    if($table == 'lgms_children')
-                                    {
-                                        $a["uniqueIdentifier"] = $result["UID"];
-                                        $childrenList = $data["child"];
-
-                                        if(isset($data["child"][0]))
-                                        {
-	                                        foreach($childrenList as $key => $child)
-	                                        {
-	                                            if($a['firstname'] == $child["firstName"])
-	                                            {
-	                                                $a["childUniqueIdentifier"] = $child["applicationInternalIdentifier"];
-	                                                $a["birthDate"]             = $child["birthDate"];
-	                                                $a["pregnant"]  		    = $child["birthDateReliability"];
-	                                                $a["gender"] 				= $child["sex"];
-	                                            }
-
-	                                            break;
-	                                        }
-                                        }
-                                    }
+                                    $a["uniqueIdentifier"] = $result['UID'];
                                 }
                                 else
                                 {
@@ -2477,12 +2442,42 @@ class CBController extends Controller {
                                         }
                                     }
 
-                                    $profile["firstName"] = $a["firstname"];
-                                    $profile["lastName"] = $a["lastname"];
-                                    $profile["address"] = $a["address"];
+                                    if($table == 'lgms_customers')
+                                    {
+	                                    $profile["firstName"] = $a["firstname"];
+	                                    $profile["lastName"]  = $a["lastname"];
+	                                    $profile["address"]   = $a["address"];
 
-                                    $data["addressLine1"] = $a["address1"];
-                                    $data["mobile"] = $a["mobileno"];
+	                                    $data["addressLine1"] = $a["address1"];
+	                                    $data["addressLine2"] = $a["address2"];
+	                                    $data["addressLine3"] = $a["address3"];
+	                                    $data["addressLine4"] = $a["address4"];
+
+	                                    $data["mobile"] = $a["mobileno"];
+                                    }
+
+                                    if($table == 'lgms_children')
+                                    {
+                                        $childrenList = $data["child"];
+
+                                        if(isset($data["child"][0]))
+                                        {
+	                                        foreach($childrenList as $key => $child)
+	                                        {
+	                                            if($child["firstName"] == $a['firstname'])
+	                                            {
+													$child["applicationInternalIdentifier"] = $a["childUniqueIdentifier"];
+													$child["birthDate"] = $a["birthDate"]; 
+													// $child["birthDateReliability"] = $a["pregnant"];
+													// $child["sex"] = $a["gender"];
+	                                            }
+
+	                                            break;
+	                                        }
+                                        }
+                                    }
+
+                                    $data["child"] = $childrenList;
 
                                     if(isset($UID) || isset($regToken))
                                     {
