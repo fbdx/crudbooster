@@ -2495,8 +2495,10 @@ class CBController extends Controller {
 
                         if($this->lgms_unsubscribe)
                         {
-                            $UID      = NULL;
-                            $regToken = NULL;
+                            $UID                   = NULL;
+                            $regToken              = NULL;
+                            $setInputData          = NULL;
+                            $data                  = NULL;
 
                             $response = $this->searchViaUid($a['uniqueIdentifier']);
 
@@ -2505,7 +2507,8 @@ class CBController extends Controller {
                                 if(isset($response["results"][0]))
                                 {
                                     $results = $response['results'];
-                                    if($results[0]["hasFullAccount"])
+                                    $result  = $results[0];
+                                    if($result["hasFullAccount"])
                                     {
                                         $UID = $results[0]['UID'];
                                     }
@@ -2520,6 +2523,8 @@ class CBController extends Controller {
                                         $regToken = $register["regToken"];
                                     }
                                 }
+
+                                $setInputData['email'] = $result['profile']['email'];
 
                                 $subscriptions["MYnestlegrp_SBcrossnl"]["email"]["isSubscribed"] = false;
 
