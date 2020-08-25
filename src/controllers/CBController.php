@@ -2427,12 +2427,12 @@ class CBController extends Controller {
                                     if($table == 'lgms_customers')
                                     {
                                         $a["uniqueIdentifier"] = $result['UID'];
-                                        $a["created"] = $result["created"];
-                                        $a["lastUpdated"] = $result["lastUpdated"];
+                                        $a["created"]          = $result["created"];
+                                        $a["lastUpdated"]      = $result["lastUpdated"];
 
                                         $a["firstname"] = $profile["firstName"];
-                                        $a["lastname"] = $profile["lastName"];
-                                        $a["address"] = $profile["address"];
+                                        $a["lastname"]  = $profile["lastName"];
+                                        $a["address"]   = $profile["address"];
 
                                         $a["address1"] = $data["addressLine1"];
                                         $a["mobileno"] = $data["mobile"];
@@ -2443,19 +2443,21 @@ class CBController extends Controller {
                                         $a["uniqueIdentifier"] = $result["UID"];
                                         $childrenList = $data["child"];
 
-                                        foreach($childrenList as $key => $child)
+                                        if(isset($data["child"][0]))
                                         {
-                                            if($a['firstname'] == $child["firstName"])
-                                            {
-                                                $a["childUniqueIdentifier"] = $child["applicationInternalIdentifier"];
-                                                $a["birthDate"] = $child["birthDate"];
-                                                $a["pregnant"] = $child["birthDateReliability"];
-                                                $a["gender"] = $child["sex"];
-                                            }
+	                                        foreach($childrenList as $key => $child)
+	                                        {
+	                                            if($a['firstname'] == $child["firstName"])
+	                                            {
+	                                                $a["childUniqueIdentifier"] = $child["applicationInternalIdentifier"];
+	                                                $a["birthDate"]             = $child["birthDate"];
+	                                                $a["pregnant"]  		    = $child["birthDateReliability"];
+	                                                $a["gender"] 				= $child["sex"];
+	                                            }
 
-                                            break;
+	                                            break;
+	                                        }
                                         }
-
                                     }
                                 }
                                 else

@@ -121,7 +121,10 @@
                         case 'tracking_number' : $field = 'Tracking Number'; break;
                         case 'email' : $field = 'Email'; break;
                         case 'mobileno' : $field = 'Mobile Number'; break;
-                        case 'address1' : $field = 'Address'; break;
+                        case 'address1' : $field = 'Address Line 1'; break;
+                        case 'address2' : $field = 'Address Line 2'; break;
+                        case 'address3' : $field = 'Address Line 3'; break;
+                        case 'address4' : $field = 'Address Line 4'; break;
                         case 'm_product' : $field = 'Product Name'; break;
                         case 'm_source' : $field = 'Source'; break;
                         case 'childdob' : $field = 'Child DOB'; break;
@@ -146,7 +149,17 @@
                         case 'datereceived' : $field = 'Date Received'; break;
                         case 'phoneno' : $field = 'Phone No'; break;
                         case 'address' : $field = 'Address'; break;
-                        case 'product' : $field = 'Product'; break;                        
+                        case 'product' : $field = 'Product'; break;
+                        case 'uniqueIdentifier' : $field = 'UID'; break;
+                        case 'created' : $field = 'Created Date'; break;
+                        case 'lastLoginDate' : $field = 'Last Login Date'; break;
+                        case 'lastUpdated' : $field = 'Last Profile Update'; break;
+                        case 'phoneOptIn' : $field = 'Phone Opt In'; break;
+                        case 'sampleRequestProduct' : $field = 'Sample Request Product'; break;
+                        case 'childUniqueIdentifier' : $field = 'Child UID'; break;
+                        case 'dateEntry' : $field = 'Date Entry'; break;
+                        case 'pregnant' : $field = 'Pregnant'; break;
+                        case 'unsubscribe_date' : $field = 'Unsubscribe Date'; break;
                         default : $field = 'Default'; break;
                       }
 
