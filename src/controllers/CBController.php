@@ -104,6 +104,8 @@ class CBController extends Controller {
 	public $import_mobile_number  = FALSE;
 	public $import_offline	      = FALSE;
 	public $sfmc_alert            = FALSE;
+    public $lgms_import           = FALSE;
+    public $lgms_unsubscribe      = FALSE;
 
 	public function __construct()
 	{
@@ -2404,6 +2406,136 @@ class CBController extends Controller {
 						if($has_created_at) {
 							$a['created_at'] = date('Y-m-d H:i:s');
 						}
+
+                        if($this->lgms_import)
+                        {
+                            $UID      = NULL;
+                            $regToken = NULL;
+
+                            $response = $this->searchViaEmail($a['email']);
+
+                            if(isset($response) && is_array($response))
+                            {
+                                $results = $response['results'];
+
+                                if(!isset($a['uniqueIdentifier']))
+                                {
+                                    $result = $results[0];
+                                    $profile = $result["profile"];
+                                    $data = $result["data"];
+
+                                    if($table == 'lgms_customers')
+                                    {
+                                        $a["uniqueIdentifier"] = $result['UID'];
+                                        $a["created"] = $result["created"];
+                                        $a["lastUpdated"] = $result["lastUpdated"];
+
+                                        $a["firstname"] = $profile["firstName"];
+                                        $a["lastname"] = $profile["lastName"];
+                                        $a["address"] = $profile["address"];
+
+                                        $a["address1"] = $data["addressLine1"];
+                                        $a["mobileno"] = $data["mobile"];
+                                    }
+
+                                    if($table == 'lgms_children')
+                                    {
+                                        $a["uniqueIdentifier"] = $result["UID"];
+                                        $childrenList = $data["child"];
+
+                                        foreach($childrenList as $key => $child)
+                                        {
+                                            if($a['firstname'] == $child["firstName"])
+                                            {
+                                                $a["childUniqueIdentifier"] = $child["applicationInternalIdentifier"];
+                                                $a["birthDate"] = $child["birthDate"];
+                                                $a["pregnant"] = $child["birthDateReliability"];
+                                                $a["gender"] = $child["sex"];
+                                            }
+
+                                            break;
+                                        }
+
+                                    }
+                                }
+                                else
+                                {
+                                    if($results[0]["hasFullAccount"])
+                                    {
+                                        $UID = $results[0]['UID'];
+                                    }
+
+                                    if(!isset($UID))
+                                    {
+                                        $register = $this->initRegistration();
+
+                                        if(is_array($register) && isset($register["regToken"]))
+                                        {
+                                            $regToken = $register["regToken"];
+                                        }
+                                    }
+
+                                    $profile["firstName"] = $a["firstname"];
+                                    $profile["lastName"] = $a["lastname"];
+                                    $profile["address"] = $a["address"];
+
+                                    $data["addressLine1"] = $a["address1"];
+                                    $data["mobile"] = $a["mobileno"];
+
+                                    if(isset($UID) || isset($regToken))
+                                    {
+                                        $this->setAccountInfo($UID, $regToken,$profile,$data);
+                                    }
+
+                                    DB::table($this->table)
+                                    ->where("email", $a["email"])
+                                    ->update($a);
+
+                                    continue;
+                                }
+                            }
+                        }
+
+                        if($this->lgms_unsubscribe)
+                        {
+                            $UID      = NULL;
+                            $regToken = NULL;
+
+                            $response = $this->searchViaUid($a['uniqueIdentifier']);
+
+                            if(isset($response) && is_array($response))
+                            {
+                                if(isset($response["results"][0]))
+                                {
+                                    $results = $response['results'];
+                                    if($results[0]["hasFullAccount"])
+                                    {
+                                        $UID = $results[0]['UID'];
+                                    }
+                                }
+
+                                if(!isset($UID))
+                                {
+                                    $register = $this->initRegistration();
+
+                                    if(is_array($register) && isset($register["regToken"]))
+                                    {
+                                        $regToken = $register["regToken"];
+                                    }
+                                }
+
+                                $subscriptions["MYnestlegrp_SBcrossnl"]["email"]["isSubscribed"] = false;
+
+                                $consent["subscriptions"] = $subscriptions;
+                                $consent["preferences"]   = NULL;
+
+                                if(isset($UID) || isset($regToken))
+                                {
+                                    $this->setAccountInfo($UID, $regToken,$setInputData,$data,$consent["subscriptions"], $consent["preferences"]);
+                                }
+                            }
+
+                        }
 
 						if($this->import_offline)
 						{
