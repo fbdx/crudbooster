@@ -2420,7 +2420,7 @@ class CBController extends Controller {
                                 $profile = $result["profile"];
                                 $data    = $result["data"];
 
-                                if(!isset($a['uniqueIdentifier']))
+                                if(!isset($a['uniqueIdentifier']) || $a['uniqueIdentifier'] == '')
                                 {
                                     $a["uniqueIdentifier"] = $result['UID'];
                                 }
