@@ -2444,16 +2444,38 @@ class CBController extends Controller {
 
                                     if($table == 'lgms_customers')
                                     {
-	                                    $profile["firstName"] = $a["firstname"];
-	                                    $profile["lastName"]  = $a["lastname"];
-	                                    $profile["address"]   = $a["address"];
-
-	                                    $data["addressLine1"] = $a["address1"];
-	                                    $data["addressLine2"] = $a["address2"];
-	                                    $data["addressLine3"] = $a["address3"];
-	                                    $data["addressLine4"] = $a["address4"];
-
-	                                    $data["mobile"] = $a["mobileno"];
+                                    	if(isset($a["firstname"]))
+                                    	{
+                                    		$profile["firstName"] = $a["firstname"];
+                                    	}
+                                    	if(isset($a["lastname"]))
+                                    	{
+		                                    $profile["lastName"] = $a["lastname"];
+                                    	}
+                                    	if(isset($a["address"]))
+                                    	{
+		                                    $profile["address"] = $a["address"];
+                                    	}
+                                    	if(isset($a["address1"]))
+                                    	{
+		                                    $data["addressLine1"] = $a["address1"];
+                                    	}
+                                    	if(isset($a["address2"]))
+                                    	{
+		                                    $data["addressLine2"] = $a["address2"];
+                                    	}
+                                    	if(isset($a["address3"]))
+                                    	{
+		                                    $data["addressLine3"] = $a["address3"];
+                                    	}
+                                    	if(isset($a["address4"]))
+                                    	{
+		                                    $data["addressLine4"] = $a["address4"];
+                                    	}
+                                    	if(isset($a["mobileno"]))
+                                    	{
+		                                    $data["mobile"] = $a["mobileno"];
+                                    	}
                                     }
 
                                     if($table == 'lgms_children')
@@ -2466,8 +2488,15 @@ class CBController extends Controller {
 	                                        {
 	                                            if($child["firstName"] == $a['firstname'])
 	                                            {
-													$child["applicationInternalIdentifier"] = $a["childUniqueIdentifier"];
-													$child["birthDate"] = $a["birthDate"]; 
+	                                            	if(isset($a["childUniqueIdentifier"]))
+	                                            	{
+														$child["applicationInternalIdentifier"] = $a["childUniqueIdentifier"];
+	                                            	}
+
+	                                            	if(isset($a["birthDate"]))
+	                                            	{
+	                                            		$child["birthDate"] = $a["birthDate"]; 
+	                                            	}
 													// $child["birthDateReliability"] = $a["pregnant"];
 													// $child["sex"] = $a["gender"];
 	                                            }
