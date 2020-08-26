@@ -142,7 +142,7 @@
                         case 'activity_name' : $field = 'Activity Name'; break;
                         case 'language_preference' : $field = 'Language Preference'; break;
                         case 'contact_preference' : $field = 'Contact Preference'; break;
-                        case 'birthdate' : $field = 'Birth Date'; break;
+                        case 'birthDate' : $field = 'Birth Date'; break;
                         case 'gender' : $field = 'Gender'; break;
                         case 'batch' : $field = 'Batch'; break;
                         case 'postage_remark' : $field = 'Postage Remark'; break;

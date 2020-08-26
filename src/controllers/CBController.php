@@ -2294,8 +2294,6 @@ class CBController extends Controller {
 					$a['created_at'] = date('Y-m-d H:i:s');
 				}
 
-				
-
 				try{
 					if($this->import_mobile_number)
 					{
@@ -2345,6 +2343,7 @@ class CBController extends Controller {
 
 			$rows = $this->csvToArray($file);
 
+
 			if(isset($rows) && $this->table == 'dbt_whatsapp_numbers')
 			{
 				DB::statement("DROP VIEW IF EXISTS CustomerView");
@@ -2371,8 +2370,6 @@ class CBController extends Controller {
 			$data_import_column = array();
 			$uploadNotUpdated = [];
 
-			// return response()->json(['select_column'=>$select_column, 'table_columns' => $table_columns]);
-
 			if($this->sfmc_alert)
 			{
 				$batch = DB::table($this->table)->max('batch');
@@ -2396,6 +2393,8 @@ class CBController extends Controller {
 						break;
 					}
 				}
+
+				// return response()->json(['select_column'=>$select_column, 'table_columns' => $table_columns, 'data' => $a]);
 
 				if($has_title_field==false) continue;
 
@@ -2442,7 +2441,8 @@ class CBController extends Controller {
                                         }
                                     }
 
-                                    if($table == 'lgms_customers')
+
+                                    if($this->table == 'lgms_customers')
                                     {
                                     	if(isset($a["firstname"]))
                                     	{
@@ -2478,7 +2478,7 @@ class CBController extends Controller {
                                     	}
                                     }
 
-                                    if($table == 'lgms_children')
+                                    if($this->table == 'lgms_children')
                                     {
                                         $childrenList = $data["child"];
 
@@ -2490,28 +2490,28 @@ class CBController extends Controller {
 	                                            {
 	                                            	if(isset($a["childUniqueIdentifier"]))
 	                                            	{
-														$child["applicationInternalIdentifier"] = $a["childUniqueIdentifier"];
+														$childrenList[$key]["applicationInternalIdentifier"] = $a["childUniqueIdentifier"];
 	                                            	}
 
 	                                            	if(isset($a["birthDate"]))
 	                                            	{
-	                                            		$child["birthDate"] = $a["birthDate"]; 
+	                                            		$childrenList[$key]["birthDate"] = $a["birthDate"]; 
 	                                            	}
 													// $child["birthDateReliability"] = $a["pregnant"];
 													// $child["sex"] = $a["gender"];
 	                                            }
-
-	                                            break;
 	                                        }
                                         }
-                                    }
 
-                                    $data["child"] = $childrenList;
+                                        $data["child"] = $childrenList;
+                                    }
 
                                     if(isset($UID) || isset($regToken))
                                     {
-                                        $this->setAccountInfo($UID, $regToken,$profile,$data);
+                                        $gigyaresponse = $this->setAccountInfo($UID, $regToken,$profile,$data);
                                     }
+
+                                    // return response()->json(['select_column'=>$select_column, 'table_columns' => $table_columns, 'profile'=>$profile, 'data'=>$data, 'a'=> $a, 'response' => $gigyaresponse]);
 
                                     DB::table($this->table)
                                     ->where("email", $a["email"])
