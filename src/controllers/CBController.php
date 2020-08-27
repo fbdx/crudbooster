@@ -2413,6 +2413,8 @@ class CBController extends Controller {
 
                             $response = $this->searchViaEmail($a['email']);
 
+                            // return response()->json(['select_column'=>$select_column, 'table_columns' => $table_columns, 'profile'=>$profile, 'data'=>$data, 'a'=> $a, 'response' => $response]);
+
                             if(isset($response) && is_array($response))
                             {
                                 $results = $response['results'];
@@ -2420,7 +2422,7 @@ class CBController extends Controller {
                                 $profile = $result["profile"];
                                 $data    = $result["data"];
 
-                                if(!isset($a['uniqueIdentifier']) || $a['uniqueIdentifier'] == '')
+                                if(!($a['uniqueIdentifier']))
                                 {
                                     $a["uniqueIdentifier"] = $result['UID'];
                                 }
@@ -2510,8 +2512,6 @@ class CBController extends Controller {
                                     {
                                         $gigyaresponse = $this->setAccountInfo($UID, $regToken,$profile,$data);
                                     }
-
-                                    // return response()->json(['select_column'=>$select_column, 'table_columns' => $table_columns, 'profile'=>$profile, 'data'=>$data, 'a'=> $a, 'response' => $gigyaresponse]);
 
                                     DB::table($this->table)
                                     ->where("email", $a["email"])
