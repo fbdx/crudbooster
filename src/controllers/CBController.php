@@ -2425,6 +2425,12 @@ class CBController extends Controller {
                                 if(!($a['uniqueIdentifier']))
                                 {
                                     $a["uniqueIdentifier"] = $result['UID'];
+
+                                    if($this->table == 'lgms_customers')
+                                    {
+	                                    $a["created"]     = $result["created"];
+	                                    $a["lastUpdated"] = $result["lastUpdated"];
+                                    }
                                 }
                                 else
                                 {
