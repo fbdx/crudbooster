@@ -151,10 +151,12 @@
                         case 'address' : $field = 'Address'; break;
                         case 'product' : $field = 'Product'; break;
                         case 'uniqueIdentifier' : $field = 'UID'; break;
+                        case 'lgmsParentIdentifier' : $field = 'LGMS Parent ID'; break;
                         case 'created' : $field = 'Created Date'; break;
                         case 'lastLoginDate' : $field = 'Last Login Date'; break;
                         case 'lastUpdated' : $field = 'Last Profile Update'; break;
                         case 'phoneOptIn' : $field = 'Phone Opt In'; break;
+                        case 'offlineOptIn' : $field = 'Offline Opt In'; break;
                         case 'sampleRequestProduct' : $field = 'Sample Request Product'; break;
                         case 'childUniqueIdentifier' : $field = 'Child UID'; break;
                         case 'dateEntry' : $field = 'Date Entry'; break;
