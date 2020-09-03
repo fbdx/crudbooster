@@ -2416,23 +2416,22 @@ class CBController extends Controller {
                             if(isset($response) && is_array($response))
                             {
                                 $results = $response['results'];
-                                if(isset($response["results"][0]))
-			                    {
-			                        $results = $response['results'];
-	                                $result  = $results[0];
-	                                $profile = $result["profile"];
-	                                $data    = $result["data"];
-			                    }
-
+                                $result  = $results[0];
+                                $profile = $result["profile"];
+                                $data    = $result["data"];
+			                    
                                 if(!isset($a['uniqueIdentifier']) || $a['uniqueIdentifier'] == '')
                                 {
-                                    $a["uniqueIdentifier"] = $result['UID'];
+                                	if(isset($result))
+                                	{
+	                                    $a["uniqueIdentifier"] = $result['UID'];
 
-                                    if($this->table == 'lgms_customers')
-                                    {
-	                                    $a["created"]     = $result["created"];
-	                                    $a["lastUpdated"] = $result["lastUpdated"];
-                                    }
+	                                    if($this->table == 'lgms_customers')
+	                                    {
+		                                    $a["created"]     = $result["created"];
+		                                    $a["lastUpdated"] = $result["lastUpdated"];
+	                                    }
+                                	}
                                 }
                                 else
                                 {
