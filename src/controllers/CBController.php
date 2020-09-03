@@ -2533,7 +2533,7 @@ class CBController extends Controller {
 											$childrenList[$count]["sex"] = $a["gender"] = 'Male' ? 1 : 2;
                                     	}
 
-                                        $data["child"] = $childrenList;
+                                        $data["child"] = $this->removeDuplicateChilds($childrenList);
                                     }
 
                                     if(isset($UID) || isset($regToken))
