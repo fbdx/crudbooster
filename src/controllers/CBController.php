@@ -2523,11 +2523,11 @@ class CBController extends Controller {
                                     	// return response()->json(['select_column'=>$select_column, 'table_columns' => $table_columns, 'profile'=>$profile, 'data'=>$data, 'a'=> $a, 'regToken' => $regToken, 'UID'=> $UID, 'response' => $gigyaresponse]);
                                     }
 
-                                    DB::table($this->table)
-                                    ->where("email", $a["email"])
-                                    ->update($a);
+                                    // DB::table($this->table)
+                                    // ->where("email", $a["email"])
+                                    // ->update($a);
 
-                                    continue;
+                                    // continue;
                                 }
                             }
                         }
