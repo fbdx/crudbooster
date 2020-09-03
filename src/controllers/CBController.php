@@ -2413,6 +2413,7 @@ class CBController extends Controller {
 
                             $response = $this->searchViaEmail($a['email']);
 
+
                             if(isset($response) && is_array($response))
                             {
                                 $results = $response['results'];
@@ -2490,28 +2491,47 @@ class CBController extends Controller {
 
                                     if($this->table == 'lgms_children')
                                     {
-                                        $childrenList = $data["child"];
-
+                                    	$count = 0; 
                                         if(isset($data["child"][0]))
                                         {
+                                        	$childrenList = $data["child"];
+
 	                                        foreach($childrenList as $key => $child)
 	                                        {
-	                                            if($child["firstName"] == $a['firstname'])
-	                                            {
-	                                            	if(isset($a["childUniqueIdentifier"]))
-	                                            	{
-														$childrenList[$key]["applicationInternalIdentifier"] = $a["childUniqueIdentifier"];
-	                                            	}
-
-	                                            	if(isset($a["birthDate"]))
-	                                            	{
-	                                            		$childrenList[$key]["birthDate"] = $a["birthDate"]; 
-	                                            	}
-													// $child["birthDateReliability"] = $a["pregnant"];
-													// $child["sex"] = $a["gender"];
-	                                            }
+	                                        	$count = $key;
 	                                        }
+
+	                                        $count ++;
                                         }
+                                        else
+                                        {
+                                        	$childrenList = [];
+                                        }
+
+                                        if(isset($a['firstname']))
+                                        {
+	                                        $childrenList[$count]["firstName"] = $a["firstname"];
+                                        }
+
+                                        if(isset($a["childUniqueIdentifier"]))
+                                    	{
+											$childrenList[$count]["applicationInternalIdentifier"] = $a["childUniqueIdentifier"];
+                                    	}
+
+                                    	// if(isset($a["birthDate"]))
+                                    	// {
+                                    	// 	$childrenList[$count]["birthDate"] = $a["birthDate"]; 
+                                    	// }
+
+                                    	if(isset($a['pregnant']))
+                                    	{
+											$childrenList[$count]["birthDateReliability"] = $a["pregnant"] = 'Yes' ? 0 : 4;
+                                    	}
+
+                                    	if(isset($a['gender']))
+                                    	{
+											$childrenList[$count]["sex"] = $a["gender"] = 'Male' ? 1 : 2;
+                                    	}
 
                                         $data["child"] = $childrenList;
                                     }
