@@ -2584,7 +2584,7 @@ class CBController extends Controller {
 
                                 $setInputData['email'] = $result['profile']['email'];
 
-                                $subscriptions["MYnestlegrp_SBcrossnl"]["email"]["isSubscribed"] = false;
+                                $subscriptions["SGnestlegrp_SBcrossnl"]["email"]["isSubscribed"] = false;
 
                                 $consent["subscriptions"] = $subscriptions;
                                 $consent["preferences"]   = NULL;
