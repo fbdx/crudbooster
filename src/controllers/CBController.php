@@ -2599,7 +2599,7 @@ class CBController extends Controller {
 
 						if($this->import_offline)
 						{
-							if(!isset($a['m_date']))
+							if(!isset($a['m_date']) || $a['m_date'] == '')
 							{
 								$a['m_date'] = date("Y-m-d H:i:s");
 							}
