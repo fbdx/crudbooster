@@ -164,6 +164,10 @@
                         case 'nric' : $field = 'NRIC'; break;
                         case 'occupation' : $field = 'Occupation'; break;
                         case 'smc_number' : $field = 'SMC Number'; break;
+                        case 'smc_status' : $field = 'SMC Status'; break;
+                        case 'marital_status' : $field = 'Marital Status'; break;
+                        case 'city' : $field = 'City'; break;
+                        case 'language' : $field = 'Language'; break;
                         case 'customer_source' : $field = 'Customer Source'; break;
                         case 'batch' : $field = 'Batch'; break;
                         case 'postage_remark' : $field = 'Postage Remark'; break;
