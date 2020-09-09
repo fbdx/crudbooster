@@ -2531,21 +2531,26 @@ class CBController extends Controller {
                                     $data["child"] = $this->removeDuplicateChilds($childrenList);
                                 }
 
-                                // return response()->json(['select_column'=>$select_column, 'table_columns' => $table_columns, 'a' => $a]);
-
                                 if(isset($UID) || isset($regToken))
                                 {
                                 	$gigyaResponse = $this->setAccountInfo($UID, $regToken,$profile,$data);
 
-                                	if($a["uniqueIdentifier"] == NULL || $$a["uniqueIdentifier"] == "")
-                                	{
-			                        	$response = $this->searchViaEmail($a['email']);
-			                        	if(isset($response) && is_array($response))
-			                        	{
-			                        		$result = $response['results'][0];
-			                        		$a['uniqueIdentifier'] = $result["UID"];
-			                        	}
-                                	}
+                                	if(is_array($gigyaResponse) && isset($gigyaResponse["errorCode"]))
+				                    {
+				                        if($gigyaResponse["errorCode"]==0)
+				                        {
+				                            if(is_null($a["uniqueIdentifier"]) || $a["uniqueIdentifier"] == "")
+		                                	{
+		                                		sleep(5);
+					                        	$newResponse = $this->searchViaEmail($a['email']);
+					                        	if(isset($newResponse) && is_array($newResponse))
+					                        	{
+					                        		$result = $newResponse['results'][0];
+					                        		$a['uniqueIdentifier'] = $result["UID"];
+					                        	}
+		                                	}
+				                        }
+				                    }
                                 }
                             }
                         }
