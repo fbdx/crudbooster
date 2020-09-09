@@ -2413,7 +2413,6 @@ class CBController extends Controller {
 
                             $response = $this->searchViaEmail($a['email']);
 
-
                             if(isset($response) && is_array($response))
                             {
                                 $results = $response['results'];
@@ -2421,132 +2420,132 @@ class CBController extends Controller {
                                 $profile = $result["profile"];
                                 $data    = $result["data"];
 			                    
-                                if(!isset($a['uniqueIdentifier']) || $a['uniqueIdentifier'] == '')
-                                {
-                                	if(isset($result))
-                                	{
-	                                    $a["uniqueIdentifier"] = $result['UID'];
-
-	                                    if($this->table == 'lgms_customers')
-	                                    {
-		                                    $a["created"]     = $result["created"];
-		                                    $a["lastUpdated"] = $result["lastUpdated"];
-	                                    }
-                                	}
-                                }
-                                else
-                                {
-                                    if($results[0]["hasFullAccount"])
-                                    {
-                                        $UID = $results[0]['UID'];
-                                    }
-
-                                    if(!isset($UID))
-                                    {
-                                        $register = $this->initRegistration();
-
-                                        if(is_array($register) && isset($register["regToken"]))
-                                        {
-                                            $regToken = $register["regToken"];
-                                        }
-                                    }
-
-                                    $profile['email'] = $a['email'];
+                                // if(isset($result))
+                                // {
+                                    $a["uniqueIdentifier"] = $result['UID'];
 
                                     if($this->table == 'lgms_customers')
                                     {
-                                    	if(isset($a["firstname"]))
-                                    	{
-                                    		$profile["firstName"] = $a["firstname"];
-                                    	}
-                                    	if(isset($a["lastname"]))
-                                    	{
-		                                    $profile["lastName"] = $a["lastname"];
-                                    	}
-                                    	if(isset($a["address"]))
-                                    	{
-		                                    $profile["address"] = $a["address"];
-                                    	}
-                                    	if(isset($a["address1"]))
-                                    	{
-		                                    $data["addressLine1"] = $a["address1"];
-                                    	}
-                                    	if(isset($a["address2"]))
-                                    	{
-		                                    $data["addressLine2"] = $a["address2"];
-                                    	}
-                                    	if(isset($a["address3"]))
-                                    	{
-		                                    $data["addressLine3"] = $a["address3"];
-                                    	}
-                                    	if(isset($a["address4"]))
-                                    	{
-		                                    $data["addressLine4"] = $a["address4"];
-                                    	}
-                                    	if(isset($a["mobileno"]))
-                                    	{
-		                                    $data["mobile"] = $a["mobileno"];
-                                    	}
+	                                    $a["created"]     = $result["created"];
+	                                    $a["lastUpdated"] = $result["lastUpdated"];
                                     }
+                                // }
+                                
+                                if($results[0]["hasFullAccount"])
+                                {
+                                    $UID = $results[0]['UID'];
+                                }
 
-                                    if($this->table == 'lgms_children')
+                                if(!isset($UID))
+                                {
+                                    $register = $this->initRegistration();
+
+                                    if(is_array($register) && isset($register["regToken"]))
                                     {
-                                    	$count = 0; 
-                                        if(isset($data["child"][0]))
-                                        {
-                                        	$childrenList = $data["child"];
-
-	                                        foreach($childrenList as $key => $child)
-	                                        {
-	                                        	$count = $key;
-	                                        }
-
-	                                        $count ++;
-                                        }
-                                        else
-                                        {
-                                        	$childrenList = [];
-                                        }
-
-                                        if(isset($a['firstname']))
-                                        {
-	                                        $childrenList[$count]["firstName"] = $a["firstname"];
-                                        }
-
-                                        if(isset($a["childUniqueIdentifier"]))
-                                    	{
-											$childrenList[$count]["applicationInternalIdentifier"] = $a["childUniqueIdentifier"];
-                                    	}
-
-                                    	// if(isset($a["birthDate"]))
-                                    	// {
-                                    	// 	$childrenList[$count]["birthDate"] = $a["birthDate"]; 
-                                    	// }
-
-                                    	if(isset($a['pregnant']))
-                                    	{
-											$childrenList[$count]["birthDateReliability"] = $a["pregnant"] = 'Yes' ? 0 : 4;
-                                    	}
-
-                                    	if(isset($a['gender']))
-                                    	{
-											$childrenList[$count]["sex"] = $a["gender"] = 'Male' ? 1 : 2;
-                                    	}
-
-                                        $data["child"] = $this->removeDuplicateChilds($childrenList);
+                                        $regToken = $register["regToken"];
                                     }
+                                }
 
-                                    if(isset($UID) || isset($regToken))
+                                $profile['email'] = $a['email'];
+
+                                if($this->table == 'lgms_customers')
+                                {
+                                	if(isset($a["firstname"]))
+                                	{
+                                		$profile["firstName"] = $a["firstname"];
+                                	}
+                                	if(isset($a["lastname"]))
+                                	{
+	                                    $profile["lastName"] = $a["lastname"];
+                                	}
+                                	if(isset($a["address"]))
+                                	{
+	                                    $profile["address"] = $a["address"];
+                                	}
+                                	if(isset($a["address1"]))
+                                	{
+	                                    $data["addressLine1"] = $a["address1"];
+                                	}
+                                	if(isset($a["address2"]))
+                                	{
+	                                    $data["addressLine2"] = $a["address2"];
+                                	}
+                                	if(isset($a["address3"]))
+                                	{
+	                                    $data["addressLine3"] = $a["address3"];
+                                	}
+                                	if(isset($a["address4"]))
+                                	{
+	                                    $data["addressLine4"] = $a["address4"];
+                                	}
+                                	if(isset($a["mobileno"]))
+                                	{
+	                                    $data["mobile"] = $a["mobileno"];
+                                	}
+                                }
+
+                                if($this->table == 'lgms_children')
+                                {
+                                	$count = 0; 
+                                    if(isset($data["child"][0]))
                                     {
-                                    	$gigyaresponse = $this->setAccountInfo($UID, $regToken,$profile,$data);
-                                    	// return response()->json(['select_column'=>$select_column, 'table_columns' => $table_columns, 'profile'=>$profile, 'data'=>$data, 'a'=> $a, 'regToken' => $regToken, 'UID'=> $UID, 'response' => $gigyaresponse]);
+                                    	$childrenList = $data["child"];
+
+                                        foreach($childrenList as $key => $child)
+                                        {
+                                        	$count = $key;
+                                        }
+
+                                        $count ++;
+                                    }
+                                    else
+                                    {
+                                    	$childrenList = [];
                                     }
 
-                                    // DB::table($this->table)
-                                    // ->where("email", $a["email"])
-                                    // ->update($a);
+                                    if(isset($a['firstname']))
+                                    {
+                                        $childrenList[$count]["firstName"] = $a["firstname"];
+                                    }
 
-                                    // continue;
+                                    if(isset($a["childUniqueIdentifier"]))
+                                	{
+										$childrenList[$count]["applicationInternalIdentifier"] = $a["childUniqueIdentifier"];
+                                	}
+
+                                	// if(isset($a["birthDate"]))
+                                	// {
+                                	// 	$childrenList[$count]["birthDate"] = $a["birthDate"]; 
+                                	// }
+
+                                	if(isset($a['pregnant']))
+                                	{
+										$childrenList[$count]["birthDateReliability"] = $a["pregnant"] == 'Yes' ? 4 : 0;
+                                	}
+
+                                	if(isset($a['gender']))
+                                	{
+										$childrenList[$count]["sex"] = $a["gender"] == 'Male' ? 1 : 2;
+                                	}
+
+                                    $data["child"] = $this->removeDuplicateChilds($childrenList);
+                                }
+
+                                // return response()->json(['select_column'=>$select_column, 'table_columns' => $table_columns, 'a' => $a]);
+
+                                if(isset($UID) || isset($regToken))
+                                {
+                                	$gigyaResponse = $this->setAccountInfo($UID, $regToken,$profile,$data);
+
+                                	if($a["uniqueIdentifier"] == NULL || $$a["uniqueIdentifier"] == "")
+                                	{
+			                        	$response = $this->searchViaEmail($a['email']);
+			                        	if(isset($response) && is_array($response))
+			                        	{
+			                        		$result = $response['results'][0];
+			                        		$a['uniqueIdentifier'] = $result["UID"];
+			                        	}
+                                	}
                                 }
                             }
                         }
