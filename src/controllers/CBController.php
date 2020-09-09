@@ -2450,35 +2450,39 @@ class CBController extends Controller {
 
                                 if($this->table == 'lgms_customers')
                                 {
-                                	if(isset($a["firstname"]))
+                                	if(isset($a["firstname"]) && !empty($a["firstname"]))
                                 	{
                                 		$profile["firstName"] = $a["firstname"];
                                 	}
-                                	if(isset($a["lastname"]))
+                                	if(isset($a["lastname"]) && !empty($a["lastname"]))
                                 	{
 	                                    $profile["lastName"] = $a["lastname"];
                                 	}
-                                	if(isset($a["address"]))
+                                	if(isset($a["address"]) && !empty($a["address"]))
                                 	{
 	                                    $profile["address"] = $a["address"];
                                 	}
-                                	if(isset($a["address1"]))
+                                	if(isset($a["postcode"]) && !empty($a["postcode"]))
+                                	{
+                                		$profile["zip"] = $a["postcode"];
+                                	}
+                                	if(isset($a["address1"]) && !empty($a["address1"]))
                                 	{
 	                                    $data["addressLine1"] = $a["address1"];
                                 	}
-                                	if(isset($a["address2"]))
+                                	if(isset($a["address2"]) && !empty($a["address2"]))
                                 	{
 	                                    $data["addressLine2"] = $a["address2"];
                                 	}
-                                	if(isset($a["address3"]))
+                                	if(isset($a["address3"]) && !empty($a["address3"]))
                                 	{
 	                                    $data["addressLine3"] = $a["address3"];
                                 	}
-                                	if(isset($a["address4"]))
+                                	if(isset($a["address4"]) && !empty($a["address4"]))
                                 	{
 	                                    $data["addressLine4"] = $a["address4"];
                                 	}
-                                	if(isset($a["mobileno"]))
+                                	if(isset($a["mobileno"]) && !empty($a["mobileno"]))
                                 	{
 	                                    $data["mobile"] = $a["mobileno"];
                                 	}
