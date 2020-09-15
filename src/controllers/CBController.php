@@ -2608,27 +2608,27 @@ class CBController extends Controller {
 			    	$childrenList = [];
 			    }
 
-			    if(isset($a['firstname']))
+			    if(isset($a['firstname']) && !empty($a['firstname']))
 			    {
 			        $childrenList[$count]["firstName"] = $a["firstname"];
 			    }
 
-			    if(isset($a["childUniqueIdentifier"]))
+			    if(isset($a["childUniqueIdentifier"]) && !empty($a['childUniqueIdentifier']))
 				{
 					$childrenList[$count]["applicationInternalIdentifier"] = $a["childUniqueIdentifier"];
 				}
 
-				// if(isset($a["birthDate"]))
-				// {
-				// 	$childrenList[$count]["birthDate"] = $a["birthDate"]; 
-				// }
+				if(isset($a["birthDate"]) && !empty($a['birthDate']))
+				{
+					$childrenList[$count]["birthDate"] = date("Y-m-d",strtotime($a["birthDate"]));
+				}
 
-				if(isset($a['pregnant']))
+				if(isset($a['pregnant']) && !empty($a['pregnant']))
 				{
 					$childrenList[$count]["birthDateReliability"] = $a["pregnant"] == 'Yes' ? 4 : 0;
 				}
 
-				if(isset($a['gender']))
+				if(isset($a['gender']) && !empty($a['gender']))
 				{
 					$childrenList[$count]["sex"] = $a["gender"] == 'Male' ? 1 : 2;
 				}
