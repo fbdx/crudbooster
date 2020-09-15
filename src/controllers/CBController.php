@@ -2418,18 +2418,18 @@ class CBController extends Controller {
 
 						if($this->import_offline)
 						{
-							if(isset($a['m_date']) && !empty($a['m_date']))
-							{
-								if(strpos($a['m_date'],'/'))
-								{
-									$dateString = str_replace('/', '-', $a['m_date']); 
-									$a['m_date'] = date("Y-m-d", strtotime($dateString));
-								}
-							}
-							else
-							{
+							// if(isset($a['m_date']) && !empty($a['m_date']))
+							// {
+							// 	if(strpos($a['m_date'],'/'))
+							// 	{
+							// 		$dateString = str_replace('/', '-', $a['m_date']); 
+							// 		$a['m_date'] = date("Y-m-d", strtotime($dateString));
+							// 	}
+							// }
+							// else
+							// {
 								$a['m_date'] = date("Y-m-d H:i:s");
-							}
+							// }
 
 							if(!isset($a['fulfillment_record']))
 							{
