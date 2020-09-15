@@ -2418,7 +2418,15 @@ class CBController extends Controller {
 
 						if($this->import_offline)
 						{
-							if(!isset($a['m_date']) || $a['m_date'] == '')
+							if(isset($a['m_date']) && !empty($a['m_date']))
+							{
+								if(strpos($a['m_date'],'/'))
+								{
+									$dateString = str_replace('/', '-', $a['m_date']); 
+									$a['m_date'] = date("Y-m-d", strtotime($dateString));
+								}
+							}
+							else
 							{
 								$a['m_date'] = date("Y-m-d H:i:s");
 							}
@@ -2428,23 +2436,33 @@ class CBController extends Controller {
 								$a['fulfillment_record'] = true;
 							}
 						
-							if(isset($a['childdob']))
+							if(isset($a['childdob']) && !empty($a['childdob']))
 							{
-								$dateString = str_replace('/', '-', $a['childdob']); 
-								$a['childdob'] = date("Y-m-d", strtotime($dateString));
+								if(strpos($a['childdob'],'/'))
+								{
+									$dateString = str_replace('/', '-', $a['childdob']); 
+									$a['childdob'] = date("Y-m-d", strtotime($dateString));
+								}
+							}
+							else
+							{
+								$a['childdob'] = NULL;
 							}
 
-							$existingRecords = DB::table($this->table)->where("email", $a["email"])->where("m_product", $a["m_product"])->get()->toArray();
-
-							if(count($existingRecords) >= 2)
+							if(!empty($a["email"]))
 							{
-								$latestRecord = end($existingRecords);
+								$existingRecords = DB::table($this->table)->where("email", $a["email"])->where("m_product", $a["m_product"])->get()->toArray();
 
-								DB::table($this->table)
-                                ->where("id", $latestRecord->id)
-                                ->update($a);
+								if(count($existingRecords) >= 2)
+								{
+									$latestRecord = end($existingRecords);
 
-                                continue;
+									DB::table($this->table)
+	                                ->where("id", $latestRecord->id)
+	                                ->update($a);
+
+	                                continue;
+								}
 							}
 						}
 
