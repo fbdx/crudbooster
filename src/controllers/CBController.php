@@ -2687,33 +2687,37 @@ class CBController extends Controller {
         $setInputData          = NULL;
         $data                  = NULL;
 
-        $response = $this->searchViaUid($a['uniqueIdentifier']);
+        $response = $this->searchViaEmail($a['email']);
 
         if(isset($response) && is_array($response))
         {
             $results = $response['results'];
-            $result  = $results[0];
-
-            if(!isset($UID))
+            if(isset($results[0]))
             {
-                $register = $this->initRegistration();
+	            $result  = $results[0];
+	            $a["uniqueIdentifier"] = $result['UID'];
 
-                if(is_array($register) && isset($register["regToken"]))
-                {
-                    $regToken = $register["regToken"];
-                }
-            }
+	            if(!isset($UID))
+	            {
+	                $register = $this->initRegistration();
 
-            $setInputData['email'] = $result['profile']['email'];
+	                if(is_array($register) && isset($register["regToken"]))
+	                {
+	                    $regToken = $register["regToken"];
+	                }
+	            }
 
-            $subscriptions["SGnestlegrp_SBcrossnl"]["email"]["isSubscribed"] = false;
+	            $setInputData['email'] = $result['profile']['email'];
 
-            $consent["subscriptions"] = $subscriptions;
-            $consent["preferences"]   = NULL;
+	            $subscriptions["SGnestlegrp_SBcrossnl"]["email"]["isSubscribed"] = false;
 
-            if(isset($UID) || isset($regToken))
-            {
-                $this->setAccountInfo($UID, $regToken,$setInputData,$data,$consent["subscriptions"], $consent["preferences"]);
+	            $consent["subscriptions"] = $subscriptions;
+	            $consent["preferences"]   = NULL;
+
+	            if(isset($UID) || isset($regToken))
+	            {
+	                $this->setAccountInfo($UID, $regToken,$setInputData,$data,$consent["subscriptions"], $consent["preferences"]);
+	            }
             }
         }
 
