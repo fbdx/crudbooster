@@ -189,6 +189,7 @@
                         case 'dateEntry' : $field = 'Date Entry'; break;
                         case 'pregnant' : $field = 'Pregnant'; break;
                         case 'unsubscribe_date' : $field = 'Unsubscribe Date'; break;
+                        case 'resubscribe_date' : $field = 'Resubscribe Date'; break;
                         default : $field = 'Default'; break;
                       }
 

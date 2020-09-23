@@ -105,7 +105,7 @@ class CBController extends Controller {
 	public $import_offline	      = FALSE;
 	public $sfmc_alert            = FALSE;
     public $lgms_import           = FALSE;
-    public $lgms_unsubscribe      = FALSE;
+    public $lgms_subscriptions      = FALSE;
 
 	public function __construct()
 	{
@@ -2406,44 +2406,44 @@ class CBController extends Controller {
 							$a['created_at'] = date('Y-m-d H:i:s');
 						}
 
-						if(isset($a['m_date']) && !empty($a['m_date']))
-						{
-							if(strpos($a['m_date'],'/'))
-							{
-								$dateString = str_replace('/', '-', $a['m_date']); 
-								$a['m_date'] = date("Y-m-d", strtotime($dateString));
-							}
-						}
-						else
-						{
-							$a['m_date'] = date("Y-m-d H:i:s");
-						}
-
-						if(isset($a['childdob']) && !empty($a['childdob']))
-						{
-							if(strpos($a['childdob'],'/'))
-							{
-								$dateString = str_replace('/', '-', $a['childdob']); 
-								$a['childdob'] = date("Y-m-d", strtotime($dateString));
-							}
-						}
-						else
-						{
-							$a['childdob'] = NULL;
-						}
-
                         if($this->lgms_import)
                         {
                             $a = $this->setLgmsIntoGigya($a);
                         }
 
-                        if($this->lgms_unsubscribe)
+                        if($this->lgms_subscriptions)
                         {
-                        	$a = $this->unsubscribeLgms($a);
+                        	$a = $this->LgmsSubscriptions($a);
                         }
 
 						if($this->import_offline)
 						{
+							if(isset($a['m_date']) && !empty($a['m_date']))
+							{
+								if(strpos($a['m_date'],'/'))
+								{
+									$dateString = str_replace('/', '-', $a['m_date']); 
+									$a['m_date'] = date("Y-m-d", strtotime($dateString));
+								}
+							}
+							else
+							{
+								$a['m_date'] = date("Y-m-d H:i:s");
+							}
+
+							if(isset($a['childdob']) && !empty($a['childdob']))
+							{
+								if(strpos($a['childdob'],'/'))
+								{
+									$dateString = str_replace('/', '-', $a['childdob']); 
+									$a['childdob'] = date("Y-m-d", strtotime($dateString));
+								}
+							}
+							else
+							{
+								$a['childdob'] = NULL;
+							}
+
 							$a['m_date'] = date("Y-m-d H:i:s");
 							
 							if(!isset($a['fulfillment_record']))
@@ -2700,7 +2700,7 @@ class CBController extends Controller {
 		return $a;
 	}
 
-	public function unsubscribeLgms($a)
+	public function LgmsSubscriptions($a)
 	{
 		$UID                   = NULL;
         $regToken              = NULL;
@@ -2727,16 +2727,24 @@ class CBController extends Controller {
 	                }
 	            }
 
-	            $setInputData['email'] = $result['profile']['email'];
+	            $data = $result["data"];
+	            $profile = $result["profile"];
+
+	            // $setInputData['email'] = $result['profile']['email'];
 
 	            $subscriptions["SGnestlegrp_SBcrossnl"]["email"]["isSubscribed"] = false;
+
+	            if($this->table == 'lgms_resubscribe')
+	            {
+	            	$subscriptions["SGnestlegrp_SBcrossnl"]["email"]["isSubscribed"] = true;
+	            }
 
 	            $consent["subscriptions"] = $subscriptions;
 	            $consent["preferences"]   = NULL;
 
 	            if(isset($UID) || isset($regToken))
 	            {
-	                $this->setAccountInfo($UID, $regToken,$setInputData,$data,$consent["subscriptions"], $consent["preferences"]);
+	                $this->setAccountInfo($UID, $regToken,$profile,$data,$consent["subscriptions"], $consent["preferences"]);
 	            }
             }
         }
