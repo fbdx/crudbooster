@@ -43,6 +43,20 @@
                     </li>
                 @endforeach
 
+
+                @if(CRUDBooster::myPrivilegeId() == 1 || in_array(CRUDBooster::myPrivilegeId(), config('crudbooster-custom-features.pwa-menu')))
+                <li data-id="27" class="treeview {{isset($data['menu']['parent']) && $data['menu']['parent'] == 'leads'?'active':''}}">
+                    <a href="#?m=27" class="text-normal"><i class="fa fa-user"></i> <span>PWA</span>
+                    <i class="fa fa-level-down pull-right"></i></a>
+                    <ul class="treeview-menu">
+                        <li data-id="" class="{{isset($data['menu']['child']) && $data['menu']['child']=='all-users'?'active':''}}"><a href="{{route('pwa.user.index')}}"><i class="fa fa-user"></i> <span>&nbsp;Users</span></a></li>
+                        <li data-id="" class="{{isset($data['menu']['child']) && $data['menu']['child']=='recruitment'?'active':''}}"><a href="{{route('pwa.recruitment.index')}}"><i class="fa fa-user"></i> <span>&nbsp;Recruitment</span></a></li>
+                        <li data-id="" class="{{isset($data['menu']['child']) && $data['menu']['child']=='all-stores'?'active':''}}"><a href="{{route('pwa.store.index')}}"><i class="fa fa-database text-normal"></i> <span>&nbsp;Store</span></a></li>
+                    </ul>
+                </li>
+                @endif
+                
+
                 @if(CRUDBooster::myPrivilegeId() == 2)
                     <li>
                         <a href="/public/admin/mainmergeoffline/import-data" id='btn_import_data' data-url-parameter='{{$build_query}}' title='Import Data' class="btn btn-sm btn-import-data" style="text-align: left;font-size: 14px;">
