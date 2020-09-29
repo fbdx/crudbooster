@@ -42,6 +42,7 @@
                         @endif
                     </li>
                 @endforeach
+                
 
                 @if(CRUDBooster::myPrivilegeId() == 2)
                     <li>

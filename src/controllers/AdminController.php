@@ -71,7 +71,7 @@ class AdminController extends CBController {
 	      $ip=$_SERVER['REMOTE_ADDR'];
 	    }
 
-	    // dump($ip);
+	    dump($ip);
 	    
 		return view('crudbooster::blank');
 	}
