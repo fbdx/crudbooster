@@ -58,19 +58,6 @@ class AdminController extends CBController {
 
 	public function getHome()
 	{
-		if (!empty($_SERVER['HTTP_CLIENT_IP']))   //check ip from share internet
-	    {
-	      $ip=$_SERVER['HTTP_CLIENT_IP'];
-	    }
-	    elseif (!empty($_SERVER['HTTP_X_FORWARDED_FOR']))   //to check ip is pass from proxy
-	    {
-	      $ip=$_SERVER['HTTP_X_FORWARDED_FOR'];
-	    }
-	    else
-	    {
-	      $ip=$_SERVER['REMOTE_ADDR'];
-	    }
-	    
 		return abort(404);
 	}
 
@@ -87,23 +74,23 @@ class AdminController extends CBController {
 				$whitelistIPList[] = $value->ip_address;
 			}
 
-	 		if (!empty($_SERVER['HTTP_CLIENT_IP']))   //check ip from share internet
-		    {
-		      $ip=$_SERVER['HTTP_CLIENT_IP'];
-		    }
-		    elseif (!empty($_SERVER['HTTP_X_FORWARDED_FOR']))   //to check ip is pass from proxy
+	 		if (!empty($_SERVER['HTTP_X_FORWARDED_FOR']))   //to check ip is pass from proxy
 		    {
 		      $ip=$_SERVER['HTTP_X_FORWARDED_FOR'];
+		    }
+		    else if (!empty($_SERVER['HTTP_CLIENT_IP']))   //check ip from share internet
+		    {
+		      $ip=$_SERVER['HTTP_CLIENT_IP'];
 		    }
 		    else
 		    {
 		      $ip=$_SERVER['REMOTE_ADDR'];
 		    }
 
-		    // if($stringCut = strpos($ip, ":"))
-		    // {
-		    // 	$ip = substr($ip, 0, $stringCut);
-		    // }
+		    if($stringCut = strpos($ip, ","))
+		    {
+		    	$ip = substr($ip, 0, $stringCut);
+		    }
 
 	 		if(array_search($ip, $whitelistIPList) === false){
 				return redirect()->route('AdminControllerGetHome');
