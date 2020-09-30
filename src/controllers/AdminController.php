@@ -73,7 +73,7 @@ class AdminController extends CBController {
 
 	    dump($ip);
 	    
-		return view('crudbooster::home');
+		return view('crudbooster::blank');
 	}
 
 	public function getLogin()
