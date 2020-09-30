@@ -70,10 +70,8 @@ class AdminController extends CBController {
 	    {
 	      $ip=$_SERVER['REMOTE_ADDR'];
 	    }
-
-	    dump($ip);
 	    
-		return view('crudbooster::blank');
+		return abort(404);
 	}
 
 	public function getLogin()
@@ -102,10 +100,10 @@ class AdminController extends CBController {
 		      $ip=$_SERVER['REMOTE_ADDR'];
 		    }
 
-		    if($stringCut = strpos($ip, ":"))
-		    {
-		    	$ip = substr($ip, 0, $stringCut);
-		    }
+		    // if($stringCut = strpos($ip, ":"))
+		    // {
+		    // 	$ip = substr($ip, 0, $stringCut);
+		    // }
 
 	 		if(array_search($ip, $whitelistIPList) === false){
 				return redirect()->route('AdminControllerGetHome');
