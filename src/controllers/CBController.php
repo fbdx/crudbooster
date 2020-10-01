@@ -65,6 +65,7 @@ class CBController extends Controller {
 	public $button_export       = TRUE;
 	public $button_export_v2    = FALSE;
 	public $button_import       = FALSE;
+	public $btn_imp_wyeth_cust_child = FALSE;
 	public $button_show         = TRUE;
 	public $button_addmore      = TRUE;
 	public $button_table_action = TRUE;
@@ -146,6 +147,7 @@ class CBController extends Controller {
 		$this->data['button_table_action']   = $this->button_table_action;
 		$this->data['button_bulk_action']    = $this->button_bulk_action;
 		$this->data['button_import']         = $this->button_import;
+		$this->data['btn_imp_wyeth_cust_child'] = $this->btn_imp_wyeth_cust_child;
 		$this->data['button_action_width']   = $this->button_action_width;
 		$this->data['button_selected']       = $this->button_selected;
 		$this->data['index_statistic']       = $this->index_statistic;
