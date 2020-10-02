@@ -148,6 +148,23 @@ $privilegeID = CRUDBooster::myPrivilegeId();?>
               </div>
             </small>
           </div>
+          <br />
+          <div class="form-content">
+              <div>
+                <label for="a">
+                  <small>
+                    <input id="a" type="radio" name="import_to" checked value="TO_SAMPLE_REQUEST">&nbsp;Import as Sample Request
+                  </small>
+                </label>
+              </div>
+              <div>
+                <label for="b">
+                  <small>
+                    <input id="b" type="radio" name="import_to" value="TO_CUSTOMER_CHILD">&nbsp;Import as Customers & Children
+                  </small>
+                </label>
+              </div>
+          </div>
         </div>
         <div class="modal-footer" id="uploading" style='display:none;text-align: center;'>
           <i class="fa fa-spinner fa-pulse fa-2x fa-fw"></i><br/>
