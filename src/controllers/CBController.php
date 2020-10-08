@@ -106,7 +106,8 @@ class CBController extends Controller {
 	public $import_offline	      = FALSE;
 	public $sfmc_alert            = FALSE;
     public $lgms_import           = FALSE;
-    public $lgms_subscriptions      = FALSE;
+    public $lgms_subscriptions    = FALSE;
+    public $import_wyeth          = FALSE;
 
 	public function __construct()
 	{
@@ -2416,6 +2417,16 @@ class CBController extends Controller {
                         if($this->lgms_subscriptions)
                         {
                         	$a = $this->LgmsSubscriptions($a);
+                        }
+
+                        if($this->import_wyeth)
+                        {
+                        	$existingCustomer = DB::table($this->table)->where('email',$record['email'])->where('m_product',$record['m_product'])->first();
+
+				            if($existingCustomer)
+				            {
+				                continue;
+				            }
                         }
 
 						if($this->import_offline)
