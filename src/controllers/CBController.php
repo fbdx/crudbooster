@@ -2421,7 +2421,7 @@ class CBController extends Controller {
 
                         if($this->import_wyeth)
                         {
-                        	$existingCustomer = DB::table($this->table)->where('email',$record['email'])->where('m_product',$record['m_product'])->first();
+                        	$existingCustomer = DB::table($this->table)->where('email',$a['email'])->where('m_product',$a['m_product'])->first();
 
 				            if($existingCustomer)
 				            {
