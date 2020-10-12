@@ -2653,7 +2653,17 @@ class CBController extends Controller {
 
 				if(isset($a["birthDate"]) && !empty($a['birthDate']))
 				{
-					$childrenList[$count]["birthDate"] = date("Y-m-d",strtotime($a["birthDate"]));
+					$birthDate = date("Y-m-d",strtotime($a["birthDate"]));
+					$childrenList[$count]["birthDate"] = $birthDate;
+
+					if($birthDate > date("Y-m-d H:i:s"))
+					{
+						$a["pregnant"] = 'Yes';
+					}
+					else
+					{
+						$a["pregnant"] = 'No';
+					}
 				}
 
 				if(isset($a['pregnant']) && !empty($a['pregnant']))
