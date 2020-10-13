@@ -178,7 +178,7 @@
                         case 'product' : $field = 'Product'; break;
                         case 'uniqueIdentifier' : $field = 'UID'; break;
                         case 'lgmsParentIdentifier' : $field = 'LGMS Parent ID'; break;
-                        case 'lgmsChildUniqueIdentifier' : $field = 'LGMS Child ID'; break;
+                        case 'lgmsChildIdentifier' : $field = 'LGMS Child ID'; break;
                         case 'created' : $field = 'Created Date'; break;
                         case 'lastLoginDate' : $field = 'Last Login Date'; break;
                         case 'lastUpdated' : $field = 'Last Profile Update'; break;

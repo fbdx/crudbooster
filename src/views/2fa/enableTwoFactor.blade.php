@@ -63,7 +63,7 @@
                 <div class="panel panel-default">
                     <div class="panel-heading">2FA Secret Key</div>
                     <div class="panel-body">
-                        Open up your Google Authenticator and scan the following QR barcode:
+                        Open up your Google/ Microsoft Authenticator and scan the following QR barcode:
                         <br /><br />
                         <img alt="Image of QR barcode" src="{{ $qrCodeUrl }}" />
                     </div>
