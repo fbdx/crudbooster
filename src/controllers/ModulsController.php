@@ -274,7 +274,8 @@ class ModulsController extends CBController {
 			->select('cms_moduls.name','cms_moduls.path','is_visible','is_create','is_read','is_edit','is_delete')
 			->get();
 			Session::put('admin_privileges_roles',$roles);
-			return redirect(Route("ModulsControllerGetStep2",["id"=>$id]));
+			return redirect()->route("ModulsControllerGetStep2", $id);
+			// return redirect(Route("ModulsControllerGetStep2",["id"=>$id]));
 		}else{
 			$id = Request::get('id');
 			DB::table($this->table)->where('id',$id)->update(compact("name","table_name","icon","path"));	
@@ -291,8 +292,8 @@ class ModulsController extends CBController {
 				// return redirect()->back()->with(['message'=>'Sorry, is not possible to edit the module with Module Generator Tool. Prefix and or Suffix tag is missing !','message_type'=>'warning']);	
 			}
 
-			
-			return redirect(Route("ModulsControllerGetStep2",["id"=>$id]));		
+			return redirect()->route("ModulsControllerGetStep2", $id);
+			// return redirect(Route("ModulsControllerGetStep2",["id"=>$id]));		
 		}
 	}
 
@@ -368,7 +369,9 @@ class ModulsController extends CBController {
 		
 		file_put_contents(app_path('Http/Controllers/'.$row->controller.'.php'), $file_controller);
 
-		return redirect(Route("ModulsControllerGetStep3",["id"=>$id]));
+		return redirect()->route("ModulsControllerGetStep3", $id);
+
+		// return redirect(Route("ModulsControllerGetStep3",["id"=>$id]));
 	}
 
 	public function getStep3($id) {
@@ -492,7 +495,9 @@ class ModulsController extends CBController {
 		//CREATE FILE CONTROLLER
 		file_put_contents(app_path('Http/Controllers/'.$row->controller.'.php'), $file_controller);
 
-		return redirect(Route("ModulsControllerGetStep4",["id"=>$id]));
+		return redirect()->route("ModulsControllerGetStep4", $id);
+
+		// return redirect(Route("ModulsControllerGetStep4",["id"=>$id]));
 		
 	}
 

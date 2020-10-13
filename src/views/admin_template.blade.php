@@ -127,6 +127,60 @@ $privilegeID = CRUDBooster::myPrivilegeId();?>
             </a>
             @endif
 
+
+@if($btn_imp_wyeth_cust_child && CRUDBooster::getCurrentMethod() == 'getIndex')
+<button type="button" class="btn btn-info btn-sm" data-toggle="modal" data-target="#myModal"><i class="fa fa-upload"></i>&nbsp;Upload CSV</button>
+  <div id="myModal" class="modal fade" role="dialog">
+  <div class="modal-dialog">
+    <!-- Modal content-->
+    <div class="modal-content">
+<form method="POST" action="{{route('backend.wyeth.import')}}" enctype="multipart/form-data">
+{{csrf_field()}}
+        <div class="modal-header">
+          <button type="button" class="close" data-dismiss="modal">&times;</button>
+          <h4 class="modal-title">Import CSV File of WYETH Customers/Child</h4>
+        </div>
+        <div class="modal-body">
+          <div class="form-content">
+            <small>
+              <div class="form-group">
+                <input type="file" class="form-control-file" id="import_file" name="import_file">
+              </div>
+            </small>
+          </div>
+          <br />
+          <div class="form-content">
+              <div>
+                <label for="a">
+                  <small>
+                    <input id="a" type="radio" name="import_to" checked value="TO_SAMPLE_REQUEST">&nbsp;Import as Sample Request
+                  </small>
+                </label>
+              </div>
+              <div>
+                <label for="b">
+                  <small>
+                    <input id="b" type="radio" name="import_to" value="TO_CUSTOMER_CHILD">&nbsp;Import as Customers & Children
+                  </small>
+                </label>
+              </div>
+          </div>
+        </div>
+        <div class="modal-footer" id="uploading" style='display:none;text-align: center;'>
+          <i class="fa fa-spinner fa-pulse fa-2x fa-fw"></i><br/>
+          <small><strong style='color:#b51e1e'>IMPORTANT: Uploading in process. Please do not close or refresh the browser</strong></small>
+        </div>
+        <div class="modal-footer form-content" id="footer">
+          <input type="submit" class="btn btn-success" value="Upload" onclick="$('.form-content').hide();$('#uploading').show()">
+          <button type="button" class="btn btn-default" data-dismiss="modal">close</button>
+        </div>
+</form>
+    </div>
+  </div>
+</div>
+@endif
+            
+
             @if(CRUDBooster::isSuperadmin() || CRUDBooster::myPrivilegeId() == 6 || CRUDBooster::myPrivilegeId() == 11)
               @if($module->name == 'Database' || $module->name == 'customer')
                 <button type="button" id="gigya_refresh" class="btn btn-success">Gigya Refresh</button>
