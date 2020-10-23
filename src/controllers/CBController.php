@@ -2144,10 +2144,8 @@ class CBController extends Controller {
 		foreach($rows as $key => $value)
 		{
 			$existingMobileNo = DbtWhatsappNumber::where("mobileno", $value["mobileno"])->first();
-			$customerMobileNo = DB::table("customerview")->where("mobileno", $value["mobileno"])->first();
-			// $customerMobileNo = Customer::where("mobileno", $value["mobileno"])->first();
 
-			if(isset($existingMobileNo) || isset($customerMobileNo))
+			if(isset($existingMobileNo))
 			{
 				continue;
 			}
@@ -2346,24 +2344,16 @@ class CBController extends Controller {
 
 			$rows = $this->csvToArray($file);
 
-
-			if(isset($rows) && $this->table == 'dbt_whatsapp_numbers')
+			if($this->sfmc_alert)
 			{
-				DB::statement("DROP VIEW IF EXISTS CustomerView");
+				if(isset($rows) && $this->table == 'dbt_whatsapp_numbers')
+				{
+					$rows = $this->removeMobileNumberDuplication($rows);
+					$batch = DB::table($this->table)->max('batch');
 
-				DB::statement("CREATE VIEW CustomerView AS
-						SELECT c.firstname, c.lastname, c.email, c.mobileno, g.preference_name, g.customer_id
-						FROM customer c
-						INNER JOIN gigya_preferences g
-						ON g.customer_id = c.id"
-					 );
-
-				$rows = $this->removeMobileNumberDuplication($rows);
-
-				DB::statement("DROP VIEW IF EXISTS CustomerView");
+					$batch++;
+				}
 			}
-			
-			$f = $this->import_consignment;
 
 			$has_created_at = false;
 			if(CRUDBooster::isColumnExists($this->table,'created_at')) {
@@ -2372,12 +2362,6 @@ class CBController extends Controller {
 
 			$data_import_column = array();
 			$uploadNotUpdated = [];
-
-			if($this->sfmc_alert)
-			{
-				$batch = DB::table($this->table)->max('batch');
-				$batch++;
-			}
 
 			foreach($rows as $value) {
 
