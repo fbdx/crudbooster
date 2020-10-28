@@ -30,6 +30,7 @@ use DateTime;
 use Carbon;
 use App\Traits\GigyaApi;
 use App\Traits\SetSmartDataInfoToGigya;
+use App\Traits\RegisterLgmsUserToGigya;
 use Config;
 use GuzzleHttp\Exception\GuzzleException;
 use GuzzleHttp\Client;
@@ -39,6 +40,7 @@ class CBController extends Controller {
 
 	use GigyaApi;
 	use SetSmartDataInfoToGigya;
+	use RegisterLgmsUserToGigya;
 
 	public $data_inputan;
 	public $columns_table;
@@ -2522,189 +2524,6 @@ class CBController extends Controller {
 		}
 		$this->hook_after_import();
 		return response()->json(['status'=>true]);
-	}
-
-	public function setLgmsIntoGigya($a)
-	{
-		$UID      = NULL;
-		$regToken = NULL;
-
-		$subscriptions = NULL;
-		$preferences   = NULL;
-
-		$response = $this->searchViaEmail($a['email']);
-
-		if(isset($response) && is_array($response))
-		{
-			$results = $response['results'];
-			$result  = $results[0];
-			$profile = $result["profile"];
-			$data    = $result["data"];
-
-		    $a["uniqueIdentifier"] = $result['UID'];
-
-		    if($this->table == 'lgms_customers')
-		    {
-		        $a["created"]     = $result["created"];
-		        $a["lastUpdated"] = $result["lastUpdated"];
-		    }
-
-			if($results[0]["hasFullAccount"])
-			{
-			    $UID = $results[0]['UID'];
-			}
-
-			if(!isset($UID))
-			{
-			    $register = $this->initRegistration();
-
-			    if(is_array($register) && isset($register["regToken"]))
-			    {
-			        $regToken = $register["regToken"];
-			    }
-			}
-
-			$profile['email'] = $a['email'];
-
-			if($this->table == 'lgms_customers')
-			{
-				if(isset($a["firstname"]) && !empty($a["firstname"]))
-				{
-					$profile["firstName"] = $a["firstname"];
-				}
-				if(isset($a["lastname"]) && !empty($a["lastname"]))
-				{
-			        $profile["lastName"] = $a["lastname"];
-				}
-				if(isset($a["address"]) && !empty($a["address"]))
-				{
-			        $profile["address"] = $a["address"];
-				}
-				if(isset($a["postcode"]) && !empty($a["postcode"]))
-				{
-					$profile["zip"] = $a["postcode"];
-				}
-				if(isset($a["address1"]) && !empty($a["address1"]))
-				{
-			        $data["addressLine1"] = $a["address1"];
-				}
-				if(isset($a["address2"]) && !empty($a["address2"]))
-				{
-			        $data["addressLine2"] = $a["address2"];
-				}
-				if(isset($a["address3"]) && !empty($a["address3"]))
-				{
-			        $data["addressLine3"] = $a["address3"];
-				}
-				if(isset($a["address4"]) && !empty($a["address4"]))
-				{
-			        $data["addressLine4"] = $a["address4"];
-				}
-				if(isset($a["mobileno"]) && !empty($a["mobileno"]))
-				{
-			        $data["mobile"] = $a["mobileno"];
-				}
-			}
-
-			if($this->table == 'lgms_children')
-			{
-				$count = 0; 
-			    if(isset($data["child"][0]))
-			    {
-			    	$childrenList = $data["child"];
-
-			        foreach($childrenList as $key => $child)
-			        {
-			        	$count = $key;
-			        }
-
-			        $count ++;
-			    }
-			    else
-			    {
-			    	$childrenList = [];
-			    }
-
-			    if(isset($a['firstname']) && !empty($a['firstname']))
-			    {
-			        $childrenList[$count]["firstName"] = $a["firstname"];
-			    }
-
-			    if(isset($a["childUniqueIdentifier"]) && !empty($a['childUniqueIdentifier']))
-				{
-					$childrenList[$count]["applicationInternalIdentifier"] = $a["childUniqueIdentifier"];
-				}
-
-				if(isset($a["birthDate"]) && !empty($a['birthDate']))
-				{
-					$birthDate = date("Y-m-d",strtotime($a["birthDate"]));
-					$childrenList[$count]["birthDate"] = $birthDate;
-
-					if($birthDate > date("Y-m-d H:i:s"))
-					{
-						$a["pregnant"] = 'Yes';
-					}
-					else
-					{
-						$a["pregnant"] = 'No';
-					}
-				}
-
-				if(isset($a['pregnant']) && !empty($a['pregnant']))
-				{
-					$childrenList[$count]["birthDateReliability"] = $a["pregnant"] == 'Yes' ? 4 : 0;
-				}
-
-				if(isset($a['gender']) && !empty($a['gender']))
-				{
-					$childrenList[$count]["sex"] = $a["gender"] == 'Male' ? 1 : 2;
-				}
-
-			    $data["child"] = $this->removeDuplicateChilds($childrenList);
-			}
-
-			$data["marketCode"]                                   = "20503";
-			$data["consumerType"]                                 = "PRIVATE";
-			$data["countryCode"]                                  = "SG";
-			$data["initialAppSourceCode"]                         = "SGNINWEB_SD";
-			$data["externalApplication"][0]["applicationCode"]    = "SGNINWEB_SD";
-			$data["externalApplication"][0]["internalIdentifier"] = $this->generateUid();
-
-			$preferences["terms"]["SGilluma_RGtcandprivacy"]["isConsentGranted"]    = true;
-			$preferences["terms"]["SGilluma_RGtcandprivacy"]["lastConsentModified"] = $this->generateTime();
-			$preferences["terms"]["SGilluma_RGtcandprivacy"]["tags"][0]             = "sourceApplication:MYNINWEB_SD";
-
-			$subscriptions["SGnestlegrp_SBcrossnl"]["email"]["isSubscribed"]                 = true;
-			$subscriptions["SGnestlegrp_SBcrossnl"]["email"]["lastUpdatedSubscriptionState"] = $this->generateTime();
-			$subscriptions["SGnestlegrp_SBcrossnl"]["email"]["tags"][0]                      = "sourceApplication:MYNINWEB_SD";
-
-			$consent["subscriptions"] = $subscriptions;
-			$consent["preferences"]   = $preferences;
-
-			if(isset($UID) || isset($regToken))
-			{
-				$gigyaResponse = $this->setAccountInfo($UID, $regToken, $profile, $data, $consent["subscriptions"],$consent["preferences"]);
-
-				if(is_array($gigyaResponse) && isset($gigyaResponse["errorCode"]))
-			    {
-			        if($gigyaResponse["errorCode"]==0)
-			        {
-			            if(is_null($a["uniqueIdentifier"]) || $a["uniqueIdentifier"] == "")
-			        	{
-			        		sleep(5);
-			            	$newResponse = $this->searchViaEmail($a['email']);
-			            	if(isset($newResponse) && is_array($newResponse))
-			            	{
-			            		$result = $newResponse['results'][0];
-			            		$a['uniqueIdentifier'] = $result["UID"];
-			            	}
-			        	}
-			        }
-			    }
-			}
-		}
-
-		return $a;
 	}
 
 	public function LgmsSubscriptions($a)
