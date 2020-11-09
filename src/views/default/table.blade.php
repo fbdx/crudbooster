@@ -200,9 +200,10 @@
               $('#export_data_v2').click(function() {
                 $('#export-data_v2').modal('show');
                 $('#loading-spinner-v2').show();
-
+                var filters_=$("#export_data_v2").attr('data-url-parm');
                 $.ajax({
                   type: "GET",
+                  data:{filters:filters_},
                   url: "{{route('backend.export.get-form')}}",
                   success: function(data){
                     if(data.status == 'success')
