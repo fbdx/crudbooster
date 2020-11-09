@@ -110,6 +110,7 @@ class CBController extends Controller {
     public $lgms_import           = FALSE;
     public $lgms_subscriptions    = FALSE;
     public $import_wyeth          = FALSE;
+    public $import_dn_samples     = FALSE;  
 
 	public function __construct()
 	{
@@ -2412,6 +2413,20 @@ class CBController extends Controller {
                         if($this->lgms_subscriptions)
                         {
                         	$a = $this->LgmsSubscriptions($a);
+                        }
+
+                        if($this->import_dn_samples)
+                        {
+                        	$existingCustomer = DB::table($this->table)->where('email',$a['email'])->where('campaign_slug', $a["campaign_slug"])->first();
+
+                        	if($existingCustomer)
+                        	{
+                        		DB::table($this->table)
+                                ->where("id", $existingCustomer->id)
+                                ->update($a);
+
+                                continue;
+                        	}
                         }
 
                         if($this->import_wyeth)
