@@ -190,6 +190,7 @@
                         case 'pregnant' : $field = 'Pregnant'; break;
                         case 'unsubscribe_date' : $field = 'Unsubscribe Date'; break;
                         case 'resubscribe_date' : $field = 'Resubscribe Date'; break;
+                        case 'campaign_slug' : $field = 'Campaign'; break;
                         default : $field = 'Default'; break;
                       }
 

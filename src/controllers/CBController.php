@@ -2395,6 +2395,15 @@ class CBController extends Controller {
 							$a['created_at'] = date('Y-m-d H:i:s');
 						}
 
+						if(isset($a['m_date']) && !empty($a['m_date']))
+						{
+							if(strpos($a['m_date'],'/'))
+							{
+								$dateString = str_replace('/', '-', $a['m_date']); 
+								$a['m_date'] = date("Y-m-d", strtotime($dateString));
+							}
+						}
+
                         if($this->lgms_import)
                         {
                             $a = $this->setLgmsIntoGigya($a);
@@ -2417,19 +2426,6 @@ class CBController extends Controller {
 
 						if($this->import_offline)
 						{
-							if(isset($a['m_date']) && !empty($a['m_date']))
-							{
-								if(strpos($a['m_date'],'/'))
-								{
-									$dateString = str_replace('/', '-', $a['m_date']); 
-									$a['m_date'] = date("Y-m-d", strtotime($dateString));
-								}
-							}
-							else
-							{
-								$a['m_date'] = date("Y-m-d H:i:s");
-							}
-
 							if(isset($a['childdob']) && !empty($a['childdob']))
 							{
 								if(strpos($a['childdob'],'/'))
