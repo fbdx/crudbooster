@@ -51,7 +51,8 @@ class LogsController extends CBController {
 
         if (CRUDBooster::myPrivilegeId() == 6 || CRUDBooster::myPrivilegeId() == 7)
      	{
-	     	$query->where('id_cms_users', CRUDBooster::myId());
+	     	$query->where('id_cms_users', 6)
+	     		  ->orWhere('id_cms_users', 7);
      	}
     }
 }
