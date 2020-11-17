@@ -13,6 +13,7 @@ use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\PDF;
 use Illuminate\Support\Facades\Excel;
+use CRUDBooster;
 
 class LogsController extends CBController {
 
@@ -43,5 +44,21 @@ class LogsController extends CBController {
 				
 	}
 	
+	public function hook_query_index(&$query) {
+        //Your code here
 
+        if (CRUDBooster::myPrivilegeId() == 6 || CRUDBooster::myPrivilegeId() == 7)
+     	{
+     		$singaporeUsers = DB::table("cms_users")->select("id")->where("id_cms_privileges", 6)->orWhere("id_cms_privileges", 7)->get()->toArray();
+
+	         // Privilege id 6 and 7for Careline Singapore
+
+	        foreach($singaporeUsers as $user)
+	        {
+	        	$userIds[] = $user->id;
+	        }
+	        
+	     	$query->whereIn('id_cms_users', $userIds);
+     	}
+    }
 }

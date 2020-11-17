@@ -164,29 +164,30 @@ class AdminController extends CBController {
 				if($passwordExpiryAt < $now)
 				{
 				    Session::flush();
+				    CRUDBooster::insertLog("User account : ".$email." is expired.");
 			        return redirect()->route('getChangePassword')->with('message','Your Password has expired. Please change it.');
 			    }
 			}
-
-			$success = $this->saveIntoSessionAndRedirect($user);
-
-			if($success)
+			
+			if($user->enable_google2fa)
 			{
-				if($user->enable_google2fa)
+				if(isset($user->google2fa_secret))
 				{
-					if(isset($user->google2fa_secret))
-					{
-						$data['secret'] = $user->google2fa_secret;
-				        $data['email']  = $user->email;
+					$data['secret'] = $user->google2fa_secret;
+			        $data['email']  = $user->email;
 
-				        return view('crudbooster::2fa/validate', $data);
-					}
-					
-					$data = $this->generateMultiFactorAuthenticationQRCode($user);
-
-					return view('crudbooster::2fa/enableTwoFactor', $data);
+			        return view('crudbooster::2fa/validate', $data);
 				}
-				else
+				
+				$data = $this->generateMultiFactorAuthenticationQRCode($user);
+
+				return view('crudbooster::2fa/enableTwoFactor', $data);
+			}
+			else
+			{
+				$success = $this->saveIntoSessionAndRedirect($user);
+
+				if($success)
 				{
 					return redirect()->route('AdminControllerGetIndex');
 				}
@@ -202,6 +203,7 @@ class AdminController extends CBController {
 			if($loginCount >= 3)
 			{
 				DB::table(config('crudbooster.USER_TABLE'))->where("email",$email)->update(['status' => 'Locked']);
+				CRUDBooster::insertLog("User account : ".$email." is locked.");
 			}
 
 			return redirect()->route('getLogin')->with('message', trans('crudbooster.alert_password_wrong'));
@@ -290,7 +292,12 @@ class AdminController extends CBController {
 		
 	    if($oneCode == $input['totp'])
 	    {
-	    	return redirect()->route('AdminControllerGetIndex');
+	    	$success = $this->saveIntoSessionAndRedirect($cmsUser);
+
+	    	if($success)
+	    	{
+		    	return redirect()->route('AdminControllerGetIndex');
+	    	}
 	    }
 	    else
 	    {
