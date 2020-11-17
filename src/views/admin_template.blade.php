@@ -115,7 +115,9 @@ $privilegeID = CRUDBooster::myPrivilegeId();?>
             @endif
 
             @if($button_export_v2 && CRUDBooster::getCurrentMethod() == 'getIndex')
-            <a href="javascript:void(0)" id='export_data_v2' data-url-parameter='' title='Export Data' class="btn btn-sm btn-primary btn-export-data-v2">
+<?php
+$filters_ = http_build_query(Request::all());?>
+            <a href="javascript:void(0)" data-url-parm="{{$filters_}}" id='export_data_v2' data-url-parameter='' title='Export Data' class="btn btn-sm btn-primary btn-export-data-v2">
               <i class="fa fa-upload"></i>&nbsp;Export CSV (PPI hashed)
             </a>
             @endif
