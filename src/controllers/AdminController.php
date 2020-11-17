@@ -179,7 +179,7 @@ class AdminController extends CBController {
 				if($passwordExpiryAt < $now)
 				{
 				    Session::flush();
-				    CRUDBooster::insertLog("User account : ".$email." is expired.");
+				    CRUDBooster::insertLog("User account : ".$email." is expired.", $user->id);
 			        return redirect()->route('getChangePassword')->with('message','Your Password has expired. Please change it.');
 			    }
 			}
@@ -218,7 +218,7 @@ class AdminController extends CBController {
 			if($loginCount >= 3)
 			{
 				DB::table(config('crudbooster.USER_TABLE'))->where("email",$email)->update(['status' => 'Locked']);
-				CRUDBooster::insertLog("User account : ".$email." is locked.");
+				CRUDBooster::insertLog("User account : ".$email." is locked.", $user->id);
 			}
 
 			return redirect()->route('getLogin')->with('message', trans('crudbooster.alert_password_wrong'));
