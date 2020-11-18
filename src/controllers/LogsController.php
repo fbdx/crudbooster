@@ -47,15 +47,19 @@ class LogsController extends CBController {
 	public function hook_query_index(&$query) {
         //Your code here
 
-        $privilegeId = CRUDBooster::myPrivilegeId();
-
-        $privilegeUsers = DB::table("cms_users")->select("id")->where("id_cms_privileges", $privilegeId)->get()->toArray();
-
-        foreach($privilegeUsers as $user)
+        if(!CRUDBooster::isSuperadmin())
         {
-        	$userIds[] = $user->id;
+	        $privilegeId = CRUDBooster::myPrivilegeId();
+
+	        $privilegeUsers = DB::table("cms_users")->select("id")->where("id_cms_privileges", $privilegeId)->get()->toArray();
+
+	        foreach($privilegeUsers as $user)
+	        {
+	        	$userIds[] = $user->id;
+	        }
+
+	        $query->whereIn('id_cms_users', $userIds);
         }
 
-        $query->whereIn('id_cms_users', $userIds);
     }
 }
