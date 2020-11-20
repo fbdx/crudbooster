@@ -777,14 +777,14 @@ class CRUDBooster  {
 	        }     
 	    }
 
-		public static function insertLog($description) {
+		public static function insertLog($description, $userId = NULL) {
 	        $a                 = array();
 	        $a['created_at']   = date('Y-m-d H:i:s');
 	        $a['ipaddress']    = $_SERVER['REMOTE_ADDR'];
 	        $a['useragent']    = $_SERVER['HTTP_USER_AGENT'];
 	        $a['url']          = Request::url();
 	        $a['description']  = $description;
-	        $a['id_cms_users'] = self::myId();
+	        $a['id_cms_users'] = isset($userId) ? $userId : self::myId();
 	        DB::table('cms_logs')->insert($a);    
 	    }
 
