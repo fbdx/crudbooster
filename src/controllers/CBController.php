@@ -2405,11 +2405,6 @@ class CBController extends Controller {
 							}
 						}
 
-                        if($this->lgms_import)
-                        {
-                            $a = $this->setLgmsIntoGigya($a);
-                        }
-
                         if($this->lgms_subscriptions)
                         {
                         	$a = $this->LgmsSubscriptions($a);
