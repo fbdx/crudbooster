@@ -176,7 +176,7 @@
                         case 'phoneno' : $field = 'Phone No'; break;
                         case 'address' : $field = 'Address'; break;
                         case 'product' : $field = 'Product'; break;
-                        case 'uniqueIdentifier' : $field = 'UID'; break;
+                        case 'uniqueIdentifier' : $field = 'Gigya UID'; break;
                         case 'lgmsParentIdentifier' : $field = 'LGMS Parent ID'; break;
                         case 'lgmsChildIdentifier' : $field = 'LGMS Child ID'; break;
                         case 'created' : $field = 'Created Date'; break;
@@ -185,7 +185,7 @@
                         case 'phoneOptIn' : $field = 'Phone Opt In'; break;
                         case 'offlineOptIn' : $field = 'Offline Opt In'; break;
                         case 'sampleRequestProduct' : $field = 'Sample Request Product'; break;
-                        case 'childUniqueIdentifier' : $field = 'Child UID'; break;
+                        case 'childUniqueIdentifier' : $field = 'Child Gigya UID'; break;
                         case 'dateEntry' : $field = 'Date Entry'; break;
                         case 'pregnant' : $field = 'Pregnant'; break;
                         case 'unsubscribe_date' : $field = 'Unsubscribe Date'; break;
