@@ -30,7 +30,6 @@ use DateTime;
 use Carbon;
 use App\Traits\GigyaApi;
 use App\Traits\SetSmartDataInfoToGigya;
-use App\Traits\RegisterLgmsUserToGigya;
 use Config;
 use GuzzleHttp\Exception\GuzzleException;
 use GuzzleHttp\Client;
@@ -40,7 +39,6 @@ class CBController extends Controller {
 
 	use GigyaApi;
 	use SetSmartDataInfoToGigya;
-	use RegisterLgmsUserToGigya;
 
 	public $data_inputan;
 	public $columns_table;
