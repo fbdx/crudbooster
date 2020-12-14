@@ -2447,7 +2447,7 @@ class CBController extends Controller {
 								$a['childdob'] = NULL;
 							}
 
-							$a['m_date'] = date("Y-m-d H:i:s");
+							$a['updated_at'] = date("Y-m-d H:i:s");
 							
 							if(!isset($a['fulfillment_record']))
 							{
