@@ -2402,6 +2402,10 @@ class CBController extends Controller {
 								$a['m_date'] = date("Y-m-d", strtotime($dateString));
 							}
 						}
+						else
+						{
+							$a['m_date'] = date("Y-m-d H:i:s");
+						}
 
                         if($this->lgms_subscriptions)
                         {
@@ -2460,6 +2464,8 @@ class CBController extends Controller {
 
 								if(isset($existingRecord))
 								{
+									unset($a['m_date']);
+
 									DB::table($this->table)
 	                                ->where("id", $existingRecord->id)
 	                                ->update($a);
