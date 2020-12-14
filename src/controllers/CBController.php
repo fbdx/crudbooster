@@ -2456,14 +2456,12 @@ class CBController extends Controller {
 
 							if(!empty($a["email"]))
 							{
-								$existingRecords = DB::table($this->table)->where("email", $a["email"])->where("m_product", $a["m_product"])->get()->toArray();
+								$existingRecord = DB::table($this->table)->where("email", $a["email"])->where("m_product", $a["m_product"])->orderBy("m_date", "desc")->first();
 
-								if(count($existingRecords) >= 2)
+								if(isset($existingRecord))
 								{
-									$latestRecord = end($existingRecords);
-
 									DB::table($this->table)
-	                                ->where("id", $latestRecord->id)
+	                                ->where("id", $existingRecord->id)
 	                                ->update($a);
 
 	                                continue;
