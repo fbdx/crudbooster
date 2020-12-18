@@ -1345,9 +1345,9 @@ class CBController extends Controller {
 
 			if($this->arr['countryCode'] = 'SG')
 			{
-				$subsampleRecords = ['m_product' => 'First Welcome Gift', 'stock_keeping_unit' => '300001', 'm_date'=>date("Y-m-d h:i:s"), 'country'=>'SG', 'customer_id'=>$recordId];
+				$gigyaPreferences = ['customer_id' => $recordId, 'preference_name' => 'SGilluma_RGtcandprivacy', 'UID' => 'UID', 'isConsentGranted' => 1, 'tags' => 'sourceApplication:SGILLUMAWEB', 'docVersion' => 1];
 
-                DB::table('mainmerge')->insert($subsampleRecords);
+                DB::table('gigya_preferences')->insert($gigyaPreferences);
 			}
 		}
 		else
