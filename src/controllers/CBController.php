@@ -518,10 +518,7 @@ class CBController extends Controller {
 				}
 
 				if ($type=='between') {
-					
-					$value[0] .=" 00:00:00";
-					$value[1] .=" 23:59:59";
-					//Log::error($value);
+
 					$result->whereBetween($key,$value);
 						
 				}else{
