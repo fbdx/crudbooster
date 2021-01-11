@@ -425,7 +425,7 @@
 
                               <option typeallow='all' {{ (CRUDBooster::getTypeFilter($col["field_with"]) == '!=')?"selected":"" }} value='!='>{{trans("crudbooster.filter_not_equal_to")}}</option>
 
-                              @if($col['type'] == 'date')
+                              @if($col['type'] == 'date' || $col['type_data'] == 'timestamp')
 
                                <option {{ (CRUDBooster::getTypeFilter($col["field_with"]) == 'between')?"selected":"" }} value='between'>{{trans("crudbooster.filter_between")}}</option>
 
