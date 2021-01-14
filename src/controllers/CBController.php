@@ -1341,14 +1341,41 @@ class CBController extends Controller {
 
 		if($this->gigya_customer)
 		{
-			$recordId = DB::table($this->table)->insertGetId($this->arr);
+			$existingCustomer = DB::table($this->table)->where("email", $this->arr["email"])->first();
 
-			if($this->arr['countryCode'] = 'SG')
+			if($existingCustomer)
 			{
-				$gigyaPreferences = ['customer_id' => $recordId, 'preference_name' => 'SGilluma_RGtcandprivacy', 'UID' => 'UID', 'isConsentGranted' => 1, 'tags' => 'sourceApplication:SGILLUMAWEB', 'docVersion' => 1];
+				$iluma = false;
+				unset($this->arr["id"]);
+				DB::table($this->table)->where("email", $this->arr["email"])->update($this->arr);
 
-                DB::table('gigya_preferences')->insert($gigyaPreferences);
+				$gigyaPreferences = DB::table('gigya_preferences')->where("customer_id", $existingCustomer->id)->get();
+
+				foreach($gigyaPreferences as $preference)
+				{
+					if($preference->preference_name == "SGilluma_RGtcandprivacy")
+					{
+						$iluma = true;
+					}
+				}
+
+				if(!$iluma)
+				{
+					$gigyaPreference = ['customer_id' => $existingCustomer->id, 'preference_name' => 'SGilluma_RGtcandprivacy', 'UID' => 'UID', 'isConsentGranted' => 1, 'tags' => 'sourceApplication:SGILLUMAWEB', 'docVersion' => 1];
+
+					DB::table('gigya_preferences')->insert($gigyaPreference);
+				}
+
+				$this->arr["id"] = $existingCustomer->id;
+				$id = $existingCustomer->id;
 			}
+			else
+			{
+				$recordId = DB::table($this->table)->insertGetId($this->arr);
+				$gigyaPreference = ['customer_id' => $recordId, 'preference_name' => 'SGilluma_RGtcandprivacy', 'UID' => 'UID', 'isConsentGranted' => 1, 'tags' => 'sourceApplication:SGILLUMAWEB', 'docVersion' => 1];
+				DB::table('gigya_preferences')->insert($gigyaPreference);
+			}
+			
 		}
 		else
 		{
@@ -1517,10 +1544,10 @@ class CBController extends Controller {
 
 			$results = $response['results'];
 
-			if($results[0]["hasFullAccount"])
-			{
-				$UID = $results[0]['UID'];
-			}
+			// if($results[0]["hasFullAccount"])
+			// {
+			// 	$UID = $results[0]['UID'];
+			// }
 
 	    	if(!isset($UID))
 	    	{
