@@ -104,14 +104,6 @@
             <a href="javascript:void(0)" id='btn_export_data' data-url-parameter='{{$build_query}}' title='Export Data' class="btn btn-sm btn-primary btn-export-data">
               <i class="fa fa-upload"></i> {{trans("crudbooster.button_export")}}
             </a> 
-{{-- @start NEW CSV --}}
-<?php 
-$privilegeID = CRUDBooster::myPrivilegeId();?>
-@if($privilegeID == 6 ||  $privilegeID == 7)
-<a href="javascript:void(0)" id='export_data_v2' data-url-parameter='' title='Export Data' class="btn btn-sm btn-primary btn-export-data-v2">
-<i class="fa fa-upload"></i>&nbsp;Export CSV</a>
-@endif
-{{-- @end NEW CSV --}}
             @endif
 
             @if($button_export_v2 && CRUDBooster::getCurrentMethod() == 'getIndex')

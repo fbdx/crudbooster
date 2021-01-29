@@ -196,26 +196,6 @@
               $('.btn-export-data').click(function() {
                 $('#export-data').modal('show');
               })
-// @start NEW CSV
-              $('#export_data_v2').click(function() {
-                $('#export-data_v2').modal('show');
-                $('#loading-spinner-v2').show();
-                var filters_=$("#export_data_v2").attr('data-url-parm');
-                $.ajax({
-                  type: "GET",
-                  data:{filters:filters_},
-                  url: "{{route('backend.export.get-form')}}",
-                  success: function(data){
-                    if(data.status == 'success')
-                    {
-                      $("#html-response").html(data.html);
-                      $("#submit-button").show();
-                    }else if(data.status == 'fail')
-                    {$("#html-response").html(data.html);}
-                  }
-                });
-              })
-// @ends NEW CSV
               var toggle_advanced_report_boolean = 1;
               $(".toggle_advanced_report").click(function() {
                 
@@ -426,7 +406,7 @@
 
                               <option typeallow='all' {{ (CRUDBooster::getTypeFilter($col["field_with"]) == '!=')?"selected":"" }} value='!='>{{trans("crudbooster.filter_not_equal_to")}}</option>
 
-                              @if($col['type'] == 'date')
+                              @if($col['type'] == 'date' || $col['type_data'] == 'timestamp')
 
                                <option {{ (CRUDBooster::getTypeFilter($col["field_with"]) == 'between')?"selected":"" }} value='between'>{{trans("crudbooster.filter_between")}}</option>
 
@@ -681,7 +661,5 @@
                 <!-- /.modal-content -->
               </div>
             </div>
-
-@include('backend.leads.partials.export-data-v2')
 
             @endif

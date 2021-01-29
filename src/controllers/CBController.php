@@ -1341,14 +1341,41 @@ class CBController extends Controller {
 
 		if($this->gigya_customer)
 		{
-			$recordId = DB::table($this->table)->insertGetId($this->arr);
+			$existingCustomer = DB::table($this->table)->where("email", $this->arr["email"])->first();
 
-			if($this->arr['countryCode'] = 'SG')
+			if($existingCustomer)
 			{
-				$subsampleRecords = ['m_product' => 'First Welcome Gift', 'stock_keeping_unit' => '300001', 'm_date'=>date("Y-m-d h:i:s"), 'country'=>'SG', 'customer_id'=>$recordId];
+				$iluma = false;
+				unset($this->arr["id"]);
+				DB::table($this->table)->where("email", $this->arr["email"])->update($this->arr);
 
-                DB::table('mainmerge')->insert($subsampleRecords);
+				$gigyaPreferences = DB::table('gigya_preferences')->where("customer_id", $existingCustomer->id)->get();
+
+				foreach($gigyaPreferences as $preference)
+				{
+					if($preference->preference_name == "SGilluma_RGtcandprivacy")
+					{
+						$iluma = true;
+					}
+				}
+
+				if(!$iluma)
+				{
+					$gigyaPreference = ['customer_id' => $existingCustomer->id, 'preference_name' => 'SGilluma_RGtcandprivacy', 'UID' => 'UID', 'isConsentGranted' => 1, 'tags' => 'sourceApplication:SGILLUMAWEB', 'docVersion' => 1];
+
+					DB::table('gigya_preferences')->insert($gigyaPreference);
+				}
+
+				$this->arr["id"] = $existingCustomer->id;
+				$id = $existingCustomer->id;
 			}
+			else
+			{
+				$recordId = DB::table($this->table)->insertGetId($this->arr);
+				$gigyaPreference = ['customer_id' => $recordId, 'preference_name' => 'SGilluma_RGtcandprivacy', 'UID' => 'UID', 'isConsentGranted' => 1, 'tags' => 'sourceApplication:SGILLUMAWEB', 'docVersion' => 1];
+				DB::table('gigya_preferences')->insert($gigyaPreference);
+			}
+			
 		}
 		else
 		{
@@ -1517,10 +1544,10 @@ class CBController extends Controller {
 
 			$results = $response['results'];
 
-			if($results[0]["hasFullAccount"])
-			{
-				$UID = $results[0]['UID'];
-			}
+			// if($results[0]["hasFullAccount"])
+			// {
+			// 	$UID = $results[0]['UID'];
+			// }
 
 	    	if(!isset($UID))
 	    	{
@@ -2402,6 +2429,10 @@ class CBController extends Controller {
 								$a['m_date'] = date("Y-m-d", strtotime($dateString));
 							}
 						}
+						else
+						{
+							$a['m_date'] = date("Y-m-d H:i:s");
+						}
 
                         if($this->lgms_subscriptions)
                         {
@@ -2447,7 +2478,7 @@ class CBController extends Controller {
 								$a['childdob'] = NULL;
 							}
 
-							$a['m_date'] = date("Y-m-d H:i:s");
+							$a['updated_at'] = date("Y-m-d H:i:s");
 							
 							if(!isset($a['fulfillment_record']))
 							{
@@ -2456,14 +2487,14 @@ class CBController extends Controller {
 
 							if(!empty($a["email"]))
 							{
-								$existingRecords = DB::table($this->table)->where("email", $a["email"])->where("m_product", $a["m_product"])->get()->toArray();
+								$existingRecord = DB::table($this->table)->where("email", $a["email"])->where("m_product", $a["m_product"])->orderBy("m_date", "desc")->first();
 
-								if(count($existingRecords) >= 2)
+								if(isset($existingRecord))
 								{
-									$latestRecord = end($existingRecords);
+									unset($a['m_date']);
 
 									DB::table($this->table)
-	                                ->where("id", $latestRecord->id)
+	                                ->where("id", $existingRecord->id)
 	                                ->update($a);
 
 	                                continue;
