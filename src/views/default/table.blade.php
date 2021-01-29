@@ -196,25 +196,6 @@
               $('.btn-export-data').click(function() {
                 $('#export-data').modal('show');
               })
-// @start NEW CSV
-              $('#export_data_v2').click(function() {
-                $('#export-data_v2').modal('show');
-                $('#loading-spinner-v2').show();
-
-                $.ajax({
-                  type: "GET",
-                  url: "{{route('backend.export.get-form')}}",
-                  success: function(data){
-                    if(data.status == 'success')
-                    {
-                      $("#html-response").html(data.html);
-                      $("#submit-button").show();
-                    }else if(data.status == 'fail')
-                    {$("#html-response").html(data.html);}
-                  }
-                });
-              })
-// @ends NEW CSV
               var toggle_advanced_report_boolean = 1;
               $(".toggle_advanced_report").click(function() {
                 
@@ -680,7 +661,5 @@
                 <!-- /.modal-content -->
               </div>
             </div>
-
-@include('backend.leads.partials.export-data-v2')
 
             @endif
