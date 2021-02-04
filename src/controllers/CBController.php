@@ -701,6 +701,11 @@ class CBController extends Controller {
 
 		$data['html_contents'] = $html_contents;
 		$data['limit'] = $result->count();
+
+		if($this->gigya_customer)
+		{
+			$data['limit'] = $result->count($table.".id");
+		}
 		//echo $result->toSql()."<br>";
 		return view("crudbooster::default.index",$data);
 	}
