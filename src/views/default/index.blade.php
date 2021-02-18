@@ -146,7 +146,7 @@
               </a>
               @endif
 
-            <form method='get' style="display:inline-block;width: 260px;" action='{{Request::url()}}'>
+            <form method='get' style="display:inline-block;width: 260px;" action='{{CRUDBooster::mainpath()}}'>
                 <div class="input-group">
                   <input type="text" name="q" value="{{ Request::get('q') }}" class="form-control input-sm pull-{{ trans('crudbooster.right') }}" placeholder="{{trans('crudbooster.filter_search')}}"/>
                   {!! CRUDBooster::getUrlParameters(['q']) !!}
