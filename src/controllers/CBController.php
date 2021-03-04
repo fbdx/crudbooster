@@ -2428,10 +2428,10 @@ class CBController extends Controller {
 								$dateString = str_replace('/', '-', $a['m_date']); 
 								$a['m_date'] = date("Y-m-d", strtotime($dateString));
 							}
-						}
-						else
-						{
-							$a['m_date'] = date("Y-m-d H:i:s");
+							else
+							{
+								$a['m_date'] = date("Y-m-d H:i:s");
+							}
 						}
 
                         if($this->lgms_subscriptions)
@@ -2507,7 +2507,14 @@ class CBController extends Controller {
 							$a['batch'] = $batch;
 						}
 
+						// try{
 						DB::table($this->table)->insert($a);
+
+						// }catch (\PDOException $e) {
+      //                       dump($e->getMessage());
+      //                       Log::info($e->getMessage());
+      //                       continue;
+      //                   }
 
 						$uploadStatus = 'Successful';
 					}
