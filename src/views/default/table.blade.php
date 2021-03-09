@@ -396,6 +396,8 @@
 
                           <div class='col-sm-3'>
 
+                            <!-- <?php dump($col['type_data']); ?> -->
+
                             @if(CRUDBooster::myPrivilegeId() == 3 || CRUDBooster::myPrivilegeId() == 4)
 
                               <select name='filter_column[{{$col["field_with"]}}][type]' data-type='{{$col["type_data"]}}' class="filter-combo form-control">
@@ -406,7 +408,7 @@
 
                               <option typeallow='all' {{ (CRUDBooster::getTypeFilter($col["field_with"]) == '!=')?"selected":"" }} value='!='>{{trans("crudbooster.filter_not_equal_to")}}</option>
 
-                              @if($col['type'] == 'date' || $col['type_data'] == 'timestamp')
+                              @if($col['type'] == 'date' || $col['type_data'] == 'timestamp' || $col['type_data'] == 'varchar')
 
                                <option {{ (CRUDBooster::getTypeFilter($col["field_with"]) == 'between')?"selected":"" }} value='between'>{{trans("crudbooster.filter_between")}}</option>
 
