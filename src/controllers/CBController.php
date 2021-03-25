@@ -1344,49 +1344,8 @@ class CBController extends Controller {
 			unset($this->arr['subsource_id']);
 		}
 
-		if($this->gigya_customer)
-		{
-			$existingCustomer = DB::table($this->table)->where("email", $this->arr["email"])->first();
-
-			if($existingCustomer)
-			{
-				$iluma = false;
-				unset($this->arr["id"]);
-				DB::table($this->table)->where("email", $this->arr["email"])->update($this->arr);
-
-				$gigyaPreferences = DB::table('gigya_preferences')->where("customer_id", $existingCustomer->id)->get();
-
-				foreach($gigyaPreferences as $preference)
-				{
-					if($preference->preference_name == "SGilluma_RGtcandprivacy")
-					{
-						$iluma = true;
-					}
-				}
-
-				if(!$iluma)
-				{
-					$gigyaPreference = ['customer_id' => $existingCustomer->id, 'preference_name' => 'SGilluma_RGtcandprivacy', 'UID' => 'UID', 'isConsentGranted' => 1, 'tags' => 'sourceApplication:SGILLUMAWEB', 'docVersion' => 1];
-
-					DB::table('gigya_preferences')->insert($gigyaPreference);
-				}
-
-				$this->arr["id"] = $existingCustomer->id;
-				$id = $existingCustomer->id;
-			}
-			else
-			{
-				$recordId = DB::table($this->table)->insertGetId($this->arr);
-				$gigyaPreference = ['customer_id' => $recordId, 'preference_name' => 'SGilluma_RGtcandprivacy', 'UID' => 'UID', 'isConsentGranted' => 1, 'tags' => 'sourceApplication:SGILLUMAWEB', 'docVersion' => 1];
-				DB::table('gigya_preferences')->insert($gigyaPreference);
-			}
-			
-		}
-		else
-		{
-			DB::table($this->table)->insert($this->arr);
-		}
-
+		DB::table($this->table)->insert($this->arr);
+		
 		//Looping Data Input Again After Insert
 
 		foreach($this->data_inputan as $ro) {
@@ -1515,10 +1474,6 @@ class CBController extends Controller {
 										default       : break;
 									}
 								}
-								if($ro['name']=='gigya_customer_pets')
-								{
-									$child_array[$i]['applicationInternalIdentifier'] = $this->generateUid();
-								}
 								if($ro['name']=='careline_detail')
 								{
 									$child_array[$i]['created_at'] = date("Y/m/d h:i:sa");
@@ -1622,80 +1577,6 @@ class CBController extends Controller {
 
 	public function getEdit($id){
 		$this->cbLoader();
-
-		if($this->gigya_customer)
-		{
-			$customer = Customer::find($id);
-
-			try{
-				$client = new Client();
-				$response = $client->get('https://www.clubillume.com.sg/user/loyalty/'.$customer->email, [
-					'headers' => [
-				        'x-api-token' => 'WVqcLsu6l9ixSvSAhLPXAxh5nunZa0MVaKU6JP6QVfJDTT7eHMKy595pAMVRCHKQ99dJo6ewca7jncaA',
-				    ]
-				]);
-
-				$contents = json_decode($response->getBody()->getContents(), true);
-
-				if($contents['status'] == '200')
-				{
-					$data = $contents['data'];
-
-					if($data['loyalty'])
-					{
-						$loyaltyPoints = $data['loyalty'];
-					}
-
-					if($data['bagtag'])
-					{
-						$personalisedBagTag = $data['bagtag'];
-					}
-
-					$dataMapped = [];
-					$subSample  = [];
-
-					foreach($loyaltyPoints as $key => $value)
-					{
-						switch($key)
-						{
-							case 'currentPoint': $dataMapped['past_three_months_points'] = $value; break;
-							case 'totalPoint'  : $dataMapped['total_lifetime_points']    = $value; break;
-							case 'expiryDate'  : $dataMapped['membership_expiry_date']   = $value; break;
-							case 'tier'        : $dataMapped['membership_status']        = $value; break;
-							default            : break;
-						}
-					}
-
-					if(isset($dataMapped['past_three_months_points']))
-					{
-						$dataMapped['points_to_retain_solitaire'] = 1800 - $dataMapped['past_three_months_points'];
-					}
-
-					if(isset($loyaltyPoints['user_first_time_solitaire']))
-					{
-						if($loyaltyPoints['user_first_time_solitaire'] == FALSE)
-						{
-							$dataMapped['membership_status'] = 'Returning Solitaire';
-						}
-					}
-
-					DB::table($this->table)
-					->where('email', $customer->email)
-					->update($dataMapped);
-
-					if(isset($customer->mainMerge))
-					{
-						$subSample['personalised_tag_name'] = $personalisedBagTag;
-						$customer->mainMerge->update($subSample);
-					}
-				}
-			}
-			catch (\Exception $e)
-            {
-                Log::info($e->getMessage());
-            }
-
-		}
 
 		$row = DB::table($this->table)->where($this->primary_key,$id)->first();
 
@@ -1908,10 +1789,6 @@ class CBController extends Controller {
 								{
 									$child_array[$i]['applicationInternalIdentifier'] = $this->generateUid();
 									$child_array[$i]['interestCode'] = 'GG_CHILD_MILK_BRAND';
-								}
-								if($ro['name']=='gigya_customer_pets')
-								{
-									$child_array[$i]['applicationInternalIdentifier'] = $this->generateUid();
 								}
 								if($ro['name']=='careline_detail')
 								{
