@@ -2079,8 +2079,6 @@ class CBController extends Controller {
 		            if(isset($result["token"]))
 		            {
 		                $gigyaResponse = $this->deleteLiteAccount($result["token"]);
-
-		                dd($gigyaResponse);
 		            }
 		        }
 	        }
