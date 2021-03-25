@@ -2071,6 +2071,26 @@ class CBController extends Controller {
 
 		$this->hook_before_delete($id);
 
+		if($this->gigya_customer || $this->gigya_based)
+		{
+			$response = $this->searchViaEmail($row->email);
+			if($response["hasFullAccount"] == false)
+	        {
+	        	if(isset($response) && is_array($response))
+		        {
+		            $results = $response['results'];
+		            $result  = $results[0];
+
+		            if(isset($result["token"]))
+		            {
+		                $gigyaResponse = $this->deleteLiteAccount($result["token"]);
+
+		                dd($gigyaResponse);
+		            }
+		        }
+	        }
+		}
+
 		if(CRUDBooster::isColumnExists($this->table,'deleted_at')) {
 			DB::table($this->table)->where($this->primary_key,$id)->update(['deleted_at'=>date('Y-m-d H:i:s')]);
 		}else{
@@ -2079,6 +2099,7 @@ class CBController extends Controller {
 
 
 		$this->hook_after_delete($id);
+
 
 		$url = g('return_url')?:CRUDBooster::referer();
 
@@ -2433,10 +2454,10 @@ class CBController extends Controller {
 								$dateString = str_replace('/', '-', $a['m_date']); 
 								$a['m_date'] = date("Y-m-d", strtotime($dateString));
 							}
-						}
-						else
-						{
-							$a['m_date'] = date("Y-m-d H:i:s");
+							else
+							{
+								$a['m_date'] = date("Y-m-d H:i:s");
+							}
 						}
 
                         if($this->lgms_subscriptions)
@@ -2512,7 +2533,14 @@ class CBController extends Controller {
 							$a['batch'] = $batch;
 						}
 
+						// try{
 						DB::table($this->table)->insert($a);
+
+						// }catch (\PDOException $e) {
+      //                       dump($e->getMessage());
+      //                       Log::info($e->getMessage());
+      //                       continue;
+      //                   }
 
 						$uploadStatus = 'Successful';
 					}
