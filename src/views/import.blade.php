@@ -127,6 +127,7 @@
                         case 'address2' : $field = 'Address Line 2'; break;
                         case 'address3' : $field = 'Address Line 3'; break;
                         case 'address4' : $field = 'Address Line 4'; break;
+                        case 'agency_name' : $field = 'Agency Name'; break;
                         case 'm_product' : $field = 'Product Name'; break;
                         case 'm_source' : $field = 'Source'; break;
                         case 'm_subsource' : $field = 'Sub Source'; break;
