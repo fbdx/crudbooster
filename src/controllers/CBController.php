@@ -34,6 +34,9 @@ use Config;
 use GuzzleHttp\Exception\GuzzleException;
 use GuzzleHttp\Client;
 use App\Http\Controllers\Alerts\SMSAlertController;
+use Maatwebsite\Excel\Concerns\FromQuery;
+use Maatwebsite\Excel\Concerns\Exportable;
+use Maatwebsite\Excel\Concerns\WithHeadings;
 
 class CBController extends Controller {
 
@@ -734,6 +737,50 @@ class CBController extends Controller {
 
 		CRUDBooster::insertLog($description);
 
+		// dump($response['limit']);
+		// dump($this->table);
+		// dump($response['columns']);
+		$columns = $response['columns'];
+		$headers = ["id"];
+		$selectFields = [];
+
+		foreach($columns as $column)
+		{
+			$headers[] = $column["label"];
+			$selectFields[] = $column['name'];
+		}
+
+		$exportClass = new class($this->table, $response['limit'], $headers, $selectFields) implements FromQuery, WithHeadings{ 
+					use Exportable;
+
+					private $table, $limit, $headers;
+
+					public function __construct($table, $limit, $headers, $fields)
+				    {
+				        $this->table = $table;
+				        $this->limit = $limit;
+				        $this->headers = $headers;
+				        $this->fields = $fields;
+				    }
+
+				    public function headings(): array
+				    {
+				        return $this->headers;
+				    }
+
+					public function query()
+				    {
+				    	$query = DB::table($this->table)->select("id");
+
+				    	foreach($this->fields as $field)
+				    	{
+				    		$query->addselect($field);
+				    	}
+
+				       return $query->orderBy("id", "desc")->limit($this->limit);
+				    }}; 
+
+
 		switch($filetype) {
 			case "pdf":
 				$view = view('crudbooster::export',$response)->render();
@@ -754,15 +801,7 @@ class CBController extends Controller {
 				})->export('xls');
 			break;
 			case 'csv':
-				Excel::create($filename, function($excel) use ($response) {
-					$excel->setTitle($filename)
-					->setCreator("crudbooster.com")
-					->setCompany(CRUDBooster::getSetting('appname'));
-				    $excel->sheet($filename, function($sheet) use ($response) {
-				    	$sheet->setOrientation($paperorientation);
-				        $sheet->loadview('crudbooster::export',$response);
-				    });
-				})->export('csv');
+				Excel::download($exportClass,$filename, \Maatwebsite\Excel\Excel::CSV, $headers);
 			break;
 		}
 	}
