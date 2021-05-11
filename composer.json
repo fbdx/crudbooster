@@ -16,11 +16,17 @@
         }
     ],
     "minimum-stability": "dev",
+    "repositories": [
+        {
+            "type": "vcs",
+            "url": "https://github.com/LeeChunGui/Laravel-Excel.git"
+        }
+    ],
     "require": {
         "php":">=5.6",
         "barryvdh/laravel-dompdf": "0.8.*",
         "doctrine/dbal": "~2.3",        
-        "maatwebsite/excel": "3.1.*",
+        "maatwebsite/excel": "dev-SD",
         "unisharp/laravel-filemanager": "1.7.*",
         "intervention/imagecache":"2.*",
         "proengsoft/laravel-jsvalidation":">2.1.0"
