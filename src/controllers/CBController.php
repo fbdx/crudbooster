@@ -737,9 +737,6 @@ class CBController extends Controller {
 
 		CRUDBooster::insertLog($description);
 
-		// dump($response['limit']);
-		// dump($this->table);
-		// dump($response['columns']);
 		$columns = $response['columns'];
 		$headers = ["id"];
 		$selectFields = [];
@@ -801,7 +798,6 @@ class CBController extends Controller {
 				})->export('xls');
 			break;
 			case 'csv':
-				// Excel::download($exportClass,$filename, \Maatwebsite\Excel\Excel::CSV, ['Content-Type' => 'text/csv']);
 				return response()->download(Excel::download($exportClass,$filename, \Maatwebsite\Excel\Excel::CSV))->deleteFileAfterSend(true);
 			break;
 		}
