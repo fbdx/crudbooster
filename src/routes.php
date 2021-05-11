@@ -35,8 +35,8 @@ Route::group(['middleware'=>['web'],'prefix'=>config('crudbooster.ADMIN_PATH'),'
 	Route::get('lock-screen', ['uses'=>'AdminController@getLockscreen','as'=>'getLockScreen']);	
 	Route::post('forgot',['uses'=>'AdminController@postForgot','as'=>'postForgot']);
 	Route::get('forgot',['uses'=>'AdminController@getForgot','as'=>'getForgot']);
-	Route::post('register', ['uses'=>'AdminController@postRegister','as'=>'postRegister']);
-	Route::get('register', ['uses'=>'AdminController@getRegister','as'=>'getRegister']);
+	// Route::post('register', ['uses'=>'AdminController@postRegister','as'=>'postRegister']);
+	// Route::get('register', ['uses'=>'AdminController@getRegister','as'=>'getRegister']);
 	Route::get('logout', ['uses'=>'AdminController@getLogout','as'=>'getLogout']);				
 	Route::get('login/google', ['uses'=>'AdminController@redirectToProvider', 'as'=>'googleLogin']);	
 	Route::get('login/callback', ['uses'=>'AdminController@handleProviderCallback', 'as'=>'googleCallback']);
