@@ -801,7 +801,8 @@ class CBController extends Controller {
 				})->export('xls');
 			break;
 			case 'csv':
-				Excel::download($exportClass,$filename, \Maatwebsite\Excel\Excel::CSV, $headers);
+				// Excel::download($exportClass,$filename, \Maatwebsite\Excel\Excel::CSV, ['Content-Type' => 'text/csv']);
+				return response()->download(Excel::download($exportClass,$filename, \Maatwebsite\Excel\Excel::CSV))->deleteFileAfterSend(true);
 			break;
 		}
 	}
