@@ -798,7 +798,7 @@ class CBController extends Controller {
 				})->export('xls');
 			break;
 			case 'csv':
-				return response()->download(Excel::download($exportClass,$filename, \Maatwebsite\Excel\Excel::CSV))->deleteFileAfterSend(true);
+				return response()->download(Excel::pathToFile($exportClass,$filename, \Maatwebsite\Excel\Excel::CSV))->deleteFileAfterSend(true);
 			break;
 		}
 	}
