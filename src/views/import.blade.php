@@ -131,6 +131,7 @@
                         case 'm_product' : $field = 'Product Name'; break;
                         case 'm_source' : $field = 'Source'; break;
                         case 'm_subsource' : $field = 'Sub Source'; break;
+                        case 'm_lang' : $field = 'Language'; break;
                         case 'childdob' : $field = 'Child DOB'; break;
                         case 'childname' : $field = 'Child Name'; break;
                         case 'currentgumbrand' : $field = 'Curent Gum Brand'; break;
