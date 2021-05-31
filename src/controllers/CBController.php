@@ -989,11 +989,11 @@ class CBController extends Controller {
 							}
 
 							//Check whether deleted_at exists or not
-							if (CB::isColumnExists($uniqueTable,'deleted_at')) {
-								$uniqueRebuild[] = CB::findPrimaryKey($uniqueTable);
-								$uniqueRebuild[] = 'deleted_at';
-								$uniqueRebuild[] = 'NULL';
-							}
+							// if (CB::isColumnExists($uniqueTable,'deleted_at')) {
+							// 	$uniqueRebuild[] = CB::findPrimaryKey($uniqueTable);
+							// 	$uniqueRebuild[] = 'deleted_at';
+							// 	$uniqueRebuild[] = 'NULL';
+							// }
 							$uniqueRebuild = array_filter($uniqueRebuild);
 							$validationItem = 'unique:'.implode(',',$uniqueRebuild);
 						}
