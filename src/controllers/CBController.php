@@ -1983,19 +1983,20 @@ class CBController extends Controller {
 		if($this->gigya_customer || $this->gigya_based)
 		{
 			$response = $this->searchViaEmail($row->email);
-			if($response["hasFullAccount"] == false)
-	        {
-	        	if(isset($response) && is_array($response))
-		        {
-		            $results = $response['results'];
-		            $result  = $results[0];
 
-		            if(isset($result["token"]))
-		            {
-		                $gigyaResponse = $this->deleteLiteAccount($result["token"]);
-		            }
+			if(isset($response) && is_array($response))
+		    {
+				$results = $response['results'];
+			    $result  = $results[0];
+
+				if($result["hasFullAccount"] == false)
+		        {
+	        	  if(isset($result["token"]))
+		          {
+		            $gigyaResponse = $this->deleteLiteAccount($result["token"]);
+		          }
 		        }
-	        }
+		    }
 		}
 
 		if(CRUDBooster::isColumnExists($this->table,'deleted_at')) {
