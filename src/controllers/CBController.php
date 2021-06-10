@@ -1864,13 +1864,9 @@ class CBController extends Controller {
 
 		if($this->gigya_customer || $this->gigya_based || $this->thailand_customer)
 		{
-			$response = $this->searchViaEmail($row->email);
-			$results = $response['results'];
+			$response = $this->searchViaEmail($this->arr["email"]);
 
-			if($results[0]["hasFullAccount"])
-			{
-				$UID = $results[0]['UID'];
-			}
+			$results = $response['results'];
 
 			if(!isset($UID))
 	    	{
@@ -1882,7 +1878,7 @@ class CBController extends Controller {
 	    		}
 	    	}
 
-			$this->synchroToGigya($UID,$regToken,$row->email,$setInputData,$id,$this->arr,$this->table);
+			$this->synchroToGigya($UID,$regToken,$this->arr["email"],$setInputData,$id,$this->arr,$this->table);
 		}
 
 		$this->hook_after_edit($id);
