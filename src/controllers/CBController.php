@@ -1222,6 +1222,13 @@ class CBController extends Controller {
 
 			if($ro['type']=='child') continue;
 
+			if($ro['type']=='text') {
+				$inputdata = trim($inputdata);
+				$specialChar = substr($inputdata,0,1);
+				if( in_array($specialChar, ["=", "+", "-", "@"]) )
+					$inputdata = "'".$inputdata;
+			}
+
 			if($name) {
 				if($inputdata!='') {
 					$this->arr[$name] = $inputdata;
