@@ -2491,11 +2491,11 @@ class CBController extends Controller {
 
 								if(isset($existingRecord))
 								{
-									unset($a['m_date']);
+									$data["consigmentno"] = $a['consigmentno'];
 
 									DB::table($this->table)
 	                                ->where("id", $existingRecord->id)
-	                                ->update($a);
+	                                ->update($data);
 
 	                                continue;
 								}
