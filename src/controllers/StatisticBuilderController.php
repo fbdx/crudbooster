@@ -117,21 +117,11 @@
 
 	    	if($config) {
 	    		foreach($config as $key=>$value) {
-	    			if($value) {
 //NEWCODE start
-						if($key == 'sql') {
-							$t = explode('::', $value);
-							if(count($t) > 1) {
-								$dateColumn = $t[0];
-								$value = $t[1];
-							} else {
-								$dateColumn = 'm_date';
-								$value = $t[0];
-							}
-							$value = str_replace(['[wheredatescondition]','[anddatescondition]'], '',$value);
-						}
+					if($key == 'sql') {
 
-						if($key == 'sqlTwo') {
+						if(isset($value))
+						{
 							$t = explode('::', $value);
 							if(count($t) > 1) {
 								$dateColumn = $t[0];
@@ -142,12 +132,40 @@
 							}
 							$value = str_replace(['[wheredatescondition]','[anddatescondition]'], '',$value);
 						}
-//NEWCODE end
+						else
+						{
+							$value = "select null";
+						}
+					}
+
+					if($key == 'sqlTwo') {
+
+						if(isset($value))
+						{
+							$t = explode('::', $value);
+							if(count($t) > 1) {
+								$dateColumn = $t[0];
+								$value = $t[1];
+							} else {
+								$dateColumn = 'm_date';
+								$value = $t[0];
+							}
+							$value = str_replace(['[wheredatescondition]','[anddatescondition]'], '',$value);
+						}
+						else
+						{
+							$value = "select null";
+						}
+					}
+
+					if(isset($value))
+					{
 						$command = 'showFunction';
 						$value = view('crudbooster::statistic_builder.components.'.$component_name,compact('command','value','key','config','componentID'))->render();
 						$value = $value > 0 ? number_format($value) : $value;
 						$layout = str_replace('['.$key.']',$value,$layout);
 					}
+//NEWCODE end
 	    		}
 			}
 
