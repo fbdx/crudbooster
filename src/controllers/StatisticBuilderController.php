@@ -130,6 +130,18 @@
 							}
 							$value = str_replace(['[wheredatescondition]','[anddatescondition]'], '',$value);
 						}
+
+						if($key == 'sqlTwo') {
+							$t = explode('::', $value);
+							if(count($t) > 1) {
+								$dateColumn = $t[0];
+								$value = $t[1];
+							} else {
+								$dateColumn = 'm_date';
+								$value = $t[0];
+							}
+							$value = str_replace(['[wheredatescondition]','[anddatescondition]'], '',$value);
+						}
 //NEWCODE end
 						$command = 'showFunction';
 						$value = view('crudbooster::statistic_builder.components.'.$component_name,compact('command','value','key','config','componentID'))->render();

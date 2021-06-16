@@ -4,6 +4,7 @@
 	<div class="small-box [color]">
 	    <div class='inner inner-box'>
 	      <h3>[sql]</h3>
+		  <h4>[sqlTwo]</h4>
 	      <p>[name]</p>
 	    </div>
 	    <div class="icon">
@@ -53,6 +54,12 @@
 			<div class="help-block">Make sure the sql query are correct unless the widget will be broken. Mak sure give the alias name each column. You may use alias [SESSION_NAME] to get the session</div>
 		</div>
 
+		<div class="form-group">
+			<label>Count (SQL QUERY (2))</label>
+			<textarea name='config[sqlTwo]' rows="5" class='form-control'>{{@$config->sqlTwo}}</textarea>
+			<div class="help-block">Make sure the sql query are correct unless the widget will be broken. Mak sure give the alias name each column. You may use alias [SESSION_NAME] to get the session</div>
+		</div>
+
 	</form>
 @elseif($command=='showFunction')
 <?php 
@@ -66,6 +73,16 @@
 		}catch(\Exception $e) {
 			echo 'ERROR';
 		}	
+	}else if($key == 'sqlTwo'){
+		try{
+			$sessions = Session::all();
+		    foreach($sessions as $key=>$val) {
+		      $value = str_replace("[".$key."]", $val, $value);
+		    }
+			echo reset(DB::select(DB::raw($value))[0]);    						    				
+		}catch(\Exception $e) {
+			echo 'ERROR';
+		}
 	}else{
 		echo $value;
 	}
