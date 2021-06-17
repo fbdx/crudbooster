@@ -1873,7 +1873,7 @@ class CBController extends Controller {
 
 		if($this->gigya_customer || $this->gigya_based || $this->thailand_customer)
 		{
-			$response = $this->searchViaEmail($this->arr["email"]);
+			$response = $this->searchViaEmail($row->email);
 
 			if(isset($response["results"][0]))
             {
