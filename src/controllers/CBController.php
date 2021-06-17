@@ -1545,12 +1545,14 @@ class CBController extends Controller {
 
 			$response = $this->searchViaEmail($this->arr['email']);
 
-			$results = $response['results'];
-
-			// if($results[0]["hasFullAccount"])
-			// {
-			// 	$UID = $results[0]['UID'];
-			// }
+			if(isset($response["results"][0]))
+            {
+                $results = $response['results'];
+                if($results[0]["hasFullAccount"])
+                {
+                    $UID = $results[0]['UID'];
+                }
+            }
 
 	    	if(!isset($UID))
 	    	{
@@ -1873,7 +1875,14 @@ class CBController extends Controller {
 		{
 			$response = $this->searchViaEmail($this->arr["email"]);
 
-			$results = $response['results'];
+			if(isset($response["results"][0]))
+            {
+                $results = $response['results'];
+                if($results[0]["hasFullAccount"])
+                {
+                    $UID = $results[0]['UID'];
+                }
+            }
 
 			if(!isset($UID))
 	    	{
