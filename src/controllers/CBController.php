@@ -2492,6 +2492,7 @@ class CBController extends Controller {
 								if(isset($existingRecord))
 								{
 									$data["consigmentno"] = $a['consigmentno'];
+									$data["fulfillment_record"] = $a['fulfillment_record'];
 									$data["updated_at"] = $a['updated_at'];
 
 									DB::table($this->table)
