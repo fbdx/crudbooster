@@ -2171,7 +2171,7 @@ class CBController extends Controller {
 
 		foreach($rows as $key => $value)
 		{
-			$existingMobileNo = DbtWhatsappNumber::where("mobileno", $value["mobileno"])->first();
+			$existingMobileNo = DB::table($this->table)->where("mobileno", $value["mobileno"])->first();
 
 			if(isset($existingMobileNo))
 			{
@@ -2184,7 +2184,7 @@ class CBController extends Controller {
 		return $newRows;
 	}
 
-	public function getImportData() {
+	public function getImportData($parentId = NULL) {
 		$this->cbLoader();
 		$data['page_menu']       = Route::getCurrentRoute()->getActionName();
 		$data['page_title']      = 'Import Data '.$module->name;
@@ -2223,6 +2223,14 @@ class CBController extends Controller {
 			$data['data_import_column'] = $data_import_column;
 		}
 
+		if(isset($parentId))
+		{
+			$data["parentId"] = $parentId;
+			if(Request::get('back_url'))
+			{
+				$data["back_url"] = Request::get('back_url');
+			}
+		}
 
 		return view('crudbooster::import',$data);
 	}
@@ -2231,12 +2239,25 @@ class CBController extends Controller {
 		$this->cbLoader();
 		$data['page_menu']       = Route::getCurrentRoute()->getActionName();
 		$data['page_title']      = trans('crudbooster.import_page_title',['module'=>$module->name]);
+		if(Request::get("parentId"))
+		{
+			$parentId = Request::get("parentId");
+			$data["parentId"] = $parentId;
+
+			if(Request::get("back_url"))
+			{
+				$back_url = Request::get("back_url");
+
+				$data["back_url"] = $back_url;
+			}
+		}
+
 		Session::put('select_column',Request::get('select_column'));
 
 		return view('crudbooster::import',$data);
 	}
 
-	public function postDoImportChunk() {
+	public function postDoImportChunk($parentId = NULL) {
 		$this->cbLoader();
 		if(CRUDBooster::myPrivilegeId() == 1){
 			$file_md5 = md5(Request::get('file'));
@@ -2374,13 +2395,18 @@ class CBController extends Controller {
 
 			if($this->sfmc_alert)
 			{
-				if(isset($rows) && $this->table == 'dbt_whatsapp_numbers')
-				{
-					$rows = $this->removeMobileNumberDuplication($rows);
-					$batch = DB::table($this->table)->max('batch');
+				// $rows = $this->removeMobileNumberDuplication($rows);
+				$batch = DB::table($this->table)->max('batch');
 
-					$batch++;
+				if(isset($parentId))
+				{
+					if($this->table == 'dear_nestle_mobile_numbers')
+					{
+						$batch = DB::table($this->table)->where("dear_nestle_sms_id",$parentId)->max('batch');
+					}
 				}
+
+				$batch++;
 			}
 
 			$has_created_at = false;
@@ -2507,16 +2533,26 @@ class CBController extends Controller {
 						if($this->sfmc_alert)
 						{
 							$a['batch'] = $batch;
+
+							if(isset($parentId))
+							{
+								if($this->table == 'dear_nestle_mobile_numbers')
+								{
+									$a['dear_nestle_sms_id'] = $parentId;
+								}
+							}
 						}
 
-						// try{
-						DB::table($this->table)->insert($a);
+						// return response()->json(['select_column'=>$select_column, 'table_columns' => $table_columns, 'data' => $a]);
 
-						// }catch (\PDOException $e) {
-      //                       dump($e->getMessage());
-      //                       Log::info($e->getMessage());
-      //                       continue;
-      //                   }
+						try{
+							DB::table($this->table)->insert($a);
+
+						}catch (\PDOException $e) {
+                            dump($e->getMessage());
+                            Log::info($e->getMessage());
+                            continue;
+                        }
 
 						$uploadStatus = 'Successful';
 					}
@@ -2624,6 +2660,7 @@ class CBController extends Controller {
 
 	public function postDoUploadImportData() {
 		$this->cbLoader();
+
 		if (Request::hasFile('userfile'))
 		{
 			$file = Request::file('userfile');
@@ -2655,6 +2692,19 @@ class CBController extends Controller {
 			}
 
 			$url = CRUDBooster::mainpath('import-data').'?file='.base64_encode($url_filename);
+
+			if(Request::get("parentId"))
+			{
+				$parentId = Request::get("parentId");
+				$url = CRUDBooster::mainpath('import-data').'/'.$parentId.'?file='.base64_encode($url_filename);
+
+				if(Request::get("back_url"))
+				{
+					$back_url = Request::get("back_url");
+
+					$url = $url.'&back_url='.urlencode($back_url);
+				}
+			}
 
 			return redirect($url);
 		}else{

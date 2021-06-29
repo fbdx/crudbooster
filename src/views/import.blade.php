@@ -13,6 +13,28 @@
 
             @if(Request::get('file') && Request::get('import'))
 
+            <?php 
+
+              if(isset($parentId))
+              {
+                $route = CRUDBooster::mainpath("do-import-chunk")."/".$parentId."?file=".Request::get('file');
+              }
+              else
+              {
+                $route = CRUDBooster::mainpath('do-import-chunk?file='.Request::get('file'));
+              }
+
+              if(isset($back_url))
+              {
+                $backUrl = $back_url;
+              }
+              else
+              {
+                $backUrl = CRUDBooster::mainpath();
+              }
+
+            ?>
+
             <ul class='nav nav-tabs'>
                     <li style="background:#eeeeee"><a style="color:#111" onclick="if(confirm('Are you sure want to leave ?')) location.href='{{ CRUDBooster::mainpath("import-data") }}'" href='javascript:;'><i class='fa fa-download'></i> Upload a File &raquo;</a></li>
                     <li style="background:#eeeeee" ><a style="color:#111" href='#'><i class='fa fa-cogs'></i> Adjustment &raquo;</a></li>
@@ -43,7 +65,7 @@
                         
                         var int_prog = setInterval(function() {
 
-                          $.post("{{ CRUDBooster::mainpath('do-import-chunk?file='.Request::get('file')) }}",{resume:1},function(resp) {                                       
+                          $.post("{{ $route }}",{resume:1},function(resp) {                                       
                               console.log(resp.progress);
                               $('#progress-import').css('width',resp.progress+'%');
                               $('#status-import').html("<i class='fa fa-spin fa-spinner'></i> Please wait importing... ("+resp.progress+"%)");
@@ -55,7 +77,7 @@
                           })
                         },2500);
 
-                        $.post("{{ CRUDBooster::mainpath('do-import-chunk').'?file='.Request::get('file') }}",function(resp) {
+                        $.post("{{ $route }}",function(resp) {
                             if(resp.status==true) {
                               $('#progress-import').css('width','100%');
                               $('#progress-import').attr('aria-valuenow',100);
@@ -75,7 +97,7 @@
                 <div class="box-footer" id='upload-footer' style="display:none">  
                   <div class='pull-right'>                            
                       <a href='{{ CRUDBooster::mainpath("import-data") }}' class='btn btn-default'><i class='fa fa-upload'></i> Upload Other File</a> 
-                      <a href='{{CRUDBooster::mainpath()}}' class='btn btn-success'>Finish</a>                                
+                      <a href='{{$backUrl}}' class='btn btn-success'>Finish</a>                                
                   </div>
                 </div><!-- /.box-footer-->
                 
@@ -202,7 +224,13 @@
                   ?>
 
                 <form method='post' id="form" enctype="multipart/form-data" action='{{$action}}'>
-                        <input type="hidden" name="_token" value="{{ csrf_token() }}">             
+                        <input type="hidden" name="_token" value="{{ csrf_token() }}">
+                        @if(isset($parentId))
+                          <input type='hidden' name='parentId' value = {{$parentId}} />
+                        @endif
+                        @if(isset($back_url))
+                          <input type='hidden' name='back_url' value = {{$back_url}} />
+                        @endif             
                         <div class="box-body table-responsive no-padding">
                               <div class='callout callout-info' style="font-size: 16px;">
                                 @if(CRUDBooster::myPrivilegeId()==2 || CRUDBooster::myPrivilegeId()==6)
@@ -322,9 +350,9 @@
                       $action_path = Route($data_sub_module->controller."GetIndex");
                     }else{
                       $action_path = CRUDBooster::mainpath();
-                    }            
+                    }
 
-                    $action = $action_path."/do-upload-import-data";
+                    $action = $action_path."/do-upload-import-data";       
                   ?>
 
                 <form method='post' id="form" enctype="multipart/form-data" action='{{$action}}'>
@@ -355,11 +383,22 @@
                                 <input type='file' name='userfile' class='form-control' required />
                                 <div class='help-block'>File type supported only : CSV</div>
                             </div>
+
+                            @if(isset($parentId))
+                              <input type='hidden' name='parentId' value = {{$parentId}} />
+                            @endif
+                            @if(isset($back_url))
+                              <input type='hidden' name='back_url' value = {{$back_url}} />
+                            @endif
                         </div><!-- /.box-body -->
                 
                         <div class="box-footer">  
-                          <div class='pull-right'>                            
-                              <a href='{{ CRUDBooster::mainpath() }}' class='btn btn-default'>Cancel</a>  
+                          <div class='pull-right'> 
+                              @if(isset($back_url))
+                                <a href='{{ $back_url }}' class='btn btn-default'>Cancel</a> 
+                              @else
+                                <a href='{{ CRUDBooster::mainpath() }}' class='btn btn-default'>Cancel</a>             
+                              @endif
                               <input type='submit' class='btn btn-primary' name='submit' value='Upload'/>   
                           </div>
                         </div><!-- /.box-footer-->
