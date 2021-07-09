@@ -2400,10 +2400,7 @@ class CBController extends Controller {
 
 				if(isset($parentId))
 				{
-					if($this->table == 'dear_nestle_mobile_numbers')
-					{
-						$batch = DB::table($this->table)->where("parent_id",$parentId)->max('batch');
-					}
+					$batch = DB::table($this->table)->where("parent_id",$parentId)->max('batch');
 				}
 
 				$batch++;
