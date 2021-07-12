@@ -51,7 +51,7 @@ Route::group(['middleware'=>['web'],'prefix'=>config('crudbooster.ADMIN_PATH'),'
 });
 
 // ROUTER FOR OWN CONTROLLER FROM CB
-Route::group(['middleware'=>['web','\crocodicstudio\crudbooster\middlewares\CBBackend'],'prefix'=>config('crudbooster.ADMIN_PATH'),'namespace'=>'App\Http\Controllers'], function () {
+Route::group(['middleware'=>['web','\crocodicstudio\crudbooster\middlewares\CBBackend','\crocodicstudio\crudbooster\middlewares\XssSanitization'],'prefix'=>config('crudbooster.ADMIN_PATH'),'namespace'=>'App\Http\Controllers'], function () {
 				
 		try {
 			$moduls = DB::table('cms_moduls')
