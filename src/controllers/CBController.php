@@ -2070,11 +2070,11 @@ class CBController extends Controller {
 
 		$this->hook_before_delete($id);
 
-		if(CRUDBooster::isColumnExists($this->table,'deleted_at')) {
-			DB::connection($this->connection)->table($this->table)->where($this->primary_key,$id)->update(['deleted_at'=>date('Y-m-d H:i:s')]);
-		}else{
+		// if(CRUDBooster::isColumnExists($this->table,'deleted_at')) {
+		// 	DB::connection($this->connection)->table($this->table)->where($this->primary_key,$id)->update(['deleted_at'=>date('Y-m-d H:i:s')]);
+		// }else{
 			DB::connection($this->connection)->table($this->table)->where($this->primary_key,$id)->delete();
-		}
+		// }
 
 
 		$this->hook_after_delete($id);
