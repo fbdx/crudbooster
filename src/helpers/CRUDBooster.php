@@ -46,10 +46,10 @@ class CRUDBooster  {
 			}
 		}
 
-		public static function get($table,$string_conditions=NULL,$orderby=NULL,$limit=NULL,$skip=NULL) {
+		public static function get($table, $connection, $string_conditions=NULL,$orderby=NULL,$limit=NULL,$skip=NULL) {
 			$table = self::parseSqlTable($table);
 			$table = $table['table'];
-			$query = DB::table($table);
+			$query = DB::connection($connection)->table($table);
 			if($string_conditions) $query->whereraw($string_conditions);
 			if($orderby) $query->orderbyraw($orderby);
 			if($limit) $query->take($limit);
@@ -677,9 +677,17 @@ class CRUDBooster  {
 			}			
 		}
 
-		public static function newId($table) {
+		public static function newId($table, $connection = NULL) {
 			$key = CRUDBooster::findPrimaryKey($table);
-			$id = DB::table($table)->max($key)+1;
+
+			if(isset($connection))
+			{
+				$id = DB::connection($connection)->table($table)->max($key)+1;
+			}
+			else {
+				$id = DB::table($table)->max($key)+1;
+			}
+
 			return $id;
 		}
 

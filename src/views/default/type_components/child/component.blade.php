@@ -286,7 +286,7 @@
 														if($col['datatable']) {
 															$tableJoin = explode(',',$col['datatable'])[0];
 															$titleField = explode(',',$col['datatable'])[1];
-															$data = CRUDBooster::get($tableJoin,NULL,"$titleField ASC");
+															$data = CRUDBooster::get($tableJoin, $connection, NULL,"$titleField ASC");
 															foreach($data as $d) {
 																echo "<option value='$d->id'>".$d->$titleField."</option>";
 															}

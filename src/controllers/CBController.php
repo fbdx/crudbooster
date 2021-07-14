@@ -1302,8 +1302,9 @@ class CBController extends Controller {
 		$option_fields	 = $this->option_fields;
 		$validator		 = $this->validation(NULL,true);
 		$gigya_customer  = $this->gigya_customer;
+		$connection      = $this->connection;
 
-		return view('crudbooster::default.form',compact('page_title','page_menu','command','option_id','validator','option_fields', 'gigya_customer'));
+		return view('crudbooster::default.form',compact('page_title','page_menu','command','option_id','validator','option_fields', 'gigya_customer', 'connection'));
 	}
 
 	public function postAddSave() {
@@ -1329,7 +1330,7 @@ class CBController extends Controller {
 
 		$this->hook_before_add($this->arr);
 
-		$this->arr[$this->primary_key] = $id = CRUDBooster::newId($this->table);
+		$this->arr[$this->primary_key] = $id = CRUDBooster::newId($this->table, $this->connection);
 
 		if($this->gigya_customer)
 		{
@@ -1499,8 +1500,8 @@ class CBController extends Controller {
 							}
 							else {
 								unset($child_array[$i]['id']);
-								$lastId = CRUDBooster::newId($childtable);
-								$child_array[$i]['id'] = $lastId;
+								// $lastId = CRUDBooster::newId($childtable);
+								// $child_array[$i]['id'] = $lastId;
 								if($ro['name']=='gigya_children')
 								{
 									$child_array[$i]['applicationInternalIdentifier'] = $this->generateUid();
@@ -1902,7 +1903,7 @@ class CBController extends Controller {
 							}
 							else {
 								unset($child_array[$i]['id']);
-								$lastId = CRUDBooster::newId($childtable);
+								// $lastId = CRUDBooster::newId($childtable);
 								if($ro['name']=='gigya_children')
 								{
 									$child_array[$i]['applicationInternalIdentifier'] = $this->generateUid();
