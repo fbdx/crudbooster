@@ -561,7 +561,7 @@
 
 								$childTable = $form['table'];
 								$columns_tbody = [];
-								$data_child = DB::table($form['table'])
+								$data_child = DB::connection($connection)->table($form['table'])
 								->where($form['foreign_key'],$id);
 
 								foreach($form['columns'] as $i=>$c) {
