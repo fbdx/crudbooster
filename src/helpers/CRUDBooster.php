@@ -46,10 +46,10 @@ class CRUDBooster  {
 			}
 		}
 
-		public static function get($table, $connection, $string_conditions=NULL,$orderby=NULL,$limit=NULL,$skip=NULL) {
+		public static function get($table, $string_conditions=NULL,$orderby=NULL,$limit=NULL,$skip=NULL) {
 			$table = self::parseSqlTable($table);
 			$table = $table['table'];
-			$query = DB::connection($connection)->table($table);
+			$query = DB::table($table);
 			if($string_conditions) $query->whereraw($string_conditions);
 			if($orderby) $query->orderbyraw($orderby);
 			if($limit) $query->take($limit);
