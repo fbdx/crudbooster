@@ -385,7 +385,7 @@ class CBController extends Controller {
 						if (array_key_exists('datatable',$f))
 						{
 							$farr = explode(",",$f["datatable"]);
-							$columns_table[$index]['optionlist'] = DB::connection($this->connection)->table($farr[0])->pluck($farr[1])->toArray();
+							$columns_table[$index]['optionlist'] = DB::table($farr[0])->pluck($farr[1])->toArray();
 						}
 						else if (array_key_exists('dataenum',$f))
 						{
