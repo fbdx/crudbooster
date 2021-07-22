@@ -2221,7 +2221,7 @@ class CBController extends Controller {
 			}
 			//Log::error($data_import_column);
 
-			$table_columns = DB::getSchemaBuilder()->getColumnListing($this->table);
+			$table_columns = DB::connection($this->connection)->getSchemaBuilder()->getColumnListing($this->table);
 			// Log::error($table_columns);
 			// Log::debug(CRUDBooster::myPrivilegeId());
 
@@ -2391,7 +2391,7 @@ class CBController extends Controller {
 
 			$select_column = Session::get('select_column');
 			$select_column = array_filter($select_column);
-			$table_columns = DB::getSchemaBuilder()->getColumnListing($this->table);
+			$table_columns = DB::connection($this->connection)->getSchemaBuilder()->getColumnListing($this->table);
 
 			$file = base64_decode(Request::get('file'));
 			$file = trim(str_replace('uploads','app',$file),'/');
@@ -2482,15 +2482,15 @@ class CBController extends Controller {
                         	}
                         }
 
-                        if($this->import_wyeth)
-                        {
-                        	$existingCustomer = DB::connection($this->connection)->table($this->table)->where('email',$a['email'])->where('m_product',$a['m_product'])->first();
+                //         if($this->import_wyeth)
+                //         {
+                //         	$existingCustomer = DB::connection($this->connection)->table($this->table)->where('email',$a['email'])->where('m_product',$a['m_product'])->first();
 
-				            if($existingCustomer)
-				            {
-				                continue;
-				            }
-                        }
+				            // if($existingCustomer)
+				            // {
+				            //     continue;
+				            // }
+                //         }
 
 						if($this->import_offline)
 						{
@@ -2594,7 +2594,7 @@ class CBController extends Controller {
 
 			Log::debug($uploadNotUpdated);
 
-			DB::connection($this->connection)->table('upload_logs')->insert([
+			DB::table('upload_logs')->insert([
 				[
 					'userid' => CRUDBooster::myId(),
 					'status' => $uploadStatus,
