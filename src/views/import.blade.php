@@ -215,6 +215,7 @@
                         case 'unsubscribe_date' : $field = 'Unsubscribe Date'; break;
                         case 'resubscribe_date' : $field = 'Resubscribe Date'; break;
                         case 'campaign_slug' : $field = 'Campaign'; break;
+                        case 'voucher_code' : $field = 'Voucher Code'; break;
                         default : $field = 'Default'; break;
                       }
 
