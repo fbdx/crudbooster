@@ -834,8 +834,8 @@ class CRUDBooster  {
 		        $string_parameters_array = explode('&',$string_parameters);
 		        foreach($string_parameters_array as $s) {
 		            $part = explode('=',$s);
-		            $name = urldecode($part[0]);      
-		            $value = urldecode($part[1]);      
+		            $name = strip_tags(urldecode($part[0]));      
+		            $value = strip_tags(urldecode($part[1]));      
 		            $inputhtml .= "<input type='hidden' name='$name' value='$value'/>";
 		        }                                                           
 		    }
